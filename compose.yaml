@@ -1,0 +1,41 @@
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "8040:80"
+      - "8010:443"
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+      - ./:/var/www/html/webte2Skuskove
+      - ./backend/certs/webte_fei_stuba_sk.pem:/etc/nginx/certs/webte_fei_stuba_sk.pem
+      - ./backend/certs/webte.fei.stuba.sk.key:/etc/nginx/certs/webte.fei.stuba.sk.key
+  php:
+    image: "backendphp"
+    build: backend
+    volumes:
+      - ./backend:/var/www/html/api
+    tmpfs:
+      - /var/www/html/temp
+  db:
+    image: mysql:8.3.0
+    restart: always
+    volumes:
+      - webte_mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "nSqqSqw3U4YZ"
+      MYSQL_DATABASE: "webte2cv2"
+    ports:
+      - 3307:3306
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "8011:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: "root"
+    depends_on:
+      - db
+
+volumes:
+  webte_mysql:
