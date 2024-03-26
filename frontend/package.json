@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --configuration=dev -o",
-    "build": "ng build && @powershell copy '../public/assets/angular/browser/index.html' '../resources/views/angular.blade.php' && @powershell Move-Item -Path '../public/assets/angular/browser/*' -Destination '../public/assets/angular/' && @powershell Remove-Item -Path '../public/assets/angular/browser'",
+    "build": "ng build && @powershell copy '../public/assets/angular/browser/index.html' '../resources/views/angular.blade.php' && @powershell Move-Item -Path '../public/assets/angular/browser/*' -Destination '../public/assets/angular/' && @powershell Remove-Item -Path '../public/assets/angular/browser' && @powershell Remove-Item -Path '../public/assets/angular/3rdpartylicenses.txt'",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
