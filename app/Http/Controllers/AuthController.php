@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 
-class AngularController extends Controller
+
+class AuthController extends Controller
 {
     public function index()
     {
-        return view('angular');
+        return "Hello World!";
     }
 }
