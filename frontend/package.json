@@ -3,20 +3,20 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --configuration=dev -o",
-    "build": "ng build && @powershell copy '../public/assets/angular/browser/index.html' '../resources/views/angular.blade.php' && @powershell Move-Item -Path '../public/assets/angular/browser/*' -Destination '../public/assets/angular/' && @powershell Remove-Item -Path '../public/assets/angular/browser' && @powershell Remove-Item -Path '../public/assets/angular/3rdpartylicenses.txt'",
+    "start": "ng serve",
+    "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
   "private": true,
   "dependencies": {
     "@angular/animations": "^17.3.0",
-    "@angular/cdk": "^17.3.1",
+    "@angular/cdk": "^17.3.5",
     "@angular/common": "^17.3.0",
     "@angular/compiler": "^17.3.0",
     "@angular/core": "^17.3.0",
     "@angular/forms": "^17.3.0",
-    "@angular/material": "^17.3.1",
+    "@angular/material": "^17.3.5",
     "@angular/platform-browser": "^17.3.0",
     "@angular/platform-browser-dynamic": "^17.3.0",
     "@angular/router": "^17.3.0",
@@ -25,8 +25,8 @@
     "zone.js": "~0.14.3"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^17.3.2",
-    "@angular/cli": "^17.3.2",
+    "@angular-devkit/build-angular": "^17.3.5",
+    "@angular/cli": "^17.3.5",
     "@angular/compiler-cli": "^17.3.0",
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.1.0",

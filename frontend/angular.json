@@ -13,8 +13,8 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "../public/assets/angular",
-            "deployUrl": "/assets/angular/",
+            "outputPath": "dist",
+            "baseHref": "/webte2skuskove/",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
@@ -42,10 +42,6 @@
               ],
               "outputHashing": "all"
             },
-            "dev": {
-              "outputPath": "dist/assets/angular",
-              "baseHref": "/assets/angular/"
-            },
             "development": {
               "optimization": false,
               "extractLicenses": false,
@@ -62,9 +58,6 @@
             },
             "development": {
               "buildTarget": "webte2skuskove:build:development"
-            },
-            "dev": {
-              "buildTarget": "webte2skuskove:build:dev"
             }
           },
           "defaultConfiguration": "development"
@@ -90,8 +83,5 @@
         }
       }
     }
-  },
-  "cli": {
-    "analytics": false
   }
 }
