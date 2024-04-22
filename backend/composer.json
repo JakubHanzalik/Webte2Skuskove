@@ -1,13 +1,13 @@
 {
-    "name": "stuba/webte2skuskove",
-    "type": "project",
-    "require": {
-        "pecee/simple-router": "^5.4",
-        "zircote/swagger-php": "^4.8"
-    },
-    "autoload": {
-        "psr-4": {
-            "Stuba\\Webte2skuskove\\": "src/"
-        }
+  "name": "stuba/webte2skuskove",
+  "type": "project",
+  "require": {
+    "pecee/simple-router": "^5.4",
+    "zircote/swagger-php": "^4.8"
+  },
+  "autoload": {
+    "psr-4": {
+      "Stuba\\": "./"
     }
+  }
 }
