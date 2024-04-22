@@ -2,10 +2,17 @@
 
 namespace Stuba\Controllers;
 
+use OpenApi\Generator;
+use OpenApi\Attributes as OA;
+
+#[OA\Info(title: "My First API", version: "0.1")]
 class OpenAPIController
 {
-    public function handle()
+    public function handle(): string
     {
-        return 'Swagger';
+        $openapi = Generator::scan(['./controllers']);
+
+        header('Content-Type: application/json');
+        return $openapi->toJson();
     }
 }

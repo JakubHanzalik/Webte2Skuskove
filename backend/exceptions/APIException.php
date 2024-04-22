@@ -1,4 +1,9 @@
 <?php
+namespace Stuba\Exceptions;
+
+use Exception;
+use Throwable;
+
 class APIException extends Exception
 {
     /**
