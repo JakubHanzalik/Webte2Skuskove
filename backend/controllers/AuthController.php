@@ -20,6 +20,7 @@ class AuthController
 
 
     #[OA\Post(path: '/api/login')]
+    // TODO: Pridat request body
     #[OA\Response(response: 200, description: 'Login user')]
     public function login()
     {
@@ -38,5 +39,23 @@ class AuthController
         } else {
             throw new APIException('Invalid credentials', 401);
         }
+    }
+
+    #[OA\Post(path: '/api/logout')]
+    #[OA\Response(response: 200, description: 'Logout user')]
+    public function logout()
+    {
+        if (isset($_COOKIE["RefreshToken"])) {
+            unset($_COOKIE["RefreshToken"]);
+        }
+        if (isset($_COOKIE["AccessToken"])) {
+            unset($_COOKIE["AccessToken"]);
+        }
+        setcookie('AccessToken', '', time() - 3600, '/', '', true, true);
+        setcookie('RefreshToken', '', time() - 3600, '/', '', true, true);
+
+        //TODO: Odstranit refresh token z databazy
+
+        SimpleRouter::response()->httpCode(200);
     }
 }

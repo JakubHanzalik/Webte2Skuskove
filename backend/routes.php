@@ -16,6 +16,7 @@ SimpleRouter::group(['prefix' => '/api'], function () {
     });
 
     SimpleRouter::post('/login', [AuthController::class, 'login']);
+    SimpleRouter::post('/logout', [AuthController::class, 'logout']);
 
     SimpleRouter::get('/swagger', [OpenAPIController::class, 'handle']);
 });
