@@ -29,7 +29,7 @@ class JwtHandler
         $payload = [
             'iss' => 'https://node41.webte.fei.stuba.sk/',
             'sub' => $username,
-            'exp' => strtotime('+1 minutes', time())
+            'exp' => strtotime('+3 minutes', time())
         ];
 
         return JWT::encode($payload, $this->secret, 'HS256');
