@@ -72,7 +72,7 @@ class JwtHandler
      * @param string $userName 
      * @return string $refreshToken 
      */
-    private function createRefreshToken(string $username): string
+    public function createRefreshToken(string $username): string
     {
         $refreshToken = $this->generateRandomString(30);
 
