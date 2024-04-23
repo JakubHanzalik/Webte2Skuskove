@@ -5,14 +5,20 @@ namespace Stuba\Controllers;
 use OpenApi\Attributes as OA;
 use Pecee\SimpleRouter\SimpleRouter;
 
+use Stuba\Handlers\JwtHandler;
 use Stuba\Models\Auth\LoginModel;
 use Stuba\Exceptions\APIException;
 
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
-
 class AuthController
 {
+    private JwtHandler $jwtHandler;
+
+    public function __construct()
+    {
+        $this->jwtHandler = new JwtHandler();
+    }
+
+
     #[OA\Post(path: '/api/login')]
     #[OA\Response(response: 200, description: 'Login user')]
     public function login()
@@ -23,16 +29,14 @@ class AuthController
         //Ak neexistuje taky uzivatel vyhodit exception
 
         if (true /*TODO: Ak je prihlasenie uspesne*/) {
-            $token = $this->issueJwtToken($model->username);
-            setcookie('Bearer', $token, time() + 3600, '/', '', true, true);
+            $token = $this->jwtHandler->createAccessToken($model->username);
+            setcookie('AccessToken', $token, strtotime('+3 minutes', time()), '/', '', true, true);
+
+            $refreshToken = $this->jwtHandler->createRefreshToken($model->username);
+            setcookie('RefreshToken', $refreshToken, strtotime('+1 week', time()), '/', '', true, true);
             SimpleRouter::response()->httpCode(200);
         } else {
             throw new APIException('Invalid credentials', 401);
         }
-    }
-
-    private function issueJwtToken(string $username): string
-    {
-        return "JWT token";
     }
 }
