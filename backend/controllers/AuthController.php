@@ -6,9 +6,12 @@ use OpenApi\Attributes as OA;
 use Pecee\SimpleRouter\SimpleRouter;
 
 use Stuba\Handlers\JwtHandler;
-use Stuba\Models\Auth\LoginModel;
 use Stuba\Exceptions\APIException;
 use Stuba\Db\DbAccess;
+
+use Stuba\Models\Auth\LoginRequestModel;
+use Stuba\Models\Auth\RegisterRequestModel;
+use Stuba\Models\Auth\LoggedUserResponseModel;
 
 use PDO;
 
@@ -23,13 +26,35 @@ class AuthController
         $this->dbConnection = (new DbAccess())->getDbConnection();
     }
 
+    #[OA\Post(path: '/api/register')]
+    #[OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/RegisterModel'))]
+    #[OA\Response(response: 200, description: 'Register user')]
+    #[OA\Response(response: 409, description: 'User already exists')]
+
+    public function register()
+    {
+        $model = new RegisterRequestModel(SimpleRouter::request()->getInputHandler()->all());
+
+        ///TODO: Ulozit uzivatela do databazy a skontrolovat ci uz neexistuje
+        /// ak existuje vyhodit APIException('User already exists', 409)
+
+        $token = $this->jwtHandler->createAccessToken($model->username);
+        setcookie('AccessToken', $token, strtotime('+3 minutes', time()), '/', '', true, true);
+
+        $refreshToken = $this->jwtHandler->createRefreshToken($model->username);
+        setcookie('RefreshToken', $refreshToken, strtotime('+1 week', time()), '/', '', true, true);
+
+        SimpleRouter::response()->httpCode(200);
+    }
+
 
     #[OA\Post(path: '/api/login')]
-    // TODO: Pridat request body
+    #[OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/LoginModel'))]
     #[OA\Response(response: 200, description: 'Login user')]
+    #[OA\Response(response: 401, description: 'Invalid credentials')]
     public function login()
     {
-        $model = new LoginModel(SimpleRouter::request()->getInputHandler()->all());
+        $model = new LoginRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
         $user = $this->validateCredentials($model->username, $model->password);
 
@@ -42,11 +67,32 @@ class AuthController
         SimpleRouter::response()->httpCode(200);
     }
 
+    #[OA\Get(path: '/api/user')]
+    #[OA\Response(response: 200, description: 'Get logged user')]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
+
+    public function getLoggedUser()
+    {
+        $accessToken = $_COOKIE["AccessToken"];
+        $decoded = $this->jwtHandler->decodeAccessToken($accessToken);
+
+        //TODO: Vratit uzivatela z databazy podla $decoded['sub'] co je username
+
+        //Toto je len mock
+        $user = new LoggedUserResponseModel([
+            'id' => 1,
+            'username' => 'test',
+            'name' => 'Test',
+            'surname' => 'Testovic'
+        ]);
+
+        SimpleRouter::response()->json($user);
+    }
+
     #[OA\Post(path: '/api/logout')]
     #[OA\Response(response: 200, description: 'Logout user')]
     public function logout()
     {
-
         if (isset($_COOKIE["RefreshToken"])) {
             $this->revokeRefreshToken($_COOKIE["RefreshToken"]);
             unset($_COOKIE["RefreshToken"]);
@@ -56,8 +102,6 @@ class AuthController
         }
         setcookie('AccessToken', '', time() - 3600, '/', '', true, true);
         setcookie('RefreshToken', '', time() - 3600, '/', '', true, true);
-
-        //TODO: Odstranit refresh token z databazy
 
         SimpleRouter::response()->httpCode(200);
     }

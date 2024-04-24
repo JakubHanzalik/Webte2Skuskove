@@ -2,6 +2,7 @@
 
 namespace Stuba\Handlers;
 
+use Exception;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -92,6 +93,17 @@ class JwtHandler
         $statement->execute();
 
         return $refreshToken;
+    }
+
+    /**
+     * Dekoduje access token
+     * @param string $accessToken
+     * @return array pole s informaciami o uzivatelovi [iss, sub, exp]
+     */
+    public function decodeAccessToken(string $accessToken): array
+    {
+        $decoded = JWT::decode($accessToken, new Key($this->secret, 'HS256'));
+        return (array) $decoded;
     }
 
     /**

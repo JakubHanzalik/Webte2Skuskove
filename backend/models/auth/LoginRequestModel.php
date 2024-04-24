@@ -4,8 +4,8 @@ namespace Stuba\Models\Auth;
 
 use OpenApi\Attributes as OA;
 
-#[OA\Schema(title: 'LoginModel')]
-class LoginModel
+#[OA\Schema(title: 'LoginModel', schema: 'LoginModel', type: 'object')]
+class LoginRequestModel
 {
     public function __construct($requestParams)
     {
@@ -13,9 +13,9 @@ class LoginModel
         $this->password = $requestParams['password'];
     }
 
-    #[OA\Property(title: "username", format: 'string')]
+    #[OA\Property(title: "username", type: 'string')]
     public string $username;
 
-    #[OA\Property(title: "password", format: 'string')]
+    #[OA\Property(title: "password", type: 'string')]
     public string $password;
 }

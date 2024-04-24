@@ -22,7 +22,8 @@ class AuthMiddleware implements IMiddleware
         $jwtHandler = new JwtHandler();
         $newAccessToken = $jwtHandler->authentificate($accessToken, $refreshToken);
         if ($newAccessToken != "") {
-            setcookie('AccessToken', $newAccessToken, strtotime('+5 minutes', time()), '/', '', true, true);
+            setcookie('AccessToken', $newAccessToken, strtotime('+3 minutes', time()), '/', '', true, true);
+            $_COOKIE["AccessToken"] = $newAccessToken;
         }
     }
 }
