@@ -19,7 +19,7 @@ services:
     image: mysql:8.3.0
     restart: always
     volumes:
-      - webte_mysql:/var/lib/mysql
+      - ./backend/Db:/docker-entrypoint-initdb.d
     environment:
       MYSQL_ROOT_PASSWORD: "nSqqSqw3U4YZ"
       MYSQL_DATABASE: "webte2skuskove"
@@ -35,6 +35,3 @@ services:
       MYSQL_ROOT_PASSWORD: "root"
     depends_on:
       - db
-
-volumes:
-  webte_mysql:

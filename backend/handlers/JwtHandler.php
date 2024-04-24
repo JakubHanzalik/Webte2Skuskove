@@ -1,4 +1,5 @@
 <?php
+
 namespace Stuba\Handlers;
 
 use Firebase\JWT\ExpiredException;
@@ -17,11 +18,11 @@ class JwtHandler
      */
     private string $secret;
     private PDO $dbConnection;
-    
-    public function __construct(DbAccess $dbAccess)
+
+    public function __construct()
     {
         $this->secret = file_get_contents(__DIR__ . '/../jwt.key');
-        $this->dbConnection = $dbAccess->getDbConnection();
+        $this->dbConnection = (new DbAccess())->getDbConnection();
     }
 
     /**
@@ -51,7 +52,7 @@ class JwtHandler
     {
         if ($accessToken == null) {
             if ($this->validateRefreshToken($refreshToken)) {
-                
+
                 $username = $this->getUsernameByRefreshToken($refreshToken);        //TODO: Ziskat username z databazy
                 return $this->createAccessToken($username);
             } else {
@@ -82,7 +83,7 @@ class JwtHandler
     {
         $refreshToken = $this->generateRandomString(30);
 
-        
+
         //TODO: Ulozit refresh token do databazy spolu s expiracnym casom a username
         // Cas expiracie by mal byt aspon 1 tyzden od teraz
         $this->saveRefreshTokenToDatabase($username, $refreshToken);
@@ -141,5 +142,4 @@ class JwtHandler
         $statement->bindParam(":validity", $expirationTime);
         $statement->execute();
     }
-
 }

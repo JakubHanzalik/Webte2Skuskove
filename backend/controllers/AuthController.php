@@ -8,14 +8,19 @@ use Pecee\SimpleRouter\SimpleRouter;
 use Stuba\Handlers\JwtHandler;
 use Stuba\Models\Auth\LoginModel;
 use Stuba\Exceptions\APIException;
+use Stuba\Db\DbAccess;
+
+use PDO;
 
 class AuthController
 {
     private JwtHandler $jwtHandler;
+    private PDO $dbConnection;
 
     public function __construct()
     {
         $this->jwtHandler = new JwtHandler();
+        $this->dbConnection = (new DbAccess())->getDbConnection();
     }
 
 
@@ -62,7 +67,12 @@ class AuthController
         SimpleRouter::response()->httpCode(200);
     }
 
-
+    /**
+     * Overi ci uzivatel existuje v databaze a heslo je spravne
+     * @param string $username
+     * @param string $password
+     * @return array|null Vrati uzivatela ak existuje, inak null
+     */
     private function validateCredentials(string $username, string $password): ?array
     {
         $query = "SELECT * FROM Users WHERE username = :username";
@@ -72,7 +82,7 @@ class AuthController
         $user = $statement->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($password, $user['password'])) {
-            return $user; 
+            return $user;
         }
         return null;
     }
@@ -84,5 +94,4 @@ class AuthController
         $statement->bindParam(":token", $refreshToken);
         $statement->execute();
     }
-
 }
