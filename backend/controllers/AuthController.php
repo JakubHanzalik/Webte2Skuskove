@@ -28,8 +28,9 @@ class AuthController
 
         //TODO: Validovat prihlasovacie udaje voci databaze
         //Ak neexistuje taky uzivatel vyhodit exception
+        $user = $this->validateCredentials($model->username, $model->password);
 
-        if (true /*TODO: Ak je prihlasenie uspesne*/) {
+        if ($user) {
             $token = $this->jwtHandler->createAccessToken($model->username);
             setcookie('AccessToken', $token, strtotime('+3 minutes', time()), '/', '', true, true);
 
@@ -45,7 +46,9 @@ class AuthController
     #[OA\Response(response: 200, description: 'Logout user')]
     public function logout()
     {
+
         if (isset($_COOKIE["RefreshToken"])) {
+            $this->revokeRefreshToken($_COOKIE["RefreshToken"]);
             unset($_COOKIE["RefreshToken"]);
         }
         if (isset($_COOKIE["AccessToken"])) {
@@ -58,4 +61,28 @@ class AuthController
 
         SimpleRouter::response()->httpCode(200);
     }
+
+
+    private function validateCredentials(string $username, string $password): ?array
+    {
+        $query = "SELECT * FROM Users WHERE username = :username";
+        $statement = $this->dbConnection->prepare($query);
+        $statement->bindParam(":username", $username);
+        $statement->execute();
+        $user = $statement->fetch(PDO::FETCH_ASSOC);
+
+        if ($user && password_verify($password, $user['password'])) {
+            return $user; 
+        }
+        return null;
+    }
+
+    private function revokeRefreshToken(string $refreshToken): void
+    {
+        $query = "DELETE FROM Token WHERE token = :token";
+        $statement = $this->dbConnection->prepare($query);
+        $statement->bindParam(":token", $refreshToken);
+        $statement->execute();
+    }
+
 }
