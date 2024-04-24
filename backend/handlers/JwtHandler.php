@@ -53,7 +53,7 @@ class JwtHandler
         if ($accessToken == null) {
             if ($this->validateRefreshToken($refreshToken)) {
 
-                $username = $this->getUsernameByRefreshToken($refreshToken);        //TODO: Ziskat username z databazy
+                $username = $this->getUsernameByRefreshToken($refreshToken);
                 return $this->createAccessToken($username);
             } else {
                 throw new APIException('Unauthorized', 401);
@@ -63,7 +63,7 @@ class JwtHandler
             JWT::decode($accessToken, new Key($this->secret, 'HS256'));
         } catch (ExpiredException $e) {
             if ($this->validateRefreshToken($refreshToken)) {
-                $username = $this->getUsernameByRefreshToken($refreshToken); //TODO: Ziskat username z databazy
+                $username = $this->getUsernameByRefreshToken($refreshToken);
                 return $this->createAccessToken($username);
             } else {
                 throw new APIException('Unauthorized', 401);
@@ -76,17 +76,20 @@ class JwtHandler
 
     /**
      * Vytvori refresh token pre uzivatela
-     * @param string $userName 
+     * @param string $userName meno pouzivatela
      * @return string $refreshToken 
      */
     public function createRefreshToken(string $username): string
     {
         $refreshToken = $this->generateRandomString(30);
 
-
-        //TODO: Ulozit refresh token do databazy spolu s expiracnym casom a username
-        // Cas expiracie by mal byt aspon 1 tyzden od teraz
-        $this->saveRefreshTokenToDatabase($username, $refreshToken);
+        $expirationTime = strtotime('+1 week', time());
+        $query = "INSERT INTO Token (username, token, validity) VALUES (:username, :token, :validity)";
+        $statement = $this->dbConnection->prepare($query);
+        $statement->bindParam(":username", $username);
+        $statement->bindParam(":token", $refreshToken);
+        $statement->bindParam(":validity", $expirationTime);
+        $statement->execute();
 
         return $refreshToken;
     }
@@ -127,19 +130,9 @@ class JwtHandler
         $statement->bindParam(":refreshToken", $refreshToken);
         $statement->execute();
         if ($statement->rowCount() > 0) {
-            return $statement->fetchColumn();  // Vráti username
+            return $statement->fetchColumn();
         } else {
-            throw new APIException("No user found for provided refresh token.", 404);
+            throw new APIException("Unauthorized", 401);
         }
-    }
-    private function saveRefreshTokenToDatabase(string $username, string $refreshToken): void
-    {
-        $expirationTime = strtotime('+1 week', time());
-        $query = "INSERT INTO Token (username, token, validity) VALUES (:username, :token, FROM_UNIXTIME(:validity))";
-        $statement = $this->dbConnection->prepare($query);
-        $statement->bindParam(":username", $username);
-        $statement->bindParam(":token", $refreshToken);
-        $statement->bindParam(":validity", $expirationTime);
-        $statement->execute();
     }
 }

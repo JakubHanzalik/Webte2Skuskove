@@ -31,20 +31,15 @@ class AuthController
     {
         $model = new LoginModel(SimpleRouter::request()->getInputHandler()->all());
 
-        //TODO: Validovat prihlasovacie udaje voci databaze
-        //Ak neexistuje taky uzivatel vyhodit exception
         $user = $this->validateCredentials($model->username, $model->password);
 
-        if ($user) {
-            $token = $this->jwtHandler->createAccessToken($model->username);
-            setcookie('AccessToken', $token, strtotime('+3 minutes', time()), '/', '', true, true);
+        $token = $this->jwtHandler->createAccessToken($user['username']);
+        setcookie('AccessToken', $token, strtotime('+3 minutes', time()), '/', '', true, true);
 
-            $refreshToken = $this->jwtHandler->createRefreshToken($model->username);
-            setcookie('RefreshToken', $refreshToken, strtotime('+1 week', time()), '/', '', true, true);
-            SimpleRouter::response()->httpCode(200);
-        } else {
-            throw new APIException('Invalid credentials', 401);
-        }
+        $refreshToken = $this->jwtHandler->createRefreshToken($user['username']);
+        setcookie('RefreshToken', $refreshToken, strtotime('+1 week', time()), '/', '', true, true);
+
+        SimpleRouter::response()->httpCode(200);
     }
 
     #[OA\Post(path: '/api/logout')]
@@ -71,9 +66,10 @@ class AuthController
      * Overi ci uzivatel existuje v databaze a heslo je spravne
      * @param string $username
      * @param string $password
-     * @return array|null Vrati uzivatela ak existuje, inak null
+     * @return array Vrati uzivatela ak existuje
+     * @throws APIException Ak uzivatel neexistuje alebo heslo je nespravne
      */
-    private function validateCredentials(string $username, string $password): ?array
+    private function validateCredentials(string $username, string $password): array
     {
         $query = "SELECT * FROM Users WHERE username = :username";
         $statement = $this->dbConnection->prepare($query);
@@ -83,8 +79,9 @@ class AuthController
 
         if ($user && password_verify($password, $user['password'])) {
             return $user;
+        } else {
+            throw new APIException('Invalid credentials', 401);
         }
-        return null;
     }
 
     private function revokeRefreshToken(string $refreshToken): void
