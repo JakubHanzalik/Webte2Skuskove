@@ -5,7 +5,7 @@ namespace Stuba\Controllers;
 use OpenApi\Generator;
 use OpenApi\Attributes as OA;
 
-#[OA\Info(title: "My First API", version: "0.1")]
+#[OA\Info(title: "Webte skuskove API", version: "0.1")]
 class OpenAPIController
 {
     public function handle(): string

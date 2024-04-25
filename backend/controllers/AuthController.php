@@ -15,6 +15,7 @@ use Stuba\Models\Auth\LoggedUserResponseModel;
 
 use PDO;
 
+#[OA\Tag('Auth')]
 class AuthController
 {
     private JwtHandler $jwtHandler;
@@ -26,7 +27,7 @@ class AuthController
         $this->dbConnection = (new DbAccess())->getDbConnection();
     }
 
-    #[OA\Post(path: '/api/register')]
+    #[OA\Post(path: '/api/register', tags: ['Auth'])]
     #[OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/RegisterModel'))]
     #[OA\Response(response: 200, description: 'Register user')]
     #[OA\Response(response: 409, description: 'User already exists')]
@@ -48,7 +49,7 @@ class AuthController
     }
 
 
-    #[OA\Post(path: '/api/login')]
+    #[OA\Post(path: '/api/login', tags: ['Auth'])]
     #[OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/LoginModel'))]
     #[OA\Response(response: 200, description: 'Login user')]
     #[OA\Response(response: 401, description: 'Invalid credentials')]
@@ -67,8 +68,8 @@ class AuthController
         SimpleRouter::response()->httpCode(200);
     }
 
-    #[OA\Get(path: '/api/user')]
-    #[OA\Response(response: 200, description: 'Get logged user')]
+    #[OA\Get(path: '/api/login', tags: ['Auth'])]
+    #[OA\Response(response: 200, description: 'Get logged user', content: new OA\JsonContent(ref: '#/components/schemas/LoggedUserModel'))]
     #[OA\Response(response: 401, description: 'Unauthorized')]
 
     public function getLoggedUser()
@@ -86,10 +87,10 @@ class AuthController
             'surname' => 'Testovic'
         ]);
 
-        SimpleRouter::response()->json($user);
+        SimpleRouter::response()->json($user)->httpCode(200);
     }
 
-    #[OA\Post(path: '/api/logout')]
+    #[OA\Post(path: '/api/logout', tags: ['Auth'])]
     #[OA\Response(response: 200, description: 'Logout user')]
     public function logout()
     {

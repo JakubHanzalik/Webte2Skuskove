@@ -13,9 +13,9 @@ class LoginRequestModel
         $this->password = $requestParams['password'];
     }
 
-    #[OA\Property(title: "username", type: 'string')]
+    #[OA\Property(title: "username", type: 'string', example: "JanKowalski")]
     public string $username;
 
-    #[OA\Property(title: "password", type: 'string')]
+    #[OA\Property(title: "password", type: 'string', example: "password")]
     public string $password;
 }

@@ -15,15 +15,15 @@ class RegisterRequestModel
         $this->surname = $requestParams['surname'];
     }
 
-    #[OA\Property(title: "username", type: 'string')]
+    #[OA\Property(title: "username", type: 'string', example: "JanKowalski")]
     public string $username;
 
-    #[OA\Property(title: "password", type: 'string')]
+    #[OA\Property(title: "password", type: 'string', example: "password")]
     public string $password;
 
-    #[OA\Property(title: "name", type: 'string')]
+    #[OA\Property(title: "name", type: 'string', example: "Jan")]
     public string $name;
 
-    #[OA\Property(title: "surname", type: 'string')]
+    #[OA\Property(title: "surname", type: 'string', example: "Kowalski")]
     public string $surname;
 }

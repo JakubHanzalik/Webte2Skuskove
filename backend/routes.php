@@ -2,6 +2,7 @@
 
 use Pecee\SimpleRouter\SimpleRouter;
 
+use Stuba\Controllers\CodelistController;
 use Stuba\Controllers\OpenAPIController;
 use Stuba\Controllers\AuthController;
 
@@ -16,6 +17,7 @@ SimpleRouter::group(['prefix' => '/api'], function () {
         SimpleRouter::get('/login', [AuthController::class, 'getLoggedUser']);
     });
 
+    SimpleRouter::get('/codelist/{code}', [CodelistController::class, 'handle']);
 
     SimpleRouter::post('/login', [AuthController::class, 'login']);
 

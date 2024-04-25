@@ -21,15 +21,15 @@ class LoggedUserResponseModel implements JsonSerializable
         return get_object_vars($this);
     }
 
-    #[OA\Property(title: "id", type: 'integer')]
+    #[OA\Property(title: "id", type: 'integer', example: 1)]
     public int $id;
 
-    #[OA\Property(title: "username", type: 'string')]
+    #[OA\Property(title: "username", type: 'string', example: "JanKowalski")]
     public string $username;
 
-    #[OA\Property(title: "name", type: 'string')]
+    #[OA\Property(title: "name", type: 'string', example: "Jan")]
     public string $name;
 
-    #[OA\Property(title: "surname", type: 'string')]
+    #[OA\Property(title: "surname", type: 'string', example: "Kowalski")]
     public string $surname;
 }
