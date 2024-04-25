@@ -5,15 +5,16 @@ use Pecee\SimpleRouter\SimpleRouter;
 use Stuba\Controllers\CodelistController;
 use Stuba\Controllers\OpenAPIController;
 use Stuba\Controllers\AuthController;
+use Stuba\Controllers\QuestionsController;
 
 use Stuba\Middleware\AuthMiddleware;
 
 SimpleRouter::group(['prefix' => '/api'], function () {
 
     SimpleRouter::group(['middleware' => AuthMiddleware::class], function () {
-        SimpleRouter::get('/user', function () {
-            return 'Hello from user';
-        });
+        SimpleRouter::get('/question', [QuestionsController::class, 'getAllQuestionsByUser']);
+        SimpleRouter::get('/question/{id}', [QuestionsController::class, 'getQuestionById']);
+
         SimpleRouter::get('/login', [AuthController::class, 'getLoggedUser']);
     });
 

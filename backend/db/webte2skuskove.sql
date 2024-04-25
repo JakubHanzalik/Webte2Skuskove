@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Apr 24, 2024 at 07:01 PM
+-- Generation Time: Apr 25, 2024 at 08:25 PM
 -- Server version: 8.3.0
 -- PHP Version: 8.2.8
 
@@ -72,7 +72,7 @@ CREATE TABLE `Token` (
   `id` int NOT NULL,
   `token` varchar(100) NOT NULL,
   `username` varchar(50) NOT NULL,
-  `validity` int NOT NULL
+  `validity` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -80,8 +80,9 @@ CREATE TABLE `Token` (
 --
 
 INSERT INTO `Token` (`id`, `token`, `username`, `validity`) VALUES
-(4, 'HTS4N0Fo9kTZ8hPWCWsI4DjOV1ve09', 'jano', 1714589754),
-(5, '7qCtUG4fui7ZPP1Php4LTCv7xCuXMg', 'jano', 1714590048);
+(4, 'HTS4N0Fo9kTZ8hPWCWsI4DjOV1ve09', 'jano', '1714589754'),
+(5, '7qCtUG4fui7ZPP1Php4LTCv7xCuXMg', 'jano', '1714590048'),
+(6, 'tGAW4IyofacJyCsH0Dwb8DDHS2uJdE', 'jano', '2024-05-02 20:23:25');
 
 -- --------------------------------------------------------
 
@@ -206,7 +207,7 @@ ALTER TABLE `Subject`
 -- AUTO_INCREMENT for table `Token`
 --
 ALTER TABLE `Token`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `Users`

@@ -10,7 +10,6 @@ use Pecee\SimpleRouter\SimpleRouter;
 
 class CodelistController
 {
-
     private PDO $dbConnection;
 
     public function __construct()
