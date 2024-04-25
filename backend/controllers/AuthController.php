@@ -36,8 +36,28 @@ class AuthController
     {
         $model = new RegisterRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
-        ///TODO: Ulozit uzivatela do databazy a skontrolovat ci uz neexistuje
-        /// ak existuje vyhodit APIException('User already exists', 409)
+        // Overenie, či užívateľ s týmto username už existuje
+        $query = "SELECT * FROM Users WHERE username = :username";
+        $statement = $this->dbConnection->prepare($query);
+        $statement->bindParam(":username", $model->username);
+        $statement->execute();
+        if ($statement->fetch(PDO::FETCH_ASSOC)) {
+            throw new APIException('User already exists', 409);
+        }
+
+        // Hash hesla pred uložením
+        $hashedPassword = password_hash($model->password, PASSWORD_DEFAULT);
+
+        // Uloženie nového užívateľa do databázy
+        $query = "INSERT INTO Users (username, password, name, surname) VALUES (:username, :password, :name,:surname)";
+        $statement = $this->dbConnection->prepare($query);
+        $statement->bindParam(":username", $model->username);
+        $statement->bindParam(":password", $hashedPassword);
+        $statement->bindParam(":name", $model->name);
+        $statement->bindParam(":surname", $model->surname);
+        $statement->execute();
+
+ 
 
         $token = $this->jwtHandler->createAccessToken($model->username);
         setcookie('AccessToken', $token, strtotime('+3 minutes', time()), '/', '', true, true);
@@ -77,17 +97,19 @@ class AuthController
         $accessToken = $_COOKIE["AccessToken"];
         $decoded = $this->jwtHandler->decodeAccessToken($accessToken);
 
-        //TODO: Vratit uzivatela z databazy podla $decoded['sub'] co je username
+        $query = "SELECT id, username, name, surname FROM Users WHERE username = :username";
+        $statement = $this->dbConnection->prepare($query);
+        $statement->bindParam(":username", $decoded['sub']);
+        $statement->execute();
+        $user = $statement->fetch(PDO::FETCH_ASSOC);
 
-        //Toto je len mock
-        $user = new LoggedUserResponseModel([
-            'id' => 1,
-            'username' => 'test',
-            'name' => 'Test',
-            'surname' => 'Testovic'
-        ]);
+        if (!$user) {
+            throw new APIException('User not found', 404);
+        }
 
-        SimpleRouter::response()->json($user)->httpCode(200);
+        $userModel = new LoggedUserResponseModel($user);
+
+        SimpleRouter::response()->json($userModel)->httpCode(200);
     }
 
     #[OA\Post(path: '/api/logout', tags: ['Auth'])]

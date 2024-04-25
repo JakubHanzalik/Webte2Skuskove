@@ -69,7 +69,7 @@ class JwtHandler
             } else {
                 throw new APIException('Unauthorized', 401);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new APIException('Unauthorized', 401);
         }
         return "";
@@ -85,11 +85,12 @@ class JwtHandler
         $refreshToken = $this->generateRandomString(30);
 
         $expirationTime = strtotime('+1 week', time());
+        $expirationDateTime = date('Y-m-d H:i:s', $expirationTime);
         $query = "INSERT INTO Token (username, token, validity) VALUES (:username, :token, :validity)";
         $statement = $this->dbConnection->prepare($query);
         $statement->bindParam(":username", $username);
         $statement->bindParam(":token", $refreshToken);
-        $statement->bindParam(":validity", $expirationTime);
+        $statement->bindParam(":validity", $expirationDateTime);
         $statement->execute();
 
         return $refreshToken;
