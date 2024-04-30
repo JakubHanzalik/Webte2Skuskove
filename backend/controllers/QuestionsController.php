@@ -5,7 +5,9 @@ namespace Stuba\Controllers;
 use OpenApi\Attributes as OA;
 use Pecee\SimpleRouter\SimpleRouter;
 use Stuba\Handlers\JwtHandler;
-use Stuba\Models\Questions\QuestionResponseModel;
+use Stuba\Models\Questions\GetAllQuestions\GetQuestionsResponseModel;
+use Stuba\Models\Questions\GetQuestion\GetQuestionResponseModel;
+use Stuba\Models\Questions\AnswerModel;
 use Stuba\Models\Questions\EQuestionType;
 
 #[OA\Tag('Question')]
@@ -19,7 +21,7 @@ class QuestionsController
     }
 
     #[OA\Get(path: '/api/question', tags: ['Question'])]
-    #[OA\Response(response: 200, description: 'Get all questions of logged user', content: new OA\JsonContent(ref: '#/components/schemas/QuestionResponseModel'))]
+    #[OA\Response(response: 200, description: 'Get all questions of logged user', content: new OA\JsonContent(ref: '#/components/schemas/GetQuestionsResponseModel'))]
     #[OA\Response(response: 401, description: 'Unauthorized')]
     public function getAllQuestionsByUser()
     {
@@ -27,29 +29,29 @@ class QuestionsController
         $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
 
         //TODO: Na zaklade username vrati vsetky otazky, ktore vytvoril
-        // Vratit pole QuestionResponseModel
+        // Vratit pole GetQuestionsResponseModel
 
         // Mock data
         SimpleRouter::response()->json([
-            new QuestionResponseModel([
-                "text" => "Ahoj",
+            new GetQuestionsResponseModel([
+                "text" => "Ako sa Vám páči tento predmet?",
                 "active" => true,
-                "type" => EQuestionType::MULTIPLE_CHOICE,
-                "subjectId" => 1,
-                "creationDate" => "2021-10-10",
-                "authorId" => 1
+                "subjectId" => 2,
+                "code" => "abcde"
             ]),
-            new QuestionResponseModel([
-                "text" => "Ako sa mas?",
+            new GetQuestionsResponseModel([
+                "text" => "Aky je tvoj obľúbený predmet?",
                 "active" => true,
-                "type" => EQuestionType::TEXT,
-                "subjectId" => 1,
-                "creationDate" => "2021-10-10",
-                "authorId" => 1
+                "subjectId" => 5,
+                "code" => "fghij"
             ])
         ])->httpCode(200);
     }
 
+    #[OA\Get(path: '/api/question/{id}', description: "Get question by id", tags: ['Question'])]
+    #[OA\Parameter(name: "id", in: 'path', required: true, description: "Question code", example: "5", schema: new OA\Schema(type: 'string'))]
+    #[OA\Response(response: 200, description: 'Get question by id of logged user', content: new OA\JsonContent(ref: '#/components/schemas/GetQuestionResponseModel'))]
+    #[OA\Response(response: 401, description: 'Unauthorized')]
     public function getQuestionById(int $id)
     {
         $accessToken = $_COOKIE["AccessToken"];
@@ -61,14 +63,32 @@ class QuestionsController
 
         // Mock data
         SimpleRouter::response()->json([
-            new QuestionResponseModel([
-                "text" => "Ahoj",
+            new GetQuestionResponseModel([
+                "text" => "Ako sa Vám páči tento predmet?",
                 "active" => true,
                 "type" => EQuestionType::SINGLE_CHOICE,
-                "subjectId" => 2,
-                "creationDate" => "2021-10-10",
-                "authorId" => 1
+                "subjectId" => 1,
+                "creationDate" => "2024-6-17 13:58:32",
+                "authorId" => 1,
+                "code" => "abcde",
+                "answers" => [
+                    new AnswerModel([
+                        "text" => "Dobrý",
+                        "correct" => true
+                    ]),
+                    new AnswerModel([
+                        "text" => "Zlý",
+                        "correct" => false
+                    ])
+                ]
             ])
         ])->httpCode(200);
+    }
+
+    public function createQuestion()
+    {
+        $accessToken = $_COOKIE["AccessToken"];
+        $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
+
     }
 }

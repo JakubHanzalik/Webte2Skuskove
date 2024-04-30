@@ -36,7 +36,6 @@ class AuthController
     {
         $model = new RegisterRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
-        // Overenie, či užívateľ s týmto username už existuje
         $query = "SELECT * FROM Users WHERE username = :username";
         $statement = $this->dbConnection->prepare($query);
         $statement->bindParam(":username", $model->username);
@@ -45,10 +44,8 @@ class AuthController
             throw new APIException('User already exists', 409);
         }
 
-        // Hash hesla pred uložením
         $hashedPassword = password_hash($model->password, PASSWORD_DEFAULT);
 
-        // Uloženie nového užívateľa do databázy
         $query = "INSERT INTO Users (username, password, name, surname) VALUES (:username, :password, :name,:surname)";
         $statement = $this->dbConnection->prepare($query);
         $statement->bindParam(":username", $model->username);
@@ -56,8 +53,6 @@ class AuthController
         $statement->bindParam(":name", $model->name);
         $statement->bindParam(":surname", $model->surname);
         $statement->execute();
-
- 
 
         $token = $this->jwtHandler->createAccessToken($model->username);
         setcookie('AccessToken', $token, strtotime('+3 minutes', time()), '/', '', true, true);
