@@ -8,11 +8,18 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(title: 'GetQuestionsResponseModel', schema: 'GetQuestionsResponseModel', type: 'object')]
 class GetQuestionsResponseModel implements JsonSerializable
 {
-    public function __construct($question)
+    public function __construct()
     {
-        $this->text = $question["text"];
-        $this->active = $question["active"];
-        $this->subjectId = $question["subjectId"];
+    }
+
+    public static function constructFromModel($question): GetQuestionsResponseModel
+    {
+        $obj = new GetQuestionsResponseModel();
+        $obj->text = $question["text"];
+        $obj->active = $question["active"];
+        $obj->subjectId = $question["subjectId"];
+
+        return $obj;
     }
 
     #[OA\Property(title: "text", type: 'string', example: "Aky je tvoj obľúbený predmet?")]
@@ -22,7 +29,7 @@ class GetQuestionsResponseModel implements JsonSerializable
     public string $active;
 
     #[OA\Property(title: "subjectId", type: 'int', example: 5)]
-    public string $subjectId;
+    public int $subjectId;
 
     #[OA\Property(title: "code", type: 'string', example: "abcde")]
     public string $code;

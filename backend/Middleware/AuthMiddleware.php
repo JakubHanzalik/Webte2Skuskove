@@ -5,7 +5,7 @@ namespace Stuba\Middleware;
 use Pecee\Http\Middleware\IMiddleware;
 use Pecee\Http\Request;
 
-use Stuba\Handlers\JwtHandler;
+use Stuba\Handlers\Jwt\JwtHandler;
 use Stuba\Exceptions\APIException;
 
 class AuthMiddleware implements IMiddleware

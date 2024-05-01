@@ -4,6 +4,7 @@ namespace Stuba\Models\Questions\UpdateQuestion;
 
 use JsonSerializable;
 use OpenApi\Attributes as OA;
+use Stuba\Models\Questions\AnswerModel;
 
 #[OA\Schema(title: 'UpdateQuestionRequestModel', schema: 'UpdateQuestionRequestModel', type: 'object')]
 class UpdateQuestionRequestModel implements JsonSerializable
@@ -14,8 +15,8 @@ class UpdateQuestionRequestModel implements JsonSerializable
     #[OA\Property(title: "type", type: 'integer', example: 7)]
     public int $subjectId;
 
-    #[OA\Property(title: "active", type: 'string', example: true)]
-    public string $active;
+    #[OA\Property(title: "active", type: 'bool', example: true)]
+    public bool $active;
 
     #[OA\Property(title: "answers", type: 'array', items: new OA\Items(ref: '#/components/schemas/AnswerModel'))]
     public array $answers;
@@ -25,7 +26,11 @@ class UpdateQuestionRequestModel implements JsonSerializable
         $this->text = $question["text"];
         $this->subjectId = $question["subjectId"];
         $this->active = $question["active"];
-        $this->answers = $question["answers"];
+        $this->answers = [];
+
+        foreach ($question["answers"] as $answer) {
+            array_push($this->answers, AnswerModel::constructFromModel($answer));
+        }
     }
 
     public function jsonSerialize(): array

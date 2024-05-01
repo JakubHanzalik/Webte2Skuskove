@@ -4,7 +4,9 @@ namespace Stuba\Controllers;
 
 use OpenApi\Attributes as OA;
 use Pecee\SimpleRouter\SimpleRouter;
-use Stuba\Handlers\JwtHandler;
+use Stuba\Handlers\Jwt\JwtHandler;
+use Stuba\Handlers\User\GetUserByUsernameHandler;
+use Stuba\Handlers\User\UserModel;
 use Stuba\Models\Questions\CreateQuestion\CreateQuestionResponseModel;
 use Stuba\Models\Questions\GetAllQuestions\GetQuestionsResponseModel;
 use Stuba\Models\Questions\GetQuestion\GetQuestionResponseModel;
@@ -22,10 +24,13 @@ class QuestionsController
     private JwtHandler $jwtHandler;
     private PDO $dbConnection;
 
+    private GetUserByUsernameHandler $userHandler;
+
     public function __construct()
     {
         $this->jwtHandler = new JwtHandler();
         $this->dbConnection = (new DbAccess())->getDbConnection();
+        $this->userHandler = new GetUserByUsernameHandler();
     }
 
     #[OA\Get(path: '/api/question', tags: ['Question'])]
@@ -35,190 +40,67 @@ class QuestionsController
     {
         $accessToken = $_COOKIE["AccessToken"];
         $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
-        
 
-        $query = "
-        SELECT 
-            q.id, 
-            q.question AS text, 
-            q.active AS active, 
-            q.response_type AS type,
-            q.subject_id,
-            q.creation_date,
-            q.author,
-            q.question_code AS code,
-            s.subject AS subjectName
-        FROM Questions q
-        LEFT JOIN Subject s ON q.subject_id = s.id
-        
-    ";
+        $user = $this->userHandler->handle($username);
 
-        $stmt = $this->dbConnection->prepare($query);
+        if ($user == null)
+            throw new APIException("User does not exists", 500);
 
-        $stmt->execute();
-        $questionsData = $stmt->fetch(PDO::FETCH_ASSOC);
-        $questions = [];
-        //var_dump($questionsData);
-    
-        foreach ($questionsData as $questionData) {
-            // Map response type to enum
-            switch ($questionData['type']) {
-                case 0:
-                    $questionType = EQuestionType::SINGLE_CHOICE;
-                    break;
-                case 1:
-                    $questionType = EQuestionType::MULTIPLE_CHOICE;
-                    break;
-                case 2:
-                    $questionType = EQuestionType::TEXT;
-                    break;
-                default:
-                    $questionType = null;
-                    break;
-            }
-            $questions[] = [
-                'id' => $questionsData['id'],
-                'text' => $questionsData['text'],
-                'active' => $questionsData['active'],
-                'type' => $questionType,
-                'subjectId' => $questionsData['subject_id'],
-                'creationDate' => $questionsData['creation_date'],
-                'author' => $questionsData['author'],
-                'code' => $questionsData['code'],
-                'subjectName' => $questionsData['subjectName']
-            ];
+        $query =
+            "SELECT 
+                q.question AS text, 
+                q.active AS active, 
+                q.subject_id AS subjectId,
+                q.question_code AS code
+            FROM Questions q WHERE q.author_id = :authorId";
+        $statement = $this->dbConnection->prepare($query);
+        $statement->bindParam(":authorId", $user->id);
 
+        $statement->execute();
+        $response = $statement->fetchAll(PDO::FETCH_CLASS, GetQuestionsResponseModel::class);
 
-
-            if (!$questionsData) {
-                // Throw an exception if no question is found
-                throw new APIException('Question not found', 404);
-            }
-
-
-            $answersQuery = "SELECT answer as text, correct FROM Answers WHERE question_code = :code";
-            $stmt = $this->dbConnection->prepare($answersQuery);
-            $stmt->bindParam(':code', $questionsData['code']);
-            $stmt->execute();
-            $answersData = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            //var_dump($answersData);
-
-            // Map the answers to a format expected by the GetQuestionResponseModel
-            $answers = array_map(function ($item) {
-                return [
-                    'text' => $item['text'],
-                    'correct' => $item['correct']
-                ];
-            }, $answersData);
-
-            var_dump($answers);
-
-            // Include answers in the question data
-            $questions['answers'] = $answers;
-            var_dump($questions);
-
-            SimpleRouter::response()->json(new GetQuestionResponseModel($questions))->httpCode(200);
-
-
-        }
+        SimpleRouter::response()->json($response)->httpCode(200);
     }
 
     #[OA\Get(path: '/api/question/{code}', description: "Get question by code", tags: ['Question'])]
     #[OA\Parameter(name: "code", in: 'path', required: true, description: "Question code", example: "abcde", schema: new OA\Schema(type: 'string'))]
     #[OA\Response(response: 200, description: 'Get question by id of logged user', content: new OA\JsonContent(ref: '#/components/schemas/GetQuestionResponseModel'))]
     #[OA\Response(response: 401, description: 'Unauthorized')]
-    public function getQuestionById(string $code)
+    public function getQuestionByCode(string $code)
     {
-        $accessToken = $_COOKIE["AccessToken"];
-        $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
-
-        $deleteAnswersQuery = "Select id FROM Users WHERE username = :username";
-        $stmt = $this->dbConnection->prepare($deleteAnswersQuery);
-        $stmt->bindParam(':username', $username);
-        $stmt->execute();
-        $userid = $stmt->fetchColumn();
-        //TODO: Overit ci ma uzivatel pristup k otazke
-
-        //TODO: Na zaklade id vrati otazku
-
-        $questionQuery = "
-        SELECT 
+        $questionsQuery =
+            "SELECT 
             q.question AS text, 
             q.active AS active, 
             q.response_type AS type,
             q.subject_id AS subjectId,
             q.creation_date AS creationDate,
-            q.author AS authorId,
-            q.question_code AS code,
-            s.subject AS subjectName
+            q.author_id AS authorId,
+            q.question_code AS code
         FROM Questions q
-        LEFT JOIN Subject s ON q.subject_id = s.id
-        WHERE q.question_code = :code AND q.author = :username
-        ";
+        WHERE q.question_code = :code";
 
-        $stmt = $this->dbConnection->prepare($questionQuery);
+        $stmt = $this->dbConnection->prepare($questionsQuery);
         $stmt->bindParam(':code', $code);
-        $stmt->bindParam(':username', $userid);
+        $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, GetQuestionResponseModel::class);
         $stmt->execute();
-        $questionData = $stmt->fetch(PDO::FETCH_ASSOC);
+        $question = $stmt->fetch();
 
-        if (!$questionData) {
-            throw new APIException('Unauthorized or Question not found', 401);
-        }
+        $answersQuery =
+            "SELECT 
+            a.answer AS text, 
+            a.correct 
+        FROM Answers a
+        WHERE a.question_code = :code";
 
-    
-        $answersQuery = "
-            SELECT 
-                a.answer AS text, 
-                a.correct 
-            FROM Answers a
-            WHERE a.question_code = :code
-        ";
         $stmt = $this->dbConnection->prepare($answersQuery);
         $stmt->bindParam(':code', $code);
         $stmt->execute();
-        $answersData = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        var_dump($answersData);
+        $answers = $stmt->fetchAll(PDO::FETCH_CLASS, AnswerModel::class);
 
-        // Prepare answers in the required format
-        $answers = array_map(function ($answer) {
-            return new AnswerModel([
-                'text' => $answer['text'],
-                'correct' => $answer['correct']
-            ]);
-        }, $answersData);
+        $question->answers = $answers;
 
-        // Add answers to the question data
-        $questionData['answers'] = $answers;
-
-        // Return the complete question details
-        $responseModel = new GetQuestionResponseModel($questionData);
-        SimpleRouter::response()->json($responseModel)->httpCode(200);
-
-
-        // Mock data
-        /* SimpleRouter::response()->json([
-            new GetQuestionResponseModel([
-                "text" => "Ako sa Vám páči tento predmet?",
-                "active" => true,
-                "type" => EQuestionType::SINGLE_CHOICE,
-                "subjectId" => 1,
-                "creationDate" => "2024-6-17 13:58:32",
-                "authorId" => 1,
-                "code" => "abcde",
-                "answers" => [
-                    new AnswerModel([
-                        "text" => "Dobrý",
-                        "correct" => true
-                    ]),
-                    new AnswerModel([
-                        "text" => "Zlý",
-                        "correct" => false
-                    ])
-                ]
-            ])
-        ])->httpCode(200); */
+        SimpleRouter::response()->json($question)->httpCode(200);
     }
 
     #[OA\Post(path: '/api/question/{code}', tags: ['Question'])]
@@ -231,38 +113,36 @@ class QuestionsController
         $accessToken = $_COOKIE["AccessToken"];
         $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
 
+        $user = $this->userHandler->handle($username);
+
         $model = new UpdateQuestionRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
-        //TODO: Aktualizovat otazku v databaze
         $this->dbConnection->beginTransaction();
 
         try {
-            // Update the question details
-            $updateQuery = "UPDATE Questions SET question = :text, subject_id = :subjectId, active = :active WHERE question_code = :code AND author = :username";
-            $stmt = $this->dbConnection->prepare($updateQuery);
-            $stmt->bindParam(':text', $model->text);
-            $stmt->bindParam(':subjectId', $model->subjectId);
-            $stmt->bindParam(':active', $active);
-            $stmt->bindParam(':code', $code);
-            $stmt->bindParam(':username', $username);
-            $stmt->execute();
+            $updateQuestionsQuery = "UPDATE Questions SET question = :text, subject_id = :subjectId, active = :active WHERE question_code = :code AND author_id = :userId";
+            $questionsStmt = $this->dbConnection->prepare($updateQuestionsQuery);
+            $questionsStmt->bindValue(':text', $model->text, PDO::PARAM_STR);
+            $questionsStmt->bindValue(':subjectId', $model->subjectId, PDO::PARAM_STR);
+            $questionsStmt->bindValue(':active', $model->active, PDO::PARAM_BOOL);
+            $questionsStmt->bindParam(':code', $code);
+            $questionsStmt->bindParam(':userId', $user->id);
+            $questionsStmt->execute();
 
-            // Update the answers, you might want to consider deleting existing answers and inserting new ones
             $deleteAnswersQuery = "DELETE FROM Answers WHERE question_code = :code";
-            $stmt = $this->dbConnection->prepare($deleteAnswersQuery);
-            $stmt->bindParam(':code', $code);
-            $stmt->execute();
+            $deleteAnswersStmt = $this->dbConnection->prepare($deleteAnswersQuery);
+            $deleteAnswersStmt->bindParam(':code', $code);
+            $deleteAnswersStmt->execute();
 
             foreach ($model->answers as $answer) {
                 $insertAnswerQuery = "INSERT INTO Answers (question_code, answer, correct) VALUES (:code, :answer, :correct)";
-                $stmt = $this->dbConnection->prepare($insertAnswerQuery);
-                $stmt->bindParam(':code', $code);
-                $stmt->bindParam(':answer', $answer['text']); 
-                $stmt->bindParam(':correct', $correct);
-                $stmt->execute();
+                $insertAnswerStmt = $this->dbConnection->prepare($insertAnswerQuery);
+                $insertAnswerStmt->bindValue(':code', $code, PDO::PARAM_STR);
+                $insertAnswerStmt->bindValue(':answer', $answer->text, PDO::PARAM_STR);
+                $insertAnswerStmt->bindValue(':correct', $answer->correct, PDO::PARAM_BOOL);
+                $insertAnswerStmt->execute();
             }
 
-            // Commit Transaction
             $this->dbConnection->commit();
             SimpleRouter::response()->httpCode(200);
         } catch (APIException $e) {
@@ -280,50 +160,39 @@ class QuestionsController
     public function createQuestion()
     {
         $model = new CreateQuestionRequestModel(SimpleRouter::request()->getInputHandler()->all());
-        $active = $model->active ?? 'N';
-        $questionCode = $this->generateQuestionCode();
-        //TODO: Vytvorit otazku v databaze
+
         $this->dbConnection->beginTransaction();
 
-    try {
-            $insertQuestionQuery = "INSERT INTO Questions (question, active, response_type, subject_id, author, question_code) VALUES (:question, :active, :type, :subjectId, :authorId, :questionCode)";
-        $stmt = $this->dbConnection->prepare($insertQuestionQuery);
-        $stmt->bindParam(':question', $model->text);
-        $stmt->bindParam(':active', $active);
-        $typeValue = $model->type->value; // Získame hodnotu enumu
-        $stmt->bindParam(':type', $typeValue);
-        $stmt->bindParam(':subjectId', $model->subjectId);
-        $stmt->bindParam(':authorId', $model->authorId);
-        $stmt->bindParam(':questionCode', $questionCode);
-        $stmt->execute();
+        try {
+            $questionCode = $this->generateQuestionCode();
 
-        
-        foreach ($model->answers as $answer) {
-            $insertAnswerQuery = "INSERT INTO Answers (question_code, answer, correct) VALUES (:questionCode, :answer, :correct)";
-            $stmt = $this->dbConnection->prepare($insertAnswerQuery);
-            $stmt->bindParam(':questionCode', $questionCode);
-            $stmt->bindParam(':answer', $answer['text']);
-            $stmt->bindParam(':correct', $correct);
-            $stmt->execute();
+            $insertQuestionQuery = "INSERT INTO Questions (question, active, response_type, subject_id, author_id, question_code) VALUES (:question, :active, :type, :subjectId, :authorId, :questionCode)";
+            $insertQuestionStmt = $this->dbConnection->prepare($insertQuestionQuery);
+            $insertQuestionStmt->bindValue(':question', $model->text, PDO::PARAM_STR);
+            $insertQuestionStmt->bindValue(':active', $model->active, PDO::PARAM_BOOL);
+            $insertQuestionStmt->bindValue(':type', $model->type->value, PDO::PARAM_INT);
+            $insertQuestionStmt->bindValue(':subjectId', $model->subjectId, PDO::PARAM_INT);
+            $insertQuestionStmt->bindValue(':authorId', $model->authorId, PDO::PARAM_INT);
+            $insertQuestionStmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
+            $insertQuestionStmt->execute();
+
+
+            foreach ($model->answers as $answer) {
+                $insertAnswerQuery = "INSERT INTO Answers (question_code, answer, correct) VALUES (:questionCode, :answer, :correct)";
+                $stmt = $this->dbConnection->prepare($insertAnswerQuery);
+                $stmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
+                $stmt->bindValue(':answer', $answer->text, PDO::PARAM_STR);
+                $stmt->bindValue(':correct', $answer->correct, PDO::PARAM_BOOL);
+                $stmt->execute();
+            }
+
+            $this->dbConnection->commit();
+
+            SimpleRouter::response()->json(CreateQuestionResponseModel::constructFromModel(['code' => $questionCode]))->httpCode(200);
+        } catch (\Exception $e) {
+            $this->dbConnection->rollback();
+            throw new APIException('Failed to create question: ' . $e->getMessage(), 500);
         }
-
-        // Commit transaction
-        $this->dbConnection->commit();
-
-        SimpleRouter::response()->json(new CreateQuestionResponseModel(['code' => $questionCode]))->httpCode(200);
-    } catch (\Exception $e) {
-        // Rollback on error
-        $this->dbConnection->rollback();
-        throw new APIException('Failed to create question: ' . $e->getMessage(), 500);
-    }
-
-
-        //Mock data
-        /* SimpleRouter::response()->json([
-            new CreateQuestionResponseModel([
-                "code" => "abcde",
-            ])
-        ])->httpCode(200); */
     }
 
     #[OA\Delete(path: '/api/question/{code}', tags: ['Question'])]
@@ -335,39 +204,30 @@ class QuestionsController
     {
         $accessToken = $_COOKIE["AccessToken"];
         $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
-        $deleteAnswersQuery = "Select id FROM Users WHERE username = :username";
-        $stmt = $this->dbConnection->prepare($deleteAnswersQuery);
-        $stmt->bindParam(':username', $username);
-        $stmt->execute();
-        $userid = $stmt->fetchColumn();
+
+        $user = $this->userHandler->handle($username);
 
         $this->dbConnection->beginTransaction();
 
-    
+        //TODO: Zmazat otazku aj s odpovedami az ked je overene ci patri uzivatelovi alebo je to admin
+        try {
+            $deleteAnswersQuery = "DELETE FROM Answers WHERE question_code = :code";
+            $stmt = $this->dbConnection->prepare($deleteAnswersQuery);
+            $stmt->bindParam(':code', $code);
+            $stmt->execute();
 
-    try {
-        
-        // Delete answers associated with the question
-        $deleteAnswersQuery = "DELETE FROM Answers WHERE question_code = :code";
-        $stmt = $this->dbConnection->prepare($deleteAnswersQuery);
-        $stmt->bindParam(':code', $code);
-        $stmt->execute(); 
+            $deleteQuestionQuery = "DELETE FROM Questions WHERE question_code = :code AND author_id = :userId";
+            $stmt = $this->dbConnection->prepare($deleteQuestionQuery);
+            $stmt->bindParam(':code', $code);
+            $stmt->bindParam(':userId', $user->id);
+            $stmt->execute();
 
-        // Delete the question      //TODO: username                 
-        $deleteQuestionQuery = "DELETE FROM Questions WHERE question_code = :code AND author = :username";
-        $stmt = $this->dbConnection->prepare($deleteQuestionQuery);
-        $stmt->bindParam(':code', $code);
-        $stmt->bindParam(':username', $userid);
-        $stmt->execute();
-
-        // Commit transaction
-        $this->dbConnection->commit();
-        SimpleRouter::response()->httpCode(200);
-    } catch (\Exception $e) {
-        // Rollback on error
-        $this->dbConnection->rollback();
-        throw new APIException('Failed to delete question: ' . $e->getMessage(), 500);
-    }
+            $this->dbConnection->commit();
+            SimpleRouter::response()->httpCode(200);
+        } catch (\Exception $e) {
+            $this->dbConnection->rollback();
+            throw new APIException('Failed to delete question: ' . $e->getMessage(), 500);
+        }
     }
 
     function generateQuestionCode($length = 5)

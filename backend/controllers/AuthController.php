@@ -5,7 +5,7 @@ namespace Stuba\Controllers;
 use OpenApi\Attributes as OA;
 use Pecee\SimpleRouter\SimpleRouter;
 
-use Stuba\Handlers\JwtHandler;
+use Stuba\Handlers\Jwt\JwtHandler;
 use Stuba\Exceptions\APIException;
 use Stuba\Db\DbAccess;
 

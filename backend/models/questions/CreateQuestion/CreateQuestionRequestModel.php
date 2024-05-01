@@ -5,6 +5,7 @@ namespace Stuba\Models\Questions\CreateQuestion;
 use JsonSerializable;
 use OpenApi\Attributes as OA;
 use Stuba\Models\Questions\EQuestionType;
+use Stuba\Models\Questions\AnswerModel;
 
 #[OA\Schema(title: 'CreateQuestionRequestModel', schema: 'CreateQuestionRequestModel', type: 'object')]
 class CreateQuestionRequestModel implements JsonSerializable
@@ -12,8 +13,8 @@ class CreateQuestionRequestModel implements JsonSerializable
     #[OA\Property(title: "text", type: 'string', example: "What is the capital of Slovakia?")]
     public string $text;
 
-    #[OA\Property(title: "active", type: 'string', example: "Y")]
-    public string $active;
+    #[OA\Property(title: "active", type: 'bool', example: false)]
+    public bool $active;
 
     #[OA\Property(title: 'type', type: 'integer', enum: EQuestionType::class)]
     public EQuestionType $type;
@@ -34,7 +35,11 @@ class CreateQuestionRequestModel implements JsonSerializable
         $this->type = EQuestionType::from($question["type"]);
         $this->subjectId = $question["subjectId"];
         $this->authorId = $question["authorId"];
-        $this->answers = $question["answers"];
+        $this->answers = [];
+
+        foreach ($question["answers"] as $answer) {
+            array_push($this->answers, AnswerModel::constructFromModel($answer));
+        }
     }
 
     public function jsonSerialize(): array

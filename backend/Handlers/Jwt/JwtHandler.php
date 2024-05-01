@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Stuba\Handlers;
+namespace Stuba\Handlers\Jwt;
 
 use Exception;
 use Firebase\JWT\ExpiredException;
@@ -22,7 +22,7 @@ class JwtHandler
 
     public function __construct()
     {
-        $this->secret = file_get_contents(__DIR__ . '/../jwt.key');
+        $this->secret = file_get_contents(__DIR__ . '/../../jwt.key');
         $this->dbConnection = (new DbAccess())->getDbConnection();
     }
 

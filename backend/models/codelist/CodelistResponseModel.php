@@ -8,20 +8,29 @@ use JsonSerializable;
 #[OA\Schema(title: 'CodelistResponseModel', schema: 'CodelistResponseModel', type: 'object')]
 class CodelistResponseModel implements JsonSerializable
 {
-    public function __construct($user)
+    #[OA\Property(title: "value", type: 'string', example: '1')]
+    public string $value;
+
+    #[OA\Property(title: "text", type: 'string', example: "Matematika")]
+    public string $text;
+
+    public function __construct()
     {
-        $this->value = $user['value'];
-        $this->text = $user['text'];
+
+    }
+
+    public static function constructFromModel($codelistItem): CodelistResponseModel
+    {
+        $obj = new CodelistResponseModel();
+
+        $obj->value = $codelistItem['value'];
+        $obj->text = $codelistItem['text'];
+
+        return $obj;
     }
 
     function jsonSerialize(): array
     {
         return get_object_vars($this);
     }
-
-    #[OA\Property(title: "value", type: 'string', example: '1')]
-    public string $value;
-
-    #[OA\Property(title: "text", type: 'string', example: "Matematika")]
-    public string $text;
 }

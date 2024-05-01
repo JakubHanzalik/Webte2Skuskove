@@ -11,9 +11,16 @@ class CreateQuestionResponseModel implements JsonSerializable
     #[OA\Property(title: "code", type: 'string', example: "abcde")]
     public string $code;
 
-    public function __construct($question)
+    public function __construct()
     {
-        $this->code = $question["code"];
+
+    }
+
+    public static function constructFromModel($question)
+    {
+        $obj = new CreateQuestionResponseModel();
+        $obj->code = $question["code"];
+        return $obj;
     }
 
     public function jsonSerialize(): array

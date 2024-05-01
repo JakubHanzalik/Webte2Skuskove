@@ -20,9 +20,9 @@ SimpleRouter::group(['prefix' => '/api'], function () {
         SimpleRouter::get('/login', [AuthController::class, 'getLoggedUser']);
     });
 
-    SimpleRouter::get('/question/{id}', [QuestionsController::class, 'getQuestionById']);
+    SimpleRouter::get('/question/{id}', [QuestionsController::class, 'getQuestionByCode']);
 
-    SimpleRouter::get('/codelist/{code}', [CodelistController::class, 'handle']);
+    SimpleRouter::get('/subject', [CodelistController::class, 'handle']);
 
     SimpleRouter::post('/login', [AuthController::class, 'login']);
 
