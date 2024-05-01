@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Hostiteľ: db
--- Čas generovania: St 01.Máj 2024, 13:12
--- Verzia serveru: 8.3.0
--- Verzia PHP: 8.2.8
+-- Host: db
+-- Generation Time: May 01, 2024 at 04:55 PM
+-- Server version: 8.3.0
+-- PHP Version: 8.2.8
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,77 +18,79 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Databáza: `webte2skuskove`
+-- Database: `webte2skuskove`
 --
 
 -- --------------------------------------------------------
 
 --
--- Štruktúra tabuľky pre tabuľku `Answers`
+-- Table structure for table `Answers`
 --
 
 CREATE TABLE `Answers` (
   `id` int NOT NULL,
   `question_code` varchar(5) NOT NULL,
   `answer` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `correct` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL
+  `correct` bit(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Sťahujem dáta pre tabuľku `Answers`
+-- Dumping data for table `Answers`
 --
 
 INSERT INTO `Answers` (`id`, `question_code`, `answer`, `correct`) VALUES
-(11, 'EKSP6', 'Vienna', 'Y'),
-(12, 'EKSP6', 'Salzburg', 'Y');
+(17, 'EKSP6', 'Bratislava', b'0'),
+(18, 'EKSP6', 'Salzburg', b'1');
 
 -- --------------------------------------------------------
 
 --
--- Štruktúra tabuľky pre tabuľku `Questions`
+-- Table structure for table `Questions`
 --
 
 CREATE TABLE `Questions` (
   `id` int NOT NULL,
   `question_code` varchar(5) NOT NULL,
-  `active` char(1) NOT NULL DEFAULT 'Y',
+  `active` bit(1) NOT NULL DEFAULT b'0',
   `question` varchar(512) NOT NULL,
-  `response_type` varchar(50) NOT NULL,
+  `response_type` int NOT NULL,
   `subject_id` int NOT NULL,
   `creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `author` varchar(50) NOT NULL
+  `author_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Sťahujem dáta pre tabuľku `Questions`
+-- Dumping data for table `Questions`
 --
 
-INSERT INTO `Questions` (`id`, `question_code`, `active`, `question`, `response_type`, `subject_id`, `creation_date`, `author`) VALUES
-(6, 'EKSP6', 'Y', 'What is the capital of Slovakia?', '1', 1, '2024-04-30 21:40:08', '1');
+INSERT INTO `Questions` (`id`, `question_code`, `active`, `question`, `response_type`, `subject_id`, `creation_date`, `author_id`) VALUES
+(6, 'EKSP6', b'1', 'What is the capital of Slovakiafsdfd?', 1, 5, '2024-04-30 21:40:08', '1');
 
 -- --------------------------------------------------------
 
 --
--- Štruktúra tabuľky pre tabuľku `Subject`
+-- Table structure for table `Subject`
 --
 
 CREATE TABLE `Subject` (
   `id` int NOT NULL,
-  `subject` varchar(100) NOT NULL
+  `text` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `value` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Sťahujem dáta pre tabuľku `Subject`
+-- Dumping data for table `Subject`
 --
 
-INSERT INTO `Subject` (`id`, `subject`) VALUES
-(1, 'TEST'),
-(3, '');
+INSERT INTO `Subject` (`id`, `text`, `value`) VALUES
+(1, 'TEST', 1),
+(5, 'Angličtina', 2),
+(6, 'Matematika', 3);
 
 -- --------------------------------------------------------
 
 --
--- Štruktúra tabuľky pre tabuľku `Token`
+-- Table structure for table `Token`
 --
 
 CREATE TABLE `Token` (
@@ -99,7 +101,7 @@ CREATE TABLE `Token` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Sťahujem dáta pre tabuľku `Token`
+-- Dumping data for table `Token`
 --
 
 INSERT INTO `Token` (`id`, `token`, `username`, `validity`) VALUES
@@ -113,12 +115,13 @@ INSERT INTO `Token` (`id`, `token`, `username`, `validity`) VALUES
 (11, '9bwin5twjPLtZYZLsESttBVfcWvyJ1', 'jano', '2024-05-07 21:21:48'),
 (12, 'YkZmjW3ZospVrnfYzICkad7DUUavWr', 'jano', '2024-05-07 22:09:02'),
 (13, '4WQqFcnCAP7boBJESKtFO0opvTBTaV', 'jano', '2024-05-07 22:09:59'),
-(14, '1cSnJKyxCFILY6ZOu6CJsOvbPdqORP', 'jano', '2024-05-07 22:30:16');
+(14, '1cSnJKyxCFILY6ZOu6CJsOvbPdqORP', 'jano', '2024-05-07 22:30:16'),
+(15, 'zw3p8X3XYDL7nWB6UNJqmzrEXdYRjG', 'jano', '2024-05-08 13:52:20');
 
 -- --------------------------------------------------------
 
 --
--- Štruktúra tabuľky pre tabuľku `Users`
+-- Table structure for table `Users`
 --
 
 CREATE TABLE `Users` (
@@ -131,7 +134,7 @@ CREATE TABLE `Users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Sťahujem dáta pre tabuľku `Users`
+-- Dumping data for table `Users`
 --
 
 INSERT INTO `Users` (`id`, `username`, `password`, `name`, `surname`, `role`) VALUES
@@ -140,7 +143,7 @@ INSERT INTO `Users` (`id`, `username`, `password`, `name`, `surname`, `role`) VA
 -- --------------------------------------------------------
 
 --
--- Štruktúra tabuľky pre tabuľku `Vote`
+-- Table structure for table `Vote`
 --
 
 CREATE TABLE `Vote` (
@@ -152,7 +155,7 @@ CREATE TABLE `Vote` (
 -- --------------------------------------------------------
 
 --
--- Štruktúra tabuľky pre tabuľku `Voting`
+-- Table structure for table `Voting`
 --
 
 CREATE TABLE `Voting` (
@@ -164,17 +167,17 @@ CREATE TABLE `Voting` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Kľúče pre exportované tabuľky
+-- Indexes for dumped tables
 --
 
 --
--- Indexy pre tabuľku `Answers`
+-- Indexes for table `Answers`
 --
 ALTER TABLE `Answers`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexy pre tabuľku `Questions`
+-- Indexes for table `Questions`
 --
 ALTER TABLE `Questions`
   ADD PRIMARY KEY (`id`),
@@ -182,78 +185,78 @@ ALTER TABLE `Questions`
   ADD UNIQUE KEY `question_code_2` (`question_code`);
 
 --
--- Indexy pre tabuľku `Subject`
+-- Indexes for table `Subject`
 --
 ALTER TABLE `Subject`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexy pre tabuľku `Token`
+-- Indexes for table `Token`
 --
 ALTER TABLE `Token`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexy pre tabuľku `Users`
+-- Indexes for table `Users`
 --
 ALTER TABLE `Users`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexy pre tabuľku `Vote`
+-- Indexes for table `Vote`
 --
 ALTER TABLE `Vote`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexy pre tabuľku `Voting`
+-- Indexes for table `Voting`
 --
 ALTER TABLE `Voting`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `question_code` (`question_code`);
 
 --
--- AUTO_INCREMENT pre exportované tabuľky
+-- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT pre tabuľku `Answers`
+-- AUTO_INCREMENT for table `Answers`
 --
 ALTER TABLE `Answers`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
--- AUTO_INCREMENT pre tabuľku `Questions`
+-- AUTO_INCREMENT for table `Questions`
 --
 ALTER TABLE `Questions`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `Subject`
+--
+ALTER TABLE `Subject`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT pre tabuľku `Subject`
---
-ALTER TABLE `Subject`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT pre tabuľku `Token`
+-- AUTO_INCREMENT for table `Token`
 --
 ALTER TABLE `Token`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
--- AUTO_INCREMENT pre tabuľku `Users`
+-- AUTO_INCREMENT for table `Users`
 --
 ALTER TABLE `Users`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT pre tabuľku `Vote`
+-- AUTO_INCREMENT for table `Vote`
 --
 ALTER TABLE `Vote`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT pre tabuľku `Voting`
+-- AUTO_INCREMENT for table `Voting`
 --
 ALTER TABLE `Voting`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
