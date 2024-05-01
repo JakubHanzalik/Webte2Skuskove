@@ -14,8 +14,8 @@ class UpdateQuestionRequestModel implements JsonSerializable
     #[OA\Property(title: "type", type: 'integer', example: 7)]
     public int $subjectId;
 
-    #[OA\Property(title: "active", type: 'boolean', example: true)]
-    public bool $active;
+    #[OA\Property(title: "active", type: 'string', example: true)]
+    public string $active;
 
     #[OA\Property(title: "answers", type: 'array', items: new OA\Items(ref: '#/components/schemas/AnswerModel'))]
     public array $answers;

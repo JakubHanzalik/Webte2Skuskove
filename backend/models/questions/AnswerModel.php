@@ -11,8 +11,8 @@ class AnswerModel implements JsonSerializable
     #[OA\Property(title: "text", type: 'string', example: "Dobrý")]
     public string $text;
 
-    #[OA\Property(title: "correct", type: 'boolean', example: true)]
-    public bool $correct;
+    #[OA\Property(title: "correct", type: 'string', example: "Y")]
+    public string $correct;
 
     public function __construct($answer)
     {

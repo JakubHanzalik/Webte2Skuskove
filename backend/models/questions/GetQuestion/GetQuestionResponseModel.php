@@ -10,23 +10,13 @@ use Stuba\Models\Questions\EQuestionType;
 #[OA\Schema(title: 'GetQuestionResponseModel', schema: 'GetQuestionResponseModel', type: 'object')]
 class GetQuestionResponseModel implements JsonSerializable
 {
-    public function __construct($question)
-    {
-        $this->text = $question["text"];
-        $this->active = $question["active"];
-        $this->type = $question["type"];
-        $this->subjectId = $question["subjectId"];
-        $this->creationDate = $question["creationDate"];
-        $this->authorId = $question["authorId"];
-        $this->code = $question["code"];
-        $this->answers = $question["answers"];
-    }
+    
 
     #[OA\Property(title: "text", type: 'string', example: "Ako sa Vám páči tento predmet?")]
     public string $text;
 
-    #[OA\Property(title: "active", type: 'boolean', example: true)]
-    public bool $active;
+    #[OA\Property(title: "active", type: 'string', example: "Y")]
+    public string $active;
 
     #[OA\Property(title: 'type', type: 'integer', enum: EQuestionType::class)]
     public EQuestionType $type;
@@ -45,6 +35,18 @@ class GetQuestionResponseModel implements JsonSerializable
 
     #[OA\Property(title: "answers", type: 'array', items: new OA\Items(ref: '#/components/schemas/AnswerModel'))]
     public array $answers;
+
+    public function __construct($question)
+    {
+        $this->text = $question["text"];
+        $this->active = $question["active"];
+        $this->type = $question["type"];
+        $this->subjectId = $question["subjectId"];
+        $this->creationDate = $question["creationDate"];
+        $this->authorId = $question["authorId"];
+        $this->code = $question["code"];
+        $this->answers = $question["answers"];
+    }
 
     public function jsonSerialize(): array
     {

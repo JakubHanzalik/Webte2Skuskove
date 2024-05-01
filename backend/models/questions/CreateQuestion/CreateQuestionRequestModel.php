@@ -12,8 +12,8 @@ class CreateQuestionRequestModel implements JsonSerializable
     #[OA\Property(title: "text", type: 'string', example: "What is the capital of Slovakia?")]
     public string $text;
 
-    #[OA\Property(title: "active", type: 'boolean', example: true)]
-    public bool $active;
+    #[OA\Property(title: "active", type: 'string', example: "Y")]
+    public string $active;
 
     #[OA\Property(title: 'type', type: 'integer', enum: EQuestionType::class)]
     public EQuestionType $type;
@@ -31,7 +31,7 @@ class CreateQuestionRequestModel implements JsonSerializable
     {
         $this->text = $question["text"];
         $this->active = $question["active"];
-        $this->type = $question["type"];
+        $this->type = EQuestionType::from($question["type"]);
         $this->subjectId = $question["subjectId"];
         $this->authorId = $question["authorId"];
         $this->answers = $question["answers"];
