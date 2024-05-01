@@ -13,7 +13,7 @@ export class SwaggerComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.swaggerUI = SwaggerUI({
-      url: 'https://localhost:8010/api/swagger',  
+      url: '/api/swagger',  
       dom_id: '#swagger-container'
     });
   }
