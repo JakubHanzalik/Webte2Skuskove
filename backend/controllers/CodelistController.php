@@ -20,7 +20,6 @@ class CodelistController
     }
 
     #[OA\Get(path: "/api/subject", tags: ['Subject'])]
-    #[OA\Parameter(name: "code", in: 'path', required: true, description: "Get all subject", example: "subject", schema: new OA\Schema(type: 'string'))]
     #[OA\Response(response: '200', description: "Get subject values", content: new OA\MediaType(mediaType: 'application/json', schema: new OA\Schema(type: 'array', items: new OA\Items(ref: '#/components/schemas/CodelistResponseModel'))))]
     public function handle()
     {
