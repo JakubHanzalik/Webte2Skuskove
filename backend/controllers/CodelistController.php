@@ -8,6 +8,7 @@ use PDO;
 use Stuba\Db\DbAccess;
 use Pecee\SimpleRouter\SimpleRouter;
 
+#[OA\Tag('Codelist')]
 class CodelistController
 {
     private PDO $dbConnection;
@@ -17,7 +18,7 @@ class CodelistController
         $this->dbConnection = (new DbAccess())->getDbConnection();
     }
 
-    #[OA\Get(path: "/api/codelist/{code}")]
+    #[OA\Get(path: "/api/codelist/{code}", tags: ['Codelist'])]
     #[OA\Parameter(name: "code", in: 'path', required: true, description: "Codelist code", example: "subject", schema: new OA\Schema(type: 'string'))]
     #[OA\Response(response: '200', description: "Get codelist values", content: new OA\MediaType(mediaType: 'application/json', schema: new OA\Schema(type: 'array', items: new OA\Items(ref: '#/components/schemas/CodelistResponseModel'))))]
     public function handle(string $code)

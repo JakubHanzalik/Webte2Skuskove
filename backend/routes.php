@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 use Pecee\SimpleRouter\SimpleRouter;
 
@@ -13,10 +13,14 @@ SimpleRouter::group(['prefix' => '/api'], function () {
 
     SimpleRouter::group(['middleware' => AuthMiddleware::class], function () {
         SimpleRouter::get('/question', [QuestionsController::class, 'getAllQuestionsByUser']);
-        SimpleRouter::get('/question/{id}', [QuestionsController::class, 'getQuestionById']);
+        SimpleRouter::put('/question', [QuestionsController::class, 'createQuestion']);
+        SimpleRouter::post('/question/{id}', [QuestionsController::class, 'updateQuestion']);
+        SimpleRouter::delete('/question/{id}', [QuestionsController::class, 'deleteQuestion']);
 
         SimpleRouter::get('/login', [AuthController::class, 'getLoggedUser']);
     });
+
+    SimpleRouter::get('/question/{id}', [QuestionsController::class, 'getQuestionById']);
 
     SimpleRouter::get('/codelist/{code}', [CodelistController::class, 'handle']);
 

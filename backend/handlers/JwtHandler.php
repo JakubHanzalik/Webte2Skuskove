@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Stuba\Handlers;
 
@@ -120,7 +120,7 @@ class JwtHandler
         $statement->execute();
         if ($statement->rowCount() > 0) {
             $expires = strtotime($statement->fetchColumn());
-            return $expires > time();  // Skontrolovať, či token ešte nevypršal
+            return $expires > time();
         }
         return false;
     }

@@ -10,7 +10,7 @@ class OpenAPIController
 {
     public function handle(): string
     {
-        $openapi = Generator::scan(['./controllers', './models']);
+        $openapi = Generator::scan(['./Controllers', './Models']);
 
         header('Content-Type: application/json');
         return $openapi->toJson();
