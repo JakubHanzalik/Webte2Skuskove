@@ -34,7 +34,7 @@ class QuestionsController
     }
 
     #[OA\Get(path: '/api/question', tags: ['Question'])]
-    #[OA\Response(response: 200, description: 'Get all questions of logged user', content: new OA\JsonContent(ref: '#/components/schemas/GetQuestionsResponseModel'))]
+    #[OA\Response(response: 200, description: "Get all questions of logged user", content: new OA\MediaType(mediaType: 'application/json', schema: new OA\Schema(type: 'array', items: new OA\Items(ref: '#/components/schemas/GetQuestionsResponseModel'))))]
     #[OA\Response(response: 401, description: 'Unauthorized')]
     public function getAllQuestionsByUser()
     {
