@@ -6,6 +6,7 @@ use Stuba\Controllers\CodelistController;
 use Stuba\Controllers\OpenAPIController;
 use Stuba\Controllers\AuthController;
 use Stuba\Controllers\QuestionsController;
+use Stuba\Controllers\DocumentationController;
 
 use Stuba\Middleware\AuthMiddleware;
 
@@ -29,6 +30,9 @@ SimpleRouter::group(['prefix' => '/api'], function () {
         SimpleRouter::post('/user/{id}', [AuthController::class, 'updateUser']);
         SimpleRouter::delete('/user/{id}', [AuthController::class, 'deleteUser']);
     });
+
+    // Documentation
+    SimpleRouter::get('/docs', [DocumentationController::class, 'generateDocs']);
 
     SimpleRouter::get('/question/{id}', [QuestionsController::class, 'getQuestionByCode']);
 
