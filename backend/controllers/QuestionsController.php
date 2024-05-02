@@ -6,12 +6,10 @@ use OpenApi\Attributes as OA;
 use Pecee\SimpleRouter\SimpleRouter;
 use Stuba\Handlers\Jwt\JwtHandler;
 use Stuba\Handlers\User\GetUserByUsernameHandler;
-use Stuba\Handlers\User\UserModel;
 use Stuba\Models\Questions\CreateQuestion\CreateQuestionResponseModel;
 use Stuba\Models\Questions\GetAllQuestions\GetQuestionsResponseModel;
 use Stuba\Models\Questions\GetQuestion\GetQuestionResponseModel;
 use Stuba\Models\Questions\AnswerModel;
-use Stuba\Models\Questions\EQuestionType;
 use Stuba\Models\Questions\UpdateQuestion\UpdateQuestionRequestModel;
 use Stuba\Models\Questions\CreateQuestion\CreateQuestionRequestModel;
 use PDO;
@@ -68,7 +66,7 @@ class QuestionsController
     #[OA\Response(response: 401, description: 'Unauthorized')]
     public function getQuestionByCode(string $code)
     {
-        $questionsQuery =
+        $questionQuery =
             "SELECT 
             q.question AS text, 
             q.active AS active, 
@@ -80,7 +78,7 @@ class QuestionsController
         FROM Questions q
         WHERE q.question_code = :code";
 
-        $stmt = $this->dbConnection->prepare($questionsQuery);
+        $stmt = $this->dbConnection->prepare($questionQuery);
         $stmt->bindParam(':code', $code);
         $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, GetQuestionResponseModel::class);
         $stmt->execute();

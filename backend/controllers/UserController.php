@@ -6,6 +6,8 @@ use OpenApi\Attributes as OA;
 use Pecee\SimpleRouter\SimpleRouter;
 use Stuba\Db\DbAccess;
 use PDO;
+use Stuba\Models\User\GetAllUsers\GetAllUsersResponseModel;
+use Stuba\Models\User\GetUser\GetUserResponseModel;
 
 #[OA\Tag('User')]
 class UserController
@@ -22,16 +24,47 @@ class UserController
     #[OA\Response(response: 401, description: 'Unauthorized')]
     public function getAllUsers()
     {
+        $query =
+            "SELECT 
+                u.id AS id, 
+                u.username AS username, 
+                u.role AS role
+            FROM Users u";
+        $statement = $this->dbConnection->prepare($query);
 
+        $statement->execute();
+        $response = $statement->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, GetAllUsersResponseModel::class);
+
+        SimpleRouter::response()->json($response)->httpCode(200);
     }
 
     #[OA\Get(path: '/api/user/{id}', tags: ['User'])]
     #[OA\Parameter(name: "id", in: 'path', required: true, description: "User id", example: 8, schema: new OA\Schema(type: 'int'))]
     #[OA\Response(response: 200, description: 'Get all users', content: new OA\JsonContent(ref: '#/components/schemas/GetUserResponseModel'))]
     #[OA\Response(response: 401, description: 'Unauthorized')]
-    public function getUserById()
+    public function getUserById(int $id)
     {
+        $userQuery =
+            "SELECT 
+            u.username AS username, 
+            u.name AS name,
+            u.surname AS surname,
+            u.role AS role
+        FROM Users u
+        WHERE u.id = :id";
 
+        $stmt = $this->dbConnection->prepare($userQuery);
+        $stmt->bindParam(':id', $id);
+        $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, GetUserResponseModel::class);
+        $stmt->execute();
+
+        if ($stmt->rowCount() === 0) {
+            SimpleRouter::response()->httpCode(404);
+            return;
+        } else {
+            $response = $stmt->fetch();
+            SimpleRouter::response()->json($response)->httpCode(200);
+        }
     }
 
     #[OA\Put(path: '/api/user', tags: ['User'])]
