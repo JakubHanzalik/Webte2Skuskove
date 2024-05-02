@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, NgModule } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-
+import { MaterialModule } from './material';
+import { MenuComponent } from './menu/menu.component';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -9,5 +10,14 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'webte2skuskove';
+  title = 'www-ise';
 }
+/*
+@NgModule({
+  imports: [
+    MaterialModule
+  ],
+  declarations: [
+    MenuComponent
+  ]
+})*/

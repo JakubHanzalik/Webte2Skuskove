@@ -5,6 +5,7 @@ import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { MenuComponent } from './menu/menu.component';
 import { SwaggerComponent } from './swagger/swagger.component';
+import { TutorialComponent } from './tutorial/tutorial.component';
 
 
 export const routes: Routes = [
@@ -13,6 +14,7 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'menu' , component: MenuComponent },
   { path: 'swagger' , component: SwaggerComponent },
+  { path: 'tutorial' , component: TutorialComponent },
   // to do errors a dalsie cesty
   { path: '**' , redirectTo: '' }
 ];

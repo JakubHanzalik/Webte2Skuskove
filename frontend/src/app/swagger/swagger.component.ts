@@ -18,7 +18,10 @@ export class SwaggerComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    this.swaggerUI.cleanup();
+  ngOnDestroy() {
+    if (this.swaggerUI && typeof this.swaggerUI.cleanup === 'function') {
+      this.swaggerUI.cleanup();
+    }
   }
+  
 }
