@@ -319,5 +319,26 @@
 <router-outlet /> -->
 
 <!-- <app-menu> -->
-  <router-outlet></router-outlet>
+  <div class="container">
+    <div class="side-menu">
+      <div class="hamburger-menu">☰</div>
+      <nav>
+        <ul>
+          <li><a href="./home">Home</a></li>
+          <li><a href="./login">Login</a></li>
+          <li><a href="./register">Register</a></li>
+          <li><a href="./swagger">Swagger</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="main-content">
+      <header class="top-menu">
+        <span>{{ title }}</span>
+      </header>
+      <div class="content">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
+  
 <!-- </app-menu> -->
