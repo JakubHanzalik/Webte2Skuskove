@@ -124,6 +124,15 @@ class AuthController
         SimpleRouter::response()->httpCode(200);
     }
 
+    #[OA\Post(path: '/api/change-password', tags: ['Auth'], description: 'Change current user password')]
+    #[OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/ChangePassordRequestModel'))]
+    #[OA\Response(response: 200, description: 'Password changed')]
+    #[OA\Response(response: 401, description: 'Invalid credentials')]
+    public function changePassword()
+    {
+
+    }
+
     /**
      * Overi ci uzivatel existuje v databaze a heslo je spravne
      * @param string $username

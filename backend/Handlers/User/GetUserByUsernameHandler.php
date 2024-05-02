@@ -15,6 +15,11 @@ class GetUserByUsernameHandler
         $this->dbConnection = (new DbAccess())->getDbConnection();
     }
 
+    /**
+     * Get user by username
+     * @param string $username
+     * @return \Stuba\Handlers\User\UserModel|null
+     */
     public function handle(string $username): UserModel|null
     {
         $query = "SELECT * FROM Users WHERE username = :username";
