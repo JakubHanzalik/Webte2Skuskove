@@ -78,6 +78,10 @@ class AuthController
     {
         $model = new LoginRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
+        if (!$model->isValid()) {
+            SimpleRouter::response()->json($model->getErrors())->httpCode(400);
+        }
+
         if (!$this->validateCredentials($model->username, $model->password)) {
             throw new APIException('Invalid credentials', 401);
         }
