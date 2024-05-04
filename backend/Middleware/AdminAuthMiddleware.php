@@ -25,9 +25,11 @@ class AdminAuthMiddleware implements IMiddleware
         if ($newAccessToken != "") {
             setcookie('AccessToken', $newAccessToken, strtotime('+3 minutes', time()), '/', '', true, true);
             $_COOKIE["AccessToken"] = $newAccessToken;
+            $decoded = $jwtHandler->decodeAccessToken($newAccessToken);
+        } else {
+            $decoded = $jwtHandler->decodeAccessToken($accessToken);
         }
 
-        $decoded = $jwtHandler->decodeAccessToken($newAccessToken);
         if ($decoded["role"] != EUserRole::ADMIN->value) {
             throw new APIException('Unauthorized', 401);
         }

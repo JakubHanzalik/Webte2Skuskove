@@ -14,12 +14,4 @@ class ChangePassordRequestModel
     {
         $this->password = $requestParams['password'];
     }
-
-    /* public static function createFromModel($user): ChangePassordRequestModel
-    {
-        $obj = new ChangePassordRequestModel();
-        $obj->password = $user["password"];
-
-        return $obj;
-    } */
 }

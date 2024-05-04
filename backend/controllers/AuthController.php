@@ -147,12 +147,10 @@ class AuthController
     public function changePassword()
     {
         $accessToken = $_COOKIE["AccessToken"] ?? null;
-        if (!$accessToken) {
-            throw new APIException('Authentication required', 401);
-        }
+
         $decoded = $this->jwtHandler->decodeAccessToken($accessToken);
         $username = $decoded['sub'];
-        $input = SimpleRouter::request()->getInputHandler()->all();
+
         $changePasswordModel = new ChangePassordRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
         if (!$changePasswordModel->password) {
@@ -170,7 +168,7 @@ class AuthController
         }
 
         SimpleRouter::response()->json(['message' => 'Password changed successfully'])->httpCode(200);
-        
+
     }
 
     /**

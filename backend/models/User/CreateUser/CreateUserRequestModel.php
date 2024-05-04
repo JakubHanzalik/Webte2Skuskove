@@ -5,6 +5,8 @@ namespace Stuba\Models\User\CreateUser;
 use JsonSerializable;
 use OpenApi\Attributes as OA;
 use Stuba\Models\User\EUserRole;
+use Respect\Validation\Exceptions\NestedValidationException;
+use Respect\Validation\Validator;
 
 #[OA\Schema(type: 'object', title: 'CreateUserRequestModel')]
 class CreateUserRequestModel implements JsonSerializable
@@ -24,9 +26,15 @@ class CreateUserRequestModel implements JsonSerializable
     #[OA\Property(title: 'type', type: 'integer', enum: EUserRole::class)]
     public EUserRole $role;
 
+    private $validator;
     public function __construct()
     {
         unset($this->role);
+        $this->validator = Validator::attribute('username', Validator::stringType()->notEmpty())
+            ->attribute('password', Validator::stringType()->notEmpty())
+            ->attribute('name', Validator::stringType()->notEmpty())
+            ->attribute('surname', Validator::stringType()->notEmpty())
+            ->attribute('role', Validator::in([EUserRole::ADMIN, EUserRole::USER])->notEmpty());
     }
 
     public function __set($key, $value)
@@ -34,6 +42,21 @@ class CreateUserRequestModel implements JsonSerializable
         if ($key === 'role') {
             $this->role = EUserRole::from($value);
         }
+    }
+
+    public function isValid(): bool
+    {
+        return $this->validator->validate($this);
+    }
+
+    public function getErrors(): array
+    {
+        try {
+            $this->validator->assert($this);
+        } catch (NestedValidationException $exception) {
+            return $exception->getMessages();
+        }
+        return [];
     }
 
     public static function createFromModel($user): CreateUserRequestModel
