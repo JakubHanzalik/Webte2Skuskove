@@ -8,6 +8,7 @@ use Stuba\Controllers\AuthController;
 use Stuba\Controllers\QuestionsController;
 use Stuba\Controllers\DocumentationController;
 use Stuba\Controllers\UserController;
+use Stuba\Controllers\VotingController;
 
 use Stuba\Middleware\AuthMiddleware;
 use Stuba\Middleware\AdminAuthMiddleware;
@@ -38,6 +39,13 @@ SimpleRouter::group(['prefix' => '/api'], function () {
         SimpleRouter::post('/user/{id}', [UserController::class, 'updateUser']);
         SimpleRouter::delete('/user/{id}', [UserController::class, 'deleteUserById']);
     });
+
+    // Voting
+    SimpleRouter::get('/voting/{code}', [VotingController::class, 'getQuestionWithAnswersByCode']);
+    SimpleRouter::post('/voting/{code}', [VotingController::class, 'voteByCode']);
+    SimpleRouter::get('/voting/{code}/correct', [VotingController::class, 'getCorrectAnswerId']);
+    SimpleRouter::get('/voting/{code}/statistics', [VotingController::class, 'getQuestionStatistics']);
+
 
     // Documentation
     SimpleRouter::get('/docs', [DocumentationController::class, 'generateDocs']);

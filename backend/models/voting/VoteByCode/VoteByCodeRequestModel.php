@@ -11,6 +11,9 @@ class VoteByCodeRequestModel implements JsonSerializable
     #[OA\Property(title: "answer id", type: 'integer', example: 0)]
     public int $answerId;
 
+    #[OA\Property(title: "answer text", type: 'string', example: "Dobrý")]
+    public string $answerText;
+
     public function __construct()
     {
     }
