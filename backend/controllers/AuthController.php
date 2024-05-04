@@ -42,6 +42,10 @@ class AuthController
     {
         $model = new RegisterRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
+        if (!$model->isValid()) {
+            SimpleRouter::response()->json($model->getErrors())->httpCode(400);
+        }
+
         $query = "SELECT * FROM Users WHERE username = :username";
         $statement = $this->dbConnection->prepare($query);
         $statement->bindParam(":username", $model->username);
@@ -58,7 +62,8 @@ class AuthController
         $statement->bindParam(":password", $hashedPassword);
         $statement->bindParam(":name", $model->name);
         $statement->bindParam(":surname", $model->surname);
-        $statement->bindParam(":role", EUserRole::USER->value);
+        $roleValue = EUserRole::USER->value;
+        $statement->bindParam(":role", $roleValue);
         $statement->execute();
 
         $token = $this->jwtHandler->createAccessToken($model->username, EUserRole::USER);
@@ -152,9 +157,11 @@ class AuthController
         }
         $decoded = $this->jwtHandler->decodeAccessToken($accessToken);
         $username = $decoded['sub'];
-        $input = SimpleRouter::request()->getInputHandler()->all();
         $changePasswordModel = new ChangePassordRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
+        if (!$changePasswordModel->isValid()) {
+            SimpleRouter::response()->json($changePasswordModel->getErrors())->httpCode(400);
+        }
         if (!$changePasswordModel->password) {
             throw new APIException('New password is required', 400);
         }
