@@ -13,6 +13,7 @@ use Stuba\Handlers\User\GetUserByUsernameHandler;
 use Stuba\Models\Auth\LoginRequestModel;
 use Stuba\Models\Auth\RegisterRequestModel;
 use Stuba\Models\Auth\LoggedUserResponseModel;
+use Stuba\Models\Auth\ChangePassordRequestModel;
 
 use PDO;
 use Stuba\Models\User\EUserRole;
@@ -149,14 +150,15 @@ class AuthController
         if (!$accessToken) {
             throw new APIException('Authentication required', 401);
         }
-        $input = SimpleRouter::request()->getInputHandler()->all();
-        $newPassword = $input['password'];  // ?? null;
-
         $decoded = $this->jwtHandler->decodeAccessToken($accessToken);
         $username = $decoded['sub'];
+        $input = SimpleRouter::request()->getInputHandler()->all();
+        $changePasswordModel = new ChangePassordRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
-        
-        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        if (!$changePasswordModel->password) {
+            throw new APIException('New password is required', 400);
+        }
+        $hashedPassword = password_hash($changePasswordModel->password, PASSWORD_DEFAULT);
         $updateQuery = "UPDATE Users SET password = :password WHERE username = :username";
         $stmt = $this->dbConnection->prepare($updateQuery);
         $stmt->bindParam(":password", $hashedPassword);
@@ -168,6 +170,7 @@ class AuthController
         }
 
         SimpleRouter::response()->json(['message' => 'Password changed successfully'])->httpCode(200);
+        
     }
 
     /**
