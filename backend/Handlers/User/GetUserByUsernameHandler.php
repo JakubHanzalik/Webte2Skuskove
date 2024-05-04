@@ -4,7 +4,7 @@ namespace Stuba\Handlers\User;
 
 use PDO;
 use Stuba\Db\DbAccess;
-use Stuba\Handlers\User;
+use Stuba\Models\User\UserModel;
 
 class GetUserByUsernameHandler
 {
@@ -18,14 +18,14 @@ class GetUserByUsernameHandler
     /**
      * Get user by username
      * @param string $username
-     * @return \Stuba\Handlers\User\UserModel|null
+     * @return \Stuba\Models\User\UserModel|null
      */
     public function handle(string $username): UserModel|null
     {
         $query = "SELECT * FROM Users WHERE username = :username";
         $statement = $this->dbConnection->prepare($query);
         $statement->bindParam(":username", $username);
-        $statement->setFetchMode(PDO::FETCH_CLASS, UserModel::class);
+        $statement->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, UserModel::class);
         $statement->execute();
         if ($statement->rowCount() > 0) {
             return $statement->fetch();
