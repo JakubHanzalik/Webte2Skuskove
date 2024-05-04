@@ -116,6 +116,9 @@ class QuestionsController
 
         $model = new UpdateQuestionRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
+        if (!$model->isValid()) {
+            SimpleRouter::response()->json($model->getErrors())->httpCode(400);
+        }
         $this->dbConnection->beginTransaction();
 
         try {
@@ -160,6 +163,9 @@ class QuestionsController
     public function createQuestion()
     {
         $model = new CreateQuestionRequestModel(SimpleRouter::request()->getInputHandler()->all());
+        if (!$model->isValid()) {
+            SimpleRouter::response()->json($model->getErrors())->httpCode(400);
+        }
 
         $this->dbConnection->beginTransaction();
 
