@@ -31,7 +31,7 @@ class UserModel
         $obj->password = $user["password"];
         $obj->name = $user["name"];
         $obj->surname = $user["surname"];
-        $obj->role = $user["role"];
+        $obj->role->value = $user["role"];
 
         return $obj;
     }
