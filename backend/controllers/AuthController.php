@@ -141,7 +141,29 @@ class AuthController
     #[OA\Response(response: 401, description: 'Invalid credentials')]
     public function changePassword()
     {
-        //TODO: Implement change password
+        $accessToken = $_COOKIE["AccessToken"] ?? null;
+        if (!$accessToken) {
+            throw new APIException('Authentication required', 401);
+        }
+        $input = SimpleRouter::request()->getInputHandler()->all();
+        $newPassword = $input['password'];  // ?? null;
+
+        $decoded = $this->jwtHandler->decodeAccessToken($accessToken);
+        $username = $decoded['sub'];
+
+        
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        $updateQuery = "UPDATE Users SET password = :password WHERE username = :username";
+        $stmt = $this->dbConnection->prepare($updateQuery);
+        $stmt->bindParam(":password", $hashedPassword);
+        $stmt->bindParam(":username", $username);
+        $stmt->execute();
+
+        if ($stmt->rowCount() === 0) {
+            throw new APIException('Failed to update password', 500);
+        }
+
+        SimpleRouter::response()->json(['message' => 'Password changed successfully'])->httpCode(200);
     }
 
     /**

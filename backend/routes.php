@@ -25,7 +25,7 @@ SimpleRouter::group(['prefix' => '/api'], function () {
         // Auth
         SimpleRouter::get('/login', [AuthController::class, 'getLoggedUser']);
         SimpleRouter::post('/logout', [AuthController::class, 'logout']);
-
+        SimpleRouter::post('/change-password', [AuthController::class, 'changePassword']);
 
     });
 

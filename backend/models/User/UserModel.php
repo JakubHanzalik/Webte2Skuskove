@@ -19,7 +19,7 @@ class UserModel
     public function __set($key, $value)
     {
         if ($key === 'role') {
-            $this->role = EUserRole::from($value);
+            $this->role = EUserRole::from((int)$value);
         }
     }
 
