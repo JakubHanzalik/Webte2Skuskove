@@ -5,7 +5,8 @@
     "pecee/simple-router": "^5.4",
     "zircote/swagger-php": "^4.8",
     "firebase/php-jwt": "^6.10",
-    "knplabs/knp-snappy": "^1.5"
+    "knplabs/knp-snappy": "^1.5",
+    "chrome-php/chrome": "^1.11"
   },
   "autoload": {
     "psr-4": {
