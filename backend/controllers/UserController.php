@@ -99,11 +99,6 @@ class UserController
         $stmt->bindValue(":role", $model->role->value, PDO::PARAM_INT);
         $stmt->execute();
 
-        if ($stmt->rowCount() === 0) {
-            SimpleRouter::response()->json(['error' => 'Failed to create user'])->httpCode(500);
-            return;
-
-        }
         $userId = $this->dbConnection->lastInsertId();
         $userData = ['id' => (int) $userId];  // Prepare user data as an array
         $responseModel = CreateUserResponseModel::createFromModel($userData);
