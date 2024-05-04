@@ -10,15 +10,16 @@ class ChangePassordRequestModel
     #[OA\Property(type: 'string', description: 'Password', example: 'password123')]
     public string $password;
 
-    public function __construct()
+    public function __construct($requestParams)
     {
+        $this->password = $requestParams['password'];
     }
 
-    public static function createFromModel($user): ChangePassordRequestModel
+    /* public static function createFromModel($user): ChangePassordRequestModel
     {
         $obj = new ChangePassordRequestModel();
         $obj->password = $user["password"];
 
         return $obj;
-    }
+    } */
 }
