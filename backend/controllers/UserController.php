@@ -52,7 +52,7 @@ class UserController
     }
 
     #[OA\Get(path: '/api/user/{id}', tags: ['User'])]
-    #[OA\Parameter(name: "id", in: 'path', required: true, description: "User id", example: 8, schema: new OA\Schema(type: 'int'))]
+    #[OA\Parameter(name: "id", in: 'path', required: true, description: "User id", example: 8, schema: new OA\Schema(type: 'integer'))]
     #[OA\Response(response: 200, description: 'Get all users', content: new OA\JsonContent(ref: '#/components/schemas/GetUserResponseModel'))]
     #[OA\Response(response: 401, description: 'Unauthorized')]
     public function getUserById(int $id)
@@ -108,7 +108,7 @@ class UserController
     }
 
     #[OA\Post(path: '/api/user/{id}', tags: ['User'])]
-    #[OA\Parameter(name: "id", in: 'path', required: true, description: "User id", example: 5, schema: new OA\Schema(type: 'int'))]
+    #[OA\Parameter(name: "id", in: 'path', required: true, description: "User id", example: 5, schema: new OA\Schema(type: 'integer'))]
     #[OA\RequestBody(description: 'Update user', required: true, content: new OA\JsonContent(ref: '#/components/schemas/UpdateUserRequestModel'))]
     #[OA\Response(response: 200, description: 'User updated successfully')]
     #[OA\Response(response: 304, description: 'No changes made to the user')]
@@ -144,7 +144,7 @@ class UserController
     }
 
     #[OA\Delete(path: '/api/user/{id}', tags: ['User'])]
-    #[OA\Parameter(name: "id", in: 'path', required: true, description: "User id", example: 5, schema: new OA\Schema(type: 'int'))]
+    #[OA\Parameter(name: "id", in: 'path', required: true, description: "User id", example: 5, schema: new OA\Schema(type: 'integer'))]
     #[OA\Response(response: 200, description: 'Delete user')]
     #[OA\Response(response: 401, description: 'Unauthorized')]
     #[OA\Response(response: 404, description: 'User not found')]

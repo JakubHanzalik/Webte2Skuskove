@@ -8,7 +8,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(type: 'object', title: 'CreateUserRequestModel')]
 class CreateUserResponseModel implements JsonSerializable
 {
-    #[OA\Property(type: 'int', description: 'User id', example: 1)]
+    #[OA\Property(type: 'integer', description: 'User id', example: 1)]
     public int $id;
 
     public function __construct()
