@@ -33,6 +33,7 @@ class VotingController
     #[OA\Parameter(name: "code", in: 'path', required: true, description: "Question code", example: "abcde", schema: new OA\Schema(type: 'string'))]
     #[OA\Response(response: 200, description: 'Get correct answer id', content: new OA\JsonContent(ref: '#/components/schemas/GetCorrectAnswerIdResponseModel'))]
     #[OA\Response(response: 401, description: 'Did not vote yet')]
+    #[OA\Response(response: 400, description: 'Question does not have correct answer')]
     #[OA\Response(response: 404, description: 'Question not found')]
 
     public function getCorrectAnswerId(string $code)

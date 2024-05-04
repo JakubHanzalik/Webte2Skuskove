@@ -8,8 +8,8 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(title: 'GetCorrectAnswerIdResponseModel', schema: 'GetCorrectAnswerIdResponseModel', type: 'object')]
 class GetCorrectAnswerIdResponseModel implements JsonSerializable
 {
-    #[OA\Property(title: "id", type: 'integer', example: 1)]
-    public int $id;
+    #[OA\Property(title: "answerId", type: 'integer', example: 1)]
+    public int $answerId;
 
     public function __construct()
     {
@@ -18,7 +18,7 @@ class GetCorrectAnswerIdResponseModel implements JsonSerializable
     public static function constructFromModel($answer): GetCorrectAnswerIdResponseModel
     {
         $obj = new GetCorrectAnswerIdResponseModel();
-        $obj->id = $answer["id"];
+        $obj->answerId = $answer["answerId"];
 
         return $obj;
     }
