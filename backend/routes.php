@@ -10,9 +10,11 @@ use Stuba\Controllers\DocumentationController;
 use Stuba\Controllers\UserController;
 
 use Stuba\Middleware\AuthMiddleware;
+use Stuba\Middleware\AdminAuthMiddleware;
 
 SimpleRouter::group(['prefix' => '/api'], function () {
 
+    //Logged user
     SimpleRouter::group(['middleware' => AuthMiddleware::class], function () {
         // Questions
         SimpleRouter::get('/question', [QuestionsController::class, 'getAllQuestionsByUser']);
@@ -24,6 +26,11 @@ SimpleRouter::group(['prefix' => '/api'], function () {
         SimpleRouter::get('/login', [AuthController::class, 'getLoggedUser']);
         SimpleRouter::post('/logout', [AuthController::class, 'logout']);
 
+
+    });
+
+    // Admin
+    SimpleRouter::group(['middleware' => AdminAuthMiddleware::class], function () {
         // User
         SimpleRouter::get('/user', [UserController::class, 'getAllUsers']);
         SimpleRouter::get('/user/{id}', [UserController::class, 'getUserById']);
