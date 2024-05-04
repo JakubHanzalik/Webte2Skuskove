@@ -91,6 +91,8 @@ class JwtHandler
      */
     public function createRefreshToken(string $username): string
     {
+        $this->deleteRefreshToken($username);
+
         $refreshToken = $this->generateRandomString(30);
 
         $expirationTime = strtotime('+1 week', time());

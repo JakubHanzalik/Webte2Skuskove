@@ -62,8 +62,7 @@ class AuthController
         $statement->bindParam(":password", $hashedPassword);
         $statement->bindParam(":name", $model->name);
         $statement->bindParam(":surname", $model->surname);
-        $roleValue = EUserRole::USER->value;
-        $statement->bindParam(":role", $roleValue);
+        $statement->bindParam(":role", EUserRole::USER->value);
         $statement->execute();
 
         $token = $this->jwtHandler->createAccessToken($model->username, EUserRole::USER);
