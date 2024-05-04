@@ -105,6 +105,14 @@ class JwtHandler
         return $refreshToken;
     }
 
+    public function deleteRefreshToken(string $username): void
+    {
+        $query = "DELETE FROM Token WHERE username = :username";
+        $statement = $this->dbConnection->prepare($query);
+        $statement->bindParam(":username", $username);
+        $statement->execute();
+    }
+
     /**
      * Dekoduje access token
      * @param string $accessToken

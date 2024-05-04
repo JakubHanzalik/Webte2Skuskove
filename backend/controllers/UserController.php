@@ -7,6 +7,9 @@ use Pecee\SimpleRouter\SimpleRouter;
 use Stuba\Db\DbAccess;
 use PDO;
 use Stuba\Exceptions\APIException;
+use Stuba\Handlers\Jwt\JwtHandler;
+use Stuba\Handlers\User\GetUserByIdHandler;
+use Stuba\Handlers\User\GetUserByUsernameHandler;
 use Stuba\Models\User\GetAllUsers\GetAllUsersResponseModel;
 use Stuba\Models\User\GetUser\GetUserResponseModel;
 use Stuba\Models\User\CreateUser\CreateUserRequestModel;
@@ -17,10 +20,16 @@ use Stuba\Models\User\UpdateUser\UpdateUserRequestModel;
 class UserController
 {
     private PDO $dbConnection;
+    private JwtHandler $jwtHandler;
+    private GetUserByIdHandler $getUserByIdHandler;
+    private GetUserByUsernameHandler $getUserByUsernameHandler;
 
     public function __construct()
     {
         $this->dbConnection = (new DbAccess())->getDbConnection();
+        $this->jwtHandler = new JwtHandler();
+        $this->getUserByIdHandler = new GetUserByIdHandler();
+        $this->getUserByUsernameHandler = new GetUserByUsernameHandler();
     }
 
     #[OA\Get(path: '/api/user', tags: ['User'])]
@@ -48,27 +57,21 @@ class UserController
     #[OA\Response(response: 401, description: 'Unauthorized')]
     public function getUserById(int $id)
     {
-        $userQuery =
-            "SELECT 
-            u.username AS username, 
-            u.name AS name,
-            u.surname AS surname,
-            u.role AS role
-        FROM Users u
-        WHERE u.id = :id";
+        $user = $this->getUserByIdHandler->handle($id);
 
-        $stmt = $this->dbConnection->prepare($userQuery);
-        $stmt->bindParam(':id', $id);
-        $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, GetUserResponseModel::class);
-        $stmt->execute();
-
-        if ($stmt->rowCount() === 0) {
+        if (is_null($user)) {
             SimpleRouter::response()->httpCode(404);
             return;
-        } else {
-            $response = $stmt->fetch();
-            SimpleRouter::response()->json($response)->httpCode(200);
         }
+
+        $responseModel = GetUserResponseModel::createFromModel([
+            'username' => $user->username,
+            'name' => $user->name,
+            'surname' => $user->surname,
+            'role' => $user->role
+        ]);
+
+        SimpleRouter::response()->json($responseModel)->httpCode(200);
     }
 
     #[OA\Put(path: '/api/user', tags: ['User'])]
@@ -80,13 +83,9 @@ class UserController
         $inputData = SimpleRouter::request()->getInputHandler()->all();
         $model = CreateUserRequestModel::createFromModel($inputData);
 
-        // Check if the user already exists
-        $query = "SELECT id FROM Users WHERE username = :username";
-        $stmt = $this->dbConnection->prepare($query);
-        $stmt->bindParam(":username", $model->username);
-        $stmt->execute();
+        $user = $this->getUserByUsernameHandler->handle($model->username);
 
-        if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+        if (!is_null($user)) {
             throw new APIException('User already exists', 409);
         }
 
@@ -97,7 +96,7 @@ class UserController
         $stmt->bindValue(":password", password_hash($model->password, PASSWORD_DEFAULT));
         $stmt->bindValue(":name", $model->name);
         $stmt->bindValue(":surname", $model->surname);
-        $stmt->bindValue(":role", $model->role->value);
+        $stmt->bindValue(":role", $model->role->value, PDO::PARAM_INT);
         $stmt->execute();
 
         if ($stmt->rowCount() === 0) {
@@ -106,7 +105,7 @@ class UserController
 
         }
         $userId = $this->dbConnection->lastInsertId();
-        $userData = ['id' => (int)$userId];  // Prepare user data as an array
+        $userData = ['id' => (int) $userId];  // Prepare user data as an array
         $responseModel = CreateUserResponseModel::createFromModel($userData);
 
         SimpleRouter::response()->json($responseModel)->httpCode(200);
@@ -116,24 +115,21 @@ class UserController
     #[OA\Post(path: '/api/user/{id}', tags: ['User'])]
     #[OA\Parameter(name: "id", in: 'path', required: true, description: "User id", example: 5, schema: new OA\Schema(type: 'int'))]
     #[OA\RequestBody(description: 'Update user', required: true, content: new OA\JsonContent(ref: '#/components/schemas/UpdateUserRequestModel'))]
-    #[OA\Response(response: 200, description: 'Update user')]
+    #[OA\Response(response: 200, description: 'User updated successfully')]
+    #[OA\Response(response: 304, description: 'No changes made to the user')]
     #[OA\Response(response: 401, description: 'Unauthorized')]
     public function updateUser(int $id)
     {
         $inputData = SimpleRouter::request()->getInputHandler()->all();
         $model = UpdateUserRequestModel::createFromModel($inputData);
 
-        // Check if the user exists
-        $selectQuery = "SELECT id FROM Users WHERE id = :id";
-        $stmt = $this->dbConnection->prepare($selectQuery);
-        $stmt->bindParam(":id", $id);
-        $stmt->execute();
-        
-        if ($stmt->rowCount() === 0) {
-            throw new APIException('User not found', 404);
+        $user = $this->getUserByIdHandler->handle($id);
+
+        if (is_null($user)) {
+            SimpleRouter::response()->json(['message' => 'User not found'])->httpCode(404);
+            return;
         }
 
-        // Update the user in the database
         $updateQuery = "UPDATE Users SET username = :username, password = :password, name = :name, surname = :surname, role = :role WHERE id = :id";
         $stmt = $this->dbConnection->prepare($updateQuery);
         $stmt->bindValue(":username", $model->username);
@@ -141,13 +137,13 @@ class UserController
         $stmt->bindValue(":name", $model->name);
         $stmt->bindValue(":surname", $model->surname);
         $stmt->bindValue(":role", $model->role->value);
-        $stmt->bindValue(":id", $id);
+        $stmt->bindParam(":id", $id, PDO::PARAM_INT);
         $stmt->execute();
 
         if ($stmt->rowCount() > 0) {
-            SimpleRouter::response()->json(['message' => 'User updated successfully'])->httpCode(200);
+            SimpleRouter::response()->httpCode(200);
         } else {
-            SimpleRouter::response()->json(['error' => 'No changes made to the user'])->httpCode(304); // Not Modified
+            throw new APIException('No changes made to the user', 304);
         }
 
     }
@@ -159,17 +155,15 @@ class UserController
     #[OA\Response(response: 404, description: 'User not found')]
     public function deleteUserById(int $id)
     {
-        $selectQuery = "SELECT id FROM Users WHERE id = :id";
-        $stmt = $this->dbConnection->prepare($selectQuery);
-        $stmt->bindValue(":id", $id);
-        $stmt->execute();
+        $user = $this->getUserByIdHandler->handle($id);
 
-         if ($stmt->rowCount() === 0) {
-            SimpleRouter::response()->json(['error' => 'User not found'])->httpCode(404);
+        if (is_null($user)) {
+            SimpleRouter::response()->json(['message' => 'User not found'])->httpCode(404);
             return;
         }
 
-        // Delete the user from the database
+        $this->jwtHandler->deleteRefreshToken($user->username);
+
         $deleteQuery = "DELETE FROM Users WHERE id = :id";
         $stmt = $this->dbConnection->prepare($deleteQuery);
         $stmt->bindParam(":id", $id, PDO::PARAM_INT);
@@ -178,8 +172,8 @@ class UserController
         if ($stmt->rowCount() > 0) {
             SimpleRouter::response()->json(['message' => 'User deleted successfully'])->httpCode(200);
         } else {
-            SimpleRouter::response()->json(['error' => 'Failed to delete user'])->httpCode(500);
-        } 
+            throw new APIException('Failed to delete user', 500);
+        }
 
     }
 }
