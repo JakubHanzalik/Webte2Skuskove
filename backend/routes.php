@@ -29,7 +29,7 @@ SimpleRouter::group(['prefix' => '/api'], function () {
         SimpleRouter::get('/user/{id}', [UserController::class, 'getUserById']);
         SimpleRouter::put('/user', [UserController::class, 'createUser']);
         SimpleRouter::post('/user/{id}', [UserController::class, 'updateUser']);
-        SimpleRouter::delete('/user/{id}', [UserController::class, 'deleteUser']);
+        SimpleRouter::delete('/user/{id}', [UserController::class, 'deleteUserById']);
     });
 
     // Documentation
