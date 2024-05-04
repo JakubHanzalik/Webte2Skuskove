@@ -21,10 +21,10 @@ class CreateQuestionRequestModel implements JsonSerializable
     #[OA\Property(title: 'type', type: 'integer', enum: EQuestionType::class)]
     public EQuestionType $type;
 
-    #[OA\Property(title: "subjectId", type: 'int', example: 5)]
+    #[OA\Property(title: "subjectId", type: 'integer', example: 5)]
     public int $subjectId;
 
-    #[OA\Property(title: "authorId", type: 'int', example: 5)]
+    #[OA\Property(title: "authorId", type: 'integer', example: 5)]
     public int $authorId;
 
     #[OA\Property(title: "answers", type: 'array', items: new OA\Items(ref: '#/components/schemas/AnswerModel'))]

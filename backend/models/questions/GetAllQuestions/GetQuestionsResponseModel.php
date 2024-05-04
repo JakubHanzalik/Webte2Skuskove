@@ -28,7 +28,7 @@ class GetQuestionsResponseModel implements JsonSerializable
     #[OA\Property(title: "active", type: 'string', example: true)]
     public string $active;
 
-    #[OA\Property(title: "subjectId", type: 'int', example: 5)]
+    #[OA\Property(title: "subjectId", type: 'integer', example: 5)]
     public int $subjectId;
 
     #[OA\Property(title: "code", type: 'string', example: "abcde")]

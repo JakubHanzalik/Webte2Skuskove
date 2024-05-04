@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: May 04, 2024 at 12:08 PM
+-- Generation Time: May 04, 2024 at 04:34 PM
 -- Server version: 8.3.0
 -- PHP Version: 8.2.8
 
@@ -39,10 +39,10 @@ CREATE TABLE `Answers` (
 --
 
 INSERT INTO `Answers` (`id`, `question_code`, `answer`, `correct`) VALUES
-(17, 'EKSP6', 'Bratislava', b'0'),
-(18, 'EKSP6', 'Salzburg', b'1'),
-(21, 'F7E8P', 'Praha', b'0'),
-(22, 'F7E8P', 'Brno', b'1');
+(0, 'EKSP6', 'Bratislava', b'0'),
+(0, 'F7E8P', 'Praha', b'0'),
+(1, 'EKSP6', 'Salzburg', b'1'),
+(1, 'F7E8P', 'Brno', b'1');
 
 -- --------------------------------------------------------
 
@@ -51,7 +51,6 @@ INSERT INTO `Answers` (`id`, `question_code`, `answer`, `correct`) VALUES
 --
 
 CREATE TABLE `Questions` (
-  `id` int NOT NULL,
   `question_code` varchar(5) NOT NULL,
   `active` bit(1) NOT NULL DEFAULT b'0',
   `question` varchar(512) NOT NULL,
@@ -65,9 +64,9 @@ CREATE TABLE `Questions` (
 -- Dumping data for table `Questions`
 --
 
-INSERT INTO `Questions` (`id`, `question_code`, `active`, `question`, `response_type`, `subject_id`, `creation_date`, `author_id`) VALUES
-(6, 'EKSP6', b'1', 'What is the capital of Slovakiafsdfd?', 1, 5, '2024-04-30 21:40:08', '1'),
-(8, 'F7E8P', b'1', 'Hlavne mesto', 2, 1, '2024-05-04 12:02:02', '1');
+INSERT INTO `Questions` (`question_code`, `active`, `question`, `response_type`, `subject_id`, `creation_date`, `author_id`) VALUES
+('EKSP6', b'1', 'What is the capital of Slovakiafsdfd?', 1, 5, '2024-04-30 21:40:08', '1'),
+('F7E8P', b'1', 'Hlavne mesto', 2, 1, '2024-05-04 12:02:02', '1');
 
 -- --------------------------------------------------------
 
@@ -120,7 +119,9 @@ INSERT INTO `Token` (`id`, `token`, `username`, `validity`) VALUES
 (13, '4WQqFcnCAP7boBJESKtFO0opvTBTaV', 'jano', '2024-05-07 22:09:59'),
 (14, '1cSnJKyxCFILY6ZOu6CJsOvbPdqORP', 'jano', '2024-05-07 22:30:16'),
 (15, 'zw3p8X3XYDL7nWB6UNJqmzrEXdYRjG', 'jano', '2024-05-08 13:52:20'),
-(18, 'LunfVS7B2Qhftb3vIGiEPrjOJ2HMUO', 'jano', '2024-05-11 12:03:19');
+(18, 'LunfVS7B2Qhftb3vIGiEPrjOJ2HMUO', 'jano', '2024-05-11 12:03:19'),
+(19, 'xmio2B0kQmM0VQPo6RXqIrdR7CKGLf', 'jano', '2024-05-11 15:08:08'),
+(20, 'rpVeQa8YTbZTOPVP5lR04WAzZKBTYO', 'jano', '2024-05-11 16:33:51');
 
 -- --------------------------------------------------------
 
@@ -178,15 +179,13 @@ CREATE TABLE `Voting` (
 -- Indexes for table `Answers`
 --
 ALTER TABLE `Answers`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`,`question_code`);
 
 --
 -- Indexes for table `Questions`
 --
 ALTER TABLE `Questions`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `question_code` (`question_code`),
-  ADD UNIQUE KEY `question_code_2` (`question_code`);
+  ADD PRIMARY KEY (`question_code`);
 
 --
 -- Indexes for table `Subject`
@@ -224,18 +223,6 @@ ALTER TABLE `Voting`
 --
 
 --
--- AUTO_INCREMENT for table `Answers`
---
-ALTER TABLE `Answers`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
-
---
--- AUTO_INCREMENT for table `Questions`
---
-ALTER TABLE `Questions`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
 -- AUTO_INCREMENT for table `Subject`
 --
 ALTER TABLE `Subject`
@@ -245,7 +232,7 @@ ALTER TABLE `Subject`
 -- AUTO_INCREMENT for table `Token`
 --
 ALTER TABLE `Token`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `Users`

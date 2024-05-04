@@ -4,7 +4,6 @@ namespace Stuba\Models\Questions\GetQuestion;
 
 use OpenApi\Attributes as OA;
 use JsonSerializable;
-
 use Stuba\Models\Questions\EQuestionType;
 
 #[OA\Schema(title: 'GetQuestionResponseModel', schema: 'GetQuestionResponseModel', type: 'object')]

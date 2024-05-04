@@ -86,6 +86,7 @@ class QuestionsController
 
         $answersQuery =
             "SELECT 
+            a.id AS id,
             a.answer AS text, 
             a.correct 
         FROM Answers a
@@ -135,12 +136,13 @@ class QuestionsController
             $deleteAnswersStmt->bindParam(':code', $code);
             $deleteAnswersStmt->execute();
 
-            foreach ($model->answers as $answer) {
-                $insertAnswerQuery = "INSERT INTO Answers (question_code, answer, correct) VALUES (:code, :answer, :correct)";
+            for ($i = 0; $i < count($model->answers); $i++) {
+                $insertAnswerQuery = "INSERT INTO Answers (id, question_code, answer, correct) VALUES (:id, :code, :answer, :correct)";
                 $insertAnswerStmt = $this->dbConnection->prepare($insertAnswerQuery);
                 $insertAnswerStmt->bindValue(':code', $code, PDO::PARAM_STR);
-                $insertAnswerStmt->bindValue(':answer', $answer->text, PDO::PARAM_STR);
-                $insertAnswerStmt->bindValue(':correct', $answer->correct, PDO::PARAM_BOOL);
+                $insertAnswerStmt->bindValue(':answer', $model->answers[$i]->text, PDO::PARAM_STR);
+                $insertAnswerStmt->bindValue(':correct', $model->answers[$i]->correct, PDO::PARAM_BOOL);
+                $insertAnswerStmt->bindValue(':id', $i, PDO::PARAM_INT);
                 $insertAnswerStmt->execute();
             }
 
@@ -180,14 +182,14 @@ class QuestionsController
             $insertQuestionStmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
             $insertQuestionStmt->execute();
 
-
-            foreach ($model->answers as $answer) {
-                $insertAnswerQuery = "INSERT INTO Answers (question_code, answer, correct) VALUES (:questionCode, :answer, :correct)";
-                $stmt = $this->dbConnection->prepare($insertAnswerQuery);
-                $stmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
-                $stmt->bindValue(':answer', $answer->text, PDO::PARAM_STR);
-                $stmt->bindValue(':correct', $answer->correct, PDO::PARAM_BOOL);
-                $stmt->execute();
+            for ($i = 0; $i < count($model->answers); $i++) {
+                $insertAnswerQuery = "INSERT INTO Answers (id, question_code, answer, correct) VALUES (:id, :code, :answer, :correct)";
+                $insertAnswerStmt = $this->dbConnection->prepare($insertAnswerQuery);
+                $insertAnswerStmt->bindValue(':code', $questionCode, PDO::PARAM_STR);
+                $insertAnswerStmt->bindValue(':answer', $model->answers[$i]->text, PDO::PARAM_STR);
+                $insertAnswerStmt->bindValue(':correct', $model->answers[$i]->correct, PDO::PARAM_BOOL);
+                $insertAnswerStmt->bindValue(':id', $i, PDO::PARAM_INT);
+                $insertAnswerStmt->execute();
             }
 
             $this->dbConnection->commit();
@@ -213,7 +215,6 @@ class QuestionsController
 
         $this->dbConnection->beginTransaction();
 
-        //TODO: Zmazat otazku aj s odpovedami az ked je overene ci patri uzivatelovi alebo je to admin
         try {
             $deleteAnswersQuery = "DELETE FROM Answers WHERE question_code = :code";
             $stmt = $this->dbConnection->prepare($deleteAnswersQuery);
