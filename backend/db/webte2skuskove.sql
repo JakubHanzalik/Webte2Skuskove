@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: May 01, 2024 at 04:55 PM
+-- Generation Time: May 04, 2024 at 12:08 PM
 -- Server version: 8.3.0
 -- PHP Version: 8.2.8
 
@@ -40,7 +40,9 @@ CREATE TABLE `Answers` (
 
 INSERT INTO `Answers` (`id`, `question_code`, `answer`, `correct`) VALUES
 (17, 'EKSP6', 'Bratislava', b'0'),
-(18, 'EKSP6', 'Salzburg', b'1');
+(18, 'EKSP6', 'Salzburg', b'1'),
+(21, 'F7E8P', 'Praha', b'0'),
+(22, 'F7E8P', 'Brno', b'1');
 
 -- --------------------------------------------------------
 
@@ -64,7 +66,8 @@ CREATE TABLE `Questions` (
 --
 
 INSERT INTO `Questions` (`id`, `question_code`, `active`, `question`, `response_type`, `subject_id`, `creation_date`, `author_id`) VALUES
-(6, 'EKSP6', b'1', 'What is the capital of Slovakiafsdfd?', 1, 5, '2024-04-30 21:40:08', '1');
+(6, 'EKSP6', b'1', 'What is the capital of Slovakiafsdfd?', 1, 5, '2024-04-30 21:40:08', '1'),
+(8, 'F7E8P', b'1', 'Hlavne mesto', 2, 1, '2024-05-04 12:02:02', '1');
 
 -- --------------------------------------------------------
 
@@ -116,7 +119,8 @@ INSERT INTO `Token` (`id`, `token`, `username`, `validity`) VALUES
 (12, 'YkZmjW3ZospVrnfYzICkad7DUUavWr', 'jano', '2024-05-07 22:09:02'),
 (13, '4WQqFcnCAP7boBJESKtFO0opvTBTaV', 'jano', '2024-05-07 22:09:59'),
 (14, '1cSnJKyxCFILY6ZOu6CJsOvbPdqORP', 'jano', '2024-05-07 22:30:16'),
-(15, 'zw3p8X3XYDL7nWB6UNJqmzrEXdYRjG', 'jano', '2024-05-08 13:52:20');
+(15, 'zw3p8X3XYDL7nWB6UNJqmzrEXdYRjG', 'jano', '2024-05-08 13:52:20'),
+(18, 'LunfVS7B2Qhftb3vIGiEPrjOJ2HMUO', 'jano', '2024-05-11 12:03:19');
 
 -- --------------------------------------------------------
 
@@ -130,7 +134,7 @@ CREATE TABLE `Users` (
   `password` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `name` varchar(50) NOT NULL,
   `surname` varchar(50) NOT NULL,
-  `role` varchar(50) NOT NULL DEFAULT 'USER'
+  `role` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -138,7 +142,7 @@ CREATE TABLE `Users` (
 --
 
 INSERT INTO `Users` (`id`, `username`, `password`, `name`, `surname`, `role`) VALUES
-(1, 'jano', '$2y$10$19hjLxk0awv8R7hOzBVPfe4Qg6i0VSEyiKDdVmVJs20rbY1ZayYze', 'jano', 'adamik', 'USER');
+(1, 'jano', '$2y$10$19hjLxk0awv8R7hOzBVPfe4Qg6i0VSEyiKDdVmVJs20rbY1ZayYze', 'jano', 'adamik', 1);
 
 -- --------------------------------------------------------
 
@@ -223,13 +227,13 @@ ALTER TABLE `Voting`
 -- AUTO_INCREMENT for table `Answers`
 --
 ALTER TABLE `Answers`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `Questions`
 --
 ALTER TABLE `Questions`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `Subject`
@@ -241,7 +245,7 @@ ALTER TABLE `Subject`
 -- AUTO_INCREMENT for table `Token`
 --
 ALTER TABLE `Token`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `Users`

@@ -9,22 +9,27 @@ use Stuba\Handlers\Jwt\JwtHandler;
 use Stuba\Exceptions\APIException;
 use Stuba\Db\DbAccess;
 
+use Stuba\Handlers\User\GetUserByUsernameHandler;
 use Stuba\Models\Auth\LoginRequestModel;
 use Stuba\Models\Auth\RegisterRequestModel;
 use Stuba\Models\Auth\LoggedUserResponseModel;
 
 use PDO;
+use Stuba\Models\User\EUserRole;
+use Stuba\Models\User\UserModel;
 
 #[OA\Tag('Auth')]
 class AuthController
 {
     private JwtHandler $jwtHandler;
     private PDO $dbConnection;
+    private GetUserByUsernameHandler $getUserByUsernameHandler;
 
     public function __construct()
     {
         $this->jwtHandler = new JwtHandler();
         $this->dbConnection = (new DbAccess())->getDbConnection();
+        $this->getUserByUsernameHandler = new GetUserByUsernameHandler();
     }
 
     #[OA\Post(path: '/api/register', tags: ['Auth'])]
@@ -46,15 +51,16 @@ class AuthController
 
         $hashedPassword = password_hash($model->password, PASSWORD_DEFAULT);
 
-        $query = "INSERT INTO Users (username, password, name, surname) VALUES (:username, :password, :name,:surname)";
+        $query = "INSERT INTO Users (username, password, name, surname, role) VALUES (:username, :password, :name,:surname, :role)";
         $statement = $this->dbConnection->prepare($query);
         $statement->bindParam(":username", $model->username);
         $statement->bindParam(":password", $hashedPassword);
         $statement->bindParam(":name", $model->name);
         $statement->bindParam(":surname", $model->surname);
+        $statement->bindParam(":role", EUserRole::USER->value);
         $statement->execute();
 
-        $token = $this->jwtHandler->createAccessToken($model->username);
+        $token = $this->jwtHandler->createAccessToken($model->username, EUserRole::USER);
         setcookie('AccessToken', $token, strtotime('+3 minutes', time()), '/', '', true, true);
 
         $refreshToken = $this->jwtHandler->createRefreshToken($model->username);
@@ -72,12 +78,16 @@ class AuthController
     {
         $model = new LoginRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
-        $user = $this->validateCredentials($model->username, $model->password);
+        if (!$this->validateCredentials($model->username, $model->password)) {
+            throw new APIException('Invalid credentials', 401);
+        }
 
-        $token = $this->jwtHandler->createAccessToken($user['username']);
+        $user = $this->getUserByUsernameHandler->handle($model->username);
+
+        $token = $this->jwtHandler->createAccessToken($user->username, $user->role);
         setcookie('AccessToken', $token, strtotime('+3 minutes', time()), '/', '', true, true);
 
-        $refreshToken = $this->jwtHandler->createRefreshToken($user['username']);
+        $refreshToken = $this->jwtHandler->createRefreshToken($user->username);
         setcookie('RefreshToken', $refreshToken, strtotime('+1 week', time()), '/', '', true, true);
 
         SimpleRouter::response()->httpCode(200);
@@ -92,17 +102,18 @@ class AuthController
         $accessToken = $_COOKIE["AccessToken"];
         $decoded = $this->jwtHandler->decodeAccessToken($accessToken);
 
-        $query = "SELECT id, username, name, surname FROM Users WHERE username = :username";
-        $statement = $this->dbConnection->prepare($query);
-        $statement->bindParam(":username", $decoded['sub']);
-        $statement->execute();
-        $user = $statement->fetch(PDO::FETCH_ASSOC);
+        $user = $this->getUserByUsernameHandler->handle($decoded["sub"]);
 
         if (!$user) {
             throw new APIException('User not found', 404);
         }
 
-        $userModel = new LoggedUserResponseModel($user);
+        $userModel = new LoggedUserResponseModel([
+            "username" => $user->username,
+            "name" => $user->name,
+            "surname" => $user->surname,
+            "role" => $user->role
+        ]);
 
         SimpleRouter::response()->json($userModel)->httpCode(200);
     }
@@ -130,29 +141,20 @@ class AuthController
     #[OA\Response(response: 401, description: 'Invalid credentials')]
     public function changePassword()
     {
-
+        //TODO: Implement change password
     }
 
     /**
      * Overi ci uzivatel existuje v databaze a heslo je spravne
      * @param string $username
      * @param string $password
-     * @return array Vrati uzivatela ak existuje
-     * @throws APIException Ak uzivatel neexistuje alebo heslo je nespravne
+     * @return bool Vrati true ak uzivatel existuje a heslo je spravne
      */
-    private function validateCredentials(string $username, string $password): array
+    private function validateCredentials(string $username, string $password): bool
     {
-        $query = "SELECT * FROM Users WHERE username = :username";
-        $statement = $this->dbConnection->prepare($query);
-        $statement->bindParam(":username", $username);
-        $statement->execute();
-        $user = $statement->fetch(PDO::FETCH_ASSOC);
+        $user = $this->getUserByUsernameHandler->handle($username);
 
-        if ($user && password_verify($password, $user['password'])) {
-            return $user;
-        } else {
-            throw new APIException('Invalid credentials', 401);
-        }
+        return $user && password_verify($password, $user->password);
     }
 
     private function revokeRefreshToken(string $refreshToken): void

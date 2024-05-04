@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Stuba\Handlers\User;
+namespace Stuba\Models\User;
 
 class UserModel
 {
@@ -9,11 +9,18 @@ class UserModel
     public string $password;
     public string $name;
     public string $surname;
-    public string $role;
+    public EUserRole $role;
 
     public function __construct()
     {
+        unset($this->role);
+    }
 
+    public function __set($key, $value)
+    {
+        if ($key === 'role') {
+            $this->role = EUserRole::from($value);
+        }
     }
 
     public static function createFromModel($user): UserModel

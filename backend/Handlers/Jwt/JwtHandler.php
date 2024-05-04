@@ -6,7 +6,8 @@ use Exception;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-use Firebase\JWT\SignatureInvalidException;
+use Stuba\Handlers\User\GetUserByUsernameHandler;
+use Stuba\Models\User\EUserRole;
 use Stuba\Exceptions\APIException;
 use Stuba\db\DbAccess;
 use PDO;
@@ -19,11 +20,13 @@ class JwtHandler
      */
     private string $secret;
     private PDO $dbConnection;
+    private GetUserByUsernameHandler $getUserByUsernameHandler;
 
     public function __construct()
     {
         $this->secret = file_get_contents(__DIR__ . '/../../jwt.key');
         $this->dbConnection = (new DbAccess())->getDbConnection();
+        $this->getUserByUsernameHandler = new GetUserByUsernameHandler();
     }
 
     /**
@@ -31,12 +34,13 @@ class JwtHandler
      * @param string $userName 
      * @return string $accessToken 
      */
-    public function createAccessToken(string $username): string
+    public function createAccessToken(string $username, EUserRole $userRole): string
     {
         $payload = [
             'iss' => 'https://node41.webte.fei.stuba.sk/',
             'sub' => $username,
-            'exp' => strtotime('+3 minutes', time())
+            'exp' => strtotime('+3 minutes', time()),
+            'role' => $userRole->value
         ];
 
         return JWT::encode($payload, $this->secret, 'HS256');
@@ -53,9 +57,11 @@ class JwtHandler
     {
         if ($accessToken == null) {
             if ($this->validateRefreshToken($refreshToken)) {
-
                 $username = $this->getUsernameByRefreshToken($refreshToken);
-                return $this->createAccessToken($username);
+
+                $user = $this->getUserByUsernameHandler->handle($username);
+
+                return $this->createAccessToken($username, $user->role);
             } else {
                 throw new APIException('Unauthorized', 401);
             }
@@ -65,7 +71,10 @@ class JwtHandler
         } catch (ExpiredException $e) {
             if ($this->validateRefreshToken($refreshToken)) {
                 $username = $this->getUsernameByRefreshToken($refreshToken);
-                return $this->createAccessToken($username);
+
+                $user = $this->getUserByUsernameHandler->handle($username);
+
+                return $this->createAccessToken($username, $user->role);
             } else {
                 throw new APIException('Unauthorized', 401);
             }

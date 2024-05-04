@@ -4,13 +4,14 @@ namespace Stuba\Models\Auth;
 
 use OpenApi\Attributes as OA;
 use JsonSerializable;
+use Stuba\Models\User\EUserRole;
 
 #[OA\Schema(title: 'LoggedUserModel', schema: 'LoggedUserModel', type: 'object')]
 class LoggedUserResponseModel implements JsonSerializable
 {
     public function __construct($user)
     {
-        $this->id = $user['id'];
+        $this->role = $user['role'];
         $this->username = $user['username'];
         $this->name = $user['name'];
         $this->surname = $user['surname'];
@@ -21,9 +22,6 @@ class LoggedUserResponseModel implements JsonSerializable
         return get_object_vars($this);
     }
 
-    #[OA\Property(title: "id", type: 'integer', example: 1)]
-    public int $id;
-
     #[OA\Property(title: "username", type: 'string', example: "JanKowalski")]
     public string $username;
 
@@ -32,4 +30,7 @@ class LoggedUserResponseModel implements JsonSerializable
 
     #[OA\Property(title: "surname", type: 'string', example: "Kowalski")]
     public string $surname;
+
+    #[OA\Property(title: 'type', type: 'integer', enum: EUserRole::class)]
+    public EUserRole $role;
 }
