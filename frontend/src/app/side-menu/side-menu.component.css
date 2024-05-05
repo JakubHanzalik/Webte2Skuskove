@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .sidenav-container {
 	height: 100%;
 }
@@ -19,3 +20,38 @@
 body {
 	margin: 0;
 }
+=======
+
+.side-menu {
+    width: 60%;
+    background-color: #ce76885b;
+    color: white;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+  .container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+  }
+  .side-menu.active nav {
+    display: block;
+  }
+    .side-menu ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+  
+    .side-menu ul li a {
+      color: white;
+      text-decoration: none;
+      padding: 10px;
+      display: block;
+    }
+  
+    .side-menu ul li a:hover {
+      background-color: #ae61754c;
+    }
+  
+>>>>>>> 51a2fc0e2d6c7f00c6d517eed689fa3ed339d960
