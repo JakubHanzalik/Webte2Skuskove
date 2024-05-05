@@ -1,0 +1,25 @@
+:host {
+	display: block;
+	height: 100%;
+}
+.responsive-img {
+	max-height: 204px;
+}
+.text-white {
+	color: #ffffff;
+}
+.list-menu {
+	color: #ffffff;
+	width: 100%;
+	text-align: center;
+}
+mat-drawer-container {
+	height: calc(100vh - 56px);
+}
+
+/*----- Media query -----*/
+@media only screen and (min-width: 599px) {
+	mat-drawer-container {
+		height: calc(100vh - 64px);
+	}
+}

@@ -1,22 +1,43 @@
-<nav class="navbar" style="background-color: aqua;">
+<!-- <nav class="navbar" style="background-color: aqua;"> -->
   <!-- Logo -->
-  <a class="navbar-brand" routerLink="/">AppName</a>
+  <!-- <a class="navbar-brand" routerLink="/">AppName</a> -->
   <!-- Navigačné odkazy -->
-  <ul class="nav">
-    <li class="nav-item">
-      <a class="nav-link" routerLink="/home">Home</a>
-    </li>
+  <!-- <ul class="nav"> -->
+    <!-- <li class="nav-item"> -->
+      <!-- <a class="nav-link" routerLink="/home">Home</a> -->
+    <!-- </li> -->
     <!-- Ďalšie odkazy -->
-  </ul>
+  <!-- </ul> -->
   <!-- Užívateľské menu -->
-  <div class="user-menu">
+  <!-- <div class="user-menu"> -->
     <!-- Zobrazenie ikonky a mena používateľa, podmienené prihlásením -->
     <!-- <span **ngIf="authService.isLoggedIn()"> -->
       <!-- {{ authService.getUserName() }} -->
       <!-- <button (click)="authService.logout()">Logout</button> -->
     <!-- </span> -->
     <!-- <span **ngIf="!authService.isLoggedIn()"> -->
-      <a routerLink="/login">Login</a>
+      <!-- <a routerLink="/login">Login</a> -->
     <!-- </span> -->
-  </div>
-</nav>
+  <!-- </div> -->
+<!-- </nav> -->
+
+<mat-toolbar color="primary">
+    <a routerLink="/home">Logo</a>
+    <span style="margin-left: 8px;">Wise</span>
+    <span></span>
+    <span style="flex:  1 1 auto;"></span>
+    <div>
+      <a routerLink="/login" mat-flat-button style="text-transform: uppercase;font-weight: bold;" style="margin: 5px" color="accent" class="text-white">Prihlásiť sa</a>
+      <a routerLink="/register" mat-flat-button style="text-transform: uppercase;font-weight: bold " style="margin: 5px" color="accent" class="text-white">Registruj sa</a>
+    </div>
+    <ng-template #logout>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item>Settings</button>
+        <button mat-menu-item>Odhlásiť sa</button>
+      </mat-menu>
+
+      <button mat-icon-button [matMenuTriggerFor]="menu">
+        <mat-icon aria-label="User menu icon">person</mat-icon>
+      </button>
+    </ng-template>
+  </mat-toolbar>
