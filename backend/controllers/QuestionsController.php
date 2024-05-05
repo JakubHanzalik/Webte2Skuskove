@@ -182,6 +182,18 @@ class QuestionsController
             $insertQuestionStmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
             $insertQuestionStmt->execute();
 
+            if ($model->active) {
+                $insertVotingQuery = "INSERT INTO Voting (question_code, date_from) VALUES (:questionCode, CURDATE())";
+                $insertVotingStmt = $this->dbConnection->prepare($insertVotingQuery);
+                $insertVotingStmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
+                $insertVotingStmt->execute();
+            }else{
+                $insertVotingQuery = "INSERT INTO Voting (question_code) VALUES (:questionCode)";
+                $insertVotingStmt = $this->dbConnection->prepare($insertVotingQuery);
+                $insertVotingStmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
+                $insertVotingStmt->execute();
+            }
+
             for ($i = 0; $i < count($model->answers); $i++) {
                 $insertAnswerQuery = "INSERT INTO Answers (id, question_code, answer, correct) VALUES (:id, :code, :answer, :correct)";
                 $insertAnswerStmt = $this->dbConnection->prepare($insertAnswerQuery);
