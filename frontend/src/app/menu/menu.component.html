@@ -1,1 +1,22 @@
-<button mat-raised-button color="primary">Klikni</button>
+<nav class="navbar" style="background-color: aqua;">
+  <!-- Logo -->
+  <a class="navbar-brand" routerLink="/">AppName</a>
+  <!-- Navigačné odkazy -->
+  <ul class="nav">
+    <li class="nav-item">
+      <a class="nav-link" routerLink="/home">Home</a>
+    </li>
+    <!-- Ďalšie odkazy -->
+  </ul>
+  <!-- Užívateľské menu -->
+  <div class="user-menu">
+    <!-- Zobrazenie ikonky a mena používateľa, podmienené prihlásením -->
+    <!-- <span **ngIf="authService.isLoggedIn()"> -->
+      <!-- {{ authService.getUserName() }} -->
+      <!-- <button (click)="authService.logout()">Logout</button> -->
+    <!-- </span> -->
+    <!-- <span **ngIf="!authService.isLoggedIn()"> -->
+      <a routerLink="/login">Login</a>
+    <!-- </span> -->
+  </div>
+</nav>

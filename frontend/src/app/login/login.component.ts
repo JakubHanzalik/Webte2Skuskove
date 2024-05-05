@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { AuthenticationService, LoginCredentials } from '../authentication.service';
 import { FormsModule } from '@angular/forms';
-import { RouterOutlet } from '@angular/router';
+import { RouterModule, RouterOutlet } from '@angular/router';
 import { MaterialModule } from '../material';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
@@ -10,6 +10,7 @@ import { HttpClientModule } from '@angular/common/http';
   selector: 'app-login',
   standalone: true,
   imports: [
+    RouterModule,
     HttpClientModule,
     RouterOutlet,
     MaterialModule,

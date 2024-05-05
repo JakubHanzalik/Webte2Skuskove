@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { AuthenticationService, RegisterCredentials } from '../authentication.service';
-import { RouterOutlet } from '@angular/router';
+import { RouterModule, RouterOutlet } from '@angular/router';
 import { MaterialModule } from '../material';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -10,6 +10,7 @@ import { HttpClientModule } from '@angular/common/http';
   selector: 'app-register',
   standalone: true,
   imports: [
+    RouterModule,
     HttpClientModule,
     RouterOutlet,
     MaterialModule,
