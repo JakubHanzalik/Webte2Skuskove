@@ -1,10 +1,10 @@
 <div class="container1">
-    <form action="#">
+    <form (ngSubmit)="login()">
       <h2>Prihlásenie</h2>
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" required>
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required>
-      <button type="submit">Prihlásiť sa</button>
+      <input type="text" [(ngModel)]="credentials.username" name="username" required placeholder="Username">
+    <input type="password" [(ngModel)]="credentials.password" name="password" required placeholder="Password">
+    <button type="submit">Prihlásiť sa</button>
+    <p *ngIf="errorMessage">{{ errorMessage }}</p>
+
     </form>
   </div>
