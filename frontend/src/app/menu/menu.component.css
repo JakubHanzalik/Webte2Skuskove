@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 :host {
 	display: block;
 	height: 100%;
@@ -24,34 +23,3 @@ mat-drawer-container {
 		height: calc(100vh - 64px);
 	}
 }
-=======
-.hamburger-menu {
-    display: none;
-    cursor: pointer;
-}
-  .navbar {
-    background-color: #ac1d541e;
-    color: white;
-    padding: 10px 20px;
-    text-align: center;
-    align-items: center;
-  }
-
-  .navbar ul {
-    list-style: none;
-    display: flex;
-    justify-content: space-around;
-    margin: 0;
-    padding: 0;
-  }
-
-  .navbar ul li a {
-    color: white;
-    text-decoration: none;
-    padding: 10px 20px;
-  }
-
-  .navbar ul li a:hover {
-    text-decoration: underline;
-  }
->>>>>>> 51a2fc0e2d6c7f00c6d517eed689fa3ed339d960

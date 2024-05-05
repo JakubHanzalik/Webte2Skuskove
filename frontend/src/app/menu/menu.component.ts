@@ -10,7 +10,7 @@ import {MatIconModule} from '@angular/material/icon';
   standalone: true,
   imports: [
     RouterOutlet,
-    RouterModule,
+RouterModule,
     MatToolbarModule,
     MatMenuModule,
     MatIconModule
