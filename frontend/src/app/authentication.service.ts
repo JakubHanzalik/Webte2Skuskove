@@ -8,14 +8,16 @@ import { map } from 'rxjs';
 // })
 
 export interface LoginCredentials{
-  email : string;
+  username : string;
   password : string;
 }
 
 export interface RegisterCredentials{
-  name : string;
-  email : string;
+  username : string;
   password : string;
+  name: string;
+  surname: string;
+
 }
 
 export class AuthenticationService {
@@ -25,21 +27,26 @@ export class AuthenticationService {
   login( credentials: LoginCredentials ){
     return this.http.post('/api/login',credentials).pipe(
       map(( res:any )=>{
-        this.setUserDataToLocalStorage(res);
+       // this.setUserDataToLocalStorage(res);
         console.log('logged in');
       })
     );
   }
 
-  register(  ){
-    // to do janka podobne jak login len post bude iny.
+  register( credentials : RegisterCredentials ){
+    return this.http.post('/api/register',credentials).pipe(
+      map(( res:any )=>{
+       // this.setUserDataToLocalStorage(res);
+        console.log('registration done');
+      })
+    );
   }
-
+/*
   private setUserDataToLocalStorage( res:any ): void{
     localStorage.setItem('loggedin' , 'true');
     localStorage.setItem('name', res.name || 'Unknown');
   }
-
+*/
   isLoggedIn(): boolean{
     return localStorage.getItem('loggedin') == 'true' ? true : false;
   }
