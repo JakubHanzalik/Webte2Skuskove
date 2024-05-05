@@ -1,0 +1,29 @@
+.hamburger-menu {
+    display: none;
+    cursor: pointer;
+}
+  .navbar {
+    background-color: #ac1d541e;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    align-items: center;
+  }
+
+  .navbar ul {
+    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    margin: 0;
+    padding: 0;
+  }
+
+  .navbar ul li a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+  }
+
+  .navbar ul li a:hover {
+    text-decoration: underline;
+  }

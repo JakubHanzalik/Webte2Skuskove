@@ -1,0 +1,18 @@
+<div class="questions-container">
+    <div style="width: 100%; padding: 10px; box-sizing: border-box;">
+        <input type="text" [(ngModel)]="newQuestionText" placeholder="Enter new question" />
+        <button (click)="addNewQuestion()">Add Question</button>
+    </div>
+    <div class="active-questions">
+        <h2>Active Questions</h2>
+        <ul>
+            <li **ngFor="let question of activeQuestions">{{ question.text }}</li>
+        </ul>
+    </div>
+    <div class="historical-questions">
+        <h2>Historical Questions</h2>
+        <ul>
+            <li **ngFor="let question of historicalQuestions">{{ question.text }}</li>
+        </ul>
+    </div>
+</div>

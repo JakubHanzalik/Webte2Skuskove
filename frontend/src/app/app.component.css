@@ -6,31 +6,15 @@ body {
     background-color: #f4f4f4;
   }
 
-  .container {
-    display: flex;
-    width: 100%;
-    min-height: 100vh;
-  }
 
-  .side-menu {
-    width: 200px;
-    background-color: #ce76885b;
-    color: white;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  }
-  .side-menu.active nav {
-    display: block;
-}
+
+
 
 .app-body {
   display: flex;
   height: 100%;
 }
 
-.side-menu {
-  width: 200px; /* alebo akúkoľvek šírku, ktorú preferujete */
-}
 
 .content-area {
   flex: 1;
@@ -38,27 +22,6 @@ body {
 }
 
 
-.hamburger-menu {
-    display: none;
-    cursor: pointer;
-}
-
-  .side-menu ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .side-menu ul li a {
-    color: white;
-    text-decoration: none;
-    padding: 10px;
-    display: block;
-  }
-
-  .side-menu ul li a:hover {
-    background-color: #ae61754c;
-  }
 
   .main-content {
     flex-grow: 1;
@@ -66,31 +29,6 @@ body {
     flex-direction: column;
   }
 
-  .top-menu {
-    background-color: #ac1d541e;
-    color: white;
-    padding: 10px 20px;
-    text-align: center;
-    align-items: center;
-  }
-
-  .top-menu ul {
-    list-style: none;
-    display: flex;
-    justify-content: space-around;
-    margin: 0;
-    padding: 0;
-  }
-
-  .top-menu ul li a {
-    color: white;
-    text-decoration: none;
-    padding: 10px 20px;
-  }
-
-  .top-menu ul li a:hover {
-    text-decoration: underline;
-  }
 
   .content {
     flex-grow: 1;

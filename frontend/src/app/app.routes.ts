@@ -7,7 +7,7 @@ import { MenuComponent } from './menu/menu.component';
 import { SwaggerComponent } from './swagger/swagger.component';
 import { TutorialComponent } from './tutorial/tutorial.component';
 import { QuestionComponent } from './question/question.component';
-
+import { QuestionsComponent } from './questions/questions.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full'},
@@ -16,6 +16,7 @@ export const routes: Routes = [
   { path: 'menu' , component: MenuComponent },
   { path: 'swagger' , component: SwaggerComponent },
   { path: 'tutorial' , component: TutorialComponent },
+  { path: 'questions' , component: QuestionsComponent },
   { path: ':id' , component: QuestionComponent },
   // to do errors a dalsie cesty
   { path: '**' , redirectTo: '' }
