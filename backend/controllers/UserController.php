@@ -123,6 +123,10 @@ class UserController
         $inputData = SimpleRouter::request()->getInputHandler()->all();
         $model = UpdateUserRequestModel::createFromModel($inputData);
 
+        if (!$model->isValid()) {
+            SimpleRouter::response()->json($model->getErrors())->httpCode(400);
+            return;
+        }
         $user = $this->getUserByIdHandler->handle($id);
 
         if (is_null($user)) {
