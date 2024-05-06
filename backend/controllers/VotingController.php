@@ -8,10 +8,11 @@ use Pecee\SimpleRouter\SimpleRouter;
 use PDO;
 use Stuba\Exceptions\APIException;
 use Stuba\Handlers\Jwt\JwtHandler;
-use Stuba\Models\voting\GetQuestionWithAnswers\GetQuestionWithAnswersResponseModel;
-use Stuba\Models\voting\GetCorrectAnswerId\GetCorrectAnswerIdResponseModel;
-use Stuba\Models\voting\GetQuestionStatistics\GetQuestionStatisticsResponseModel;
-use Stuba\Models\voting\VoteByCode\VoteByCodeRequestModel;
+use Stuba\Models\Voting\GetQuestionWithAnswers\GetQuestionWithAnswersResponseModel;
+use Stuba\Models\Voting\GetCorrectAnswerId\GetCorrectAnswerIdResponseModel;
+use Stuba\Models\Voting\GetQuestionStatistics\GetQuestionStatisticsResponseModel;
+use Stuba\Models\Voting\VoteByCode\VoteByCodeRequestModel;
+
 #[OA\Tag('Voting')]
 class VotingController
 {
@@ -24,7 +25,7 @@ class VotingController
         $this->dbConnection = (new DbAccess())->getDbConnection();
     }
 
-    #[OA\Get(path: '/api/voting/{code}', tags: ['Voting'])]
+    #[OA\Get(path: '/api/Voting/{code}', tags: ['Voting'])]
     #[OA\Parameter(name: "code", in: 'path', required: true, description: "Question code", example: "abcde", schema: new OA\Schema(type: 'string'))]
     #[OA\Response(response: 200, description: 'Get question with answers', content: new OA\JsonContent(ref: '#/components/schemas/GetQuestionWithAnswersResponseModel'))]
     #[OA\Response(response: 404, description: 'Question not found')]
@@ -61,7 +62,7 @@ class VotingController
         SimpleRouter::response()->json($responseModel)->httpCode(200);
     }
 
-    #[OA\Post(path: '/api/voting/{code}', tags: ['Voting'])]
+    #[OA\Post(path: '/api/Voting/{code}', tags: ['Voting'])]
     #[OA\Parameter(name: "code", in: 'path', required: true, description: "Question code", example: "abcde", schema: new OA\Schema(type: 'string'))]
     #[OA\RequestBody(description: 'Vote by code', required: true, content: new OA\JsonContent(ref: '#/components/schemas/VoteByCodeRequestModel'))]
     #[OA\Response(response: 200, description: 'Vote successful')]
@@ -80,7 +81,7 @@ class VotingController
             return;
         }
 
-        $votingId = $stmt->fetchColumn();
+        $VotingId = $stmt->fetchColumn();
         $data = SimpleRouter::request()->getInputHandler()->all();
         $answerId = $data['answerId'] ?? null;
         $answerText = $data['answerText'] ?? null;
@@ -99,16 +100,16 @@ class VotingController
         }
 
         // Prepare and execute the insertion query
-        $insertQuery = "INSERT INTO Vote (voting_id, $field) VALUES (:votingId, :param)";
+        $insertQuery = "INSERT INTO Vote (Voting_id, $field) VALUES (:VotingId, :param)";
         $insertStmt = $this->dbConnection->prepare($insertQuery);
-        $insertStmt->bindParam(':votingId', $votingId);
+        $insertStmt->bindParam(':VotingId', $VotingId);
         $insertStmt->bindParam(':param', $param);
         $insertStmt->execute();
 
         SimpleRouter::response()->json(['message' => 'Vote recorded successfully'])->httpCode(200);
     }
 
-    #[OA\Get(path: '/api/voting/{code}/correct', tags: ['Voting'])]
+    #[OA\Get(path: '/api/Voting/{code}/correct', tags: ['Voting'])]
     #[OA\Parameter(name: "code", in: 'path', required: true, description: "Question code", example: "abcde", schema: new OA\Schema(type: 'string'))]
     #[OA\Response(response: 200, description: 'Get correct answer id', content: new OA\JsonContent(ref: '#/components/schemas/GetCorrectAnswerIdResponseModel'))]
     #[OA\Response(response: 401, description: 'Did not vote yet')]
@@ -134,18 +135,18 @@ class VotingController
 
         // Return the response
         SimpleRouter::response()->json($responseModel)->httpCode(200);
-    
+
 
     }
 
-    #[OA\Get(path: '/api/voting/{code}/statistics', tags: ['Voting'])]
+    #[OA\Get(path: '/api/Voting/{code}/statistics', tags: ['Voting'])]
     #[OA\Parameter(name: "code", in: 'path', required: true, description: "Question code", example: "abcde", schema: new OA\Schema(type: 'string'))]
     #[OA\Response(response: 200, description: 'Get question statistics', content: new OA\JsonContent(ref: '#/components/schemas/GetQuestionStatisticsResponseModel'))]
     #[OA\Response(response: 401, description: 'Did not vote yet')]
     #[OA\Response(response: 404, description: 'Question not found')]
     public function getQuestionStatistics(string $code)
     {
-    
+
         $query = "SELECT a.id AS answerId, a.answer AS questionText, COUNT(v.id) AS count
                   FROM Answers a
                   LEFT JOIN Votes v ON a.id = v.answer_id

@@ -40,47 +40,24 @@ class CreateQuestionRequestModel implements JsonSerializable
         $this->authorId = $question["authorId"];
         $this->answers = [];
         $this->answers = array_map([AnswerModel::class, 'constructFromModel'], $question["answers"]);
-        //foreach ($question["answers"] as $answer) {
-        //    array_push($this->answers, AnswerModel::constructFromModel($answer));
-        // }
 
-        $this->validator = Validator::create()
-            ->key('text', Validator::stringType()->notEmpty())
-            ->key('active', Validator::boolType()->notEmpty())
-            ->key('type', Validator::instance(EQuestionType::class)->notEmpty())
-            ->key('subjectId', Validator::intType()->positive()->notEmpty())
-            ->key('authorId', Validator::intType()->positive()->notEmpty())
-            ->key('answers', Validator::arrayType()->each(Validator::instance(AnswerModel::class))->notEmpty());
+        $this->validator = Validator::attribute('text', Validator::stringType()->notEmpty())
+            ->attribute('active', Validator::boolType()->notEmpty())
+            ->attribute('type', Validator::instance(EQuestionType::class)->notEmpty())
+            ->attribute('subjectId', Validator::intType()->positive()->notEmpty())
+            ->attribute('authorId', Validator::intType()->positive()->notEmpty())
+            ->attribute('answers', Validator::arrayType()->each(Validator::instance(AnswerModel::class))->notEmpty());
     }
 
     public function isValid(): bool
     {
-        try {
-            $this->validator->assert([
-                'text' => $this->text,
-                'active' => $this->active,
-                'type' => $this->type,
-                'subjectId' => $this->subjectId,
-                'authorId' => $this->authorId,
-                'answers' => $this->answers
-            ]);
-            return true;
-        } catch (NestedValidationException $exception) {
-            return false;
-        }
+        return $this->validator->validate($this);
     }
 
     public function getErrors(): array
     {
         try {
-            $this->validator->assert([
-                'text' => $this->text,
-                'active' => $this->active,
-                'type' => $this->type,
-                'subjectId' => $this->subjectId,
-                'authorId' => $this->authorId,
-                'answers' => $this->answers
-            ]);
+            $this->validator->assert($this);
         } catch (NestedValidationException $exception) {
             return $exception->getMessages();
         }

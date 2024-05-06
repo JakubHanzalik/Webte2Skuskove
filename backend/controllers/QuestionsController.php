@@ -15,6 +15,7 @@ use Stuba\Models\Questions\CreateQuestion\CreateQuestionRequestModel;
 use PDO;
 use Stuba\Db\DbAccess;
 use Stuba\Exceptions\APIException;
+use Stuba\Models\User\EUserRole;
 
 #[OA\Tag('Question')]
 class QuestionsController
@@ -22,13 +23,13 @@ class QuestionsController
     private JwtHandler $jwtHandler;
     private PDO $dbConnection;
 
-    private GetUserByUsernameHandler $userHandler;
+    private GetUserByUsernameHandler $getUserByUsernameHandler;
 
     public function __construct()
     {
         $this->jwtHandler = new JwtHandler();
         $this->dbConnection = (new DbAccess())->getDbConnection();
-        $this->userHandler = new GetUserByUsernameHandler();
+        $this->getUserByUsernameHandler = new GetUserByUsernameHandler();
     }
 
     #[OA\Get(path: '/api/question', tags: ['Question'])]
@@ -39,7 +40,7 @@ class QuestionsController
         $accessToken = $_COOKIE["AccessToken"];
         $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
 
-        $user = $this->userHandler->handle($username);
+        $user = $this->getUserByUsernameHandler->handle($username);
 
         if ($user == null)
             throw new APIException("User does not exists", 500);
@@ -95,9 +96,7 @@ class QuestionsController
         $stmt = $this->dbConnection->prepare($answersQuery);
         $stmt->bindParam(':code', $code);
         $stmt->execute();
-        $answers = $stmt->fetchAll(PDO::FETCH_CLASS, AnswerModel::class);
-
-        $question->answers = $answers;
+        $question->answers = $stmt->fetchAll(PDO::FETCH_CLASS, AnswerModel::class);
 
         SimpleRouter::response()->json($question)->httpCode(200);
     }
@@ -112,7 +111,7 @@ class QuestionsController
         $accessToken = $_COOKIE["AccessToken"];
         $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
 
-        $user = $this->userHandler->handle($username);
+        $user = $this->getUserByUsernameHandler->handle($username);
 
         $model = new UpdateQuestionRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
@@ -167,6 +166,13 @@ class QuestionsController
             SimpleRouter::response()->json($model->getErrors())->httpCode(400);
         }
 
+        $accessToken = $_COOKIE["AccessToken"];
+        $decoded = $this->jwtHandler->decodeAccessToken($accessToken);
+        $user = $this->getUserByUsernameHandler->handle($decoded["sub"]);
+
+        if ($model->authorId != $user->id && $user->role != EUserRole::ADMIN)
+            throw new APIException("User is not authorized to create question", 401);
+
         $this->dbConnection->beginTransaction();
 
         try {
@@ -187,7 +193,7 @@ class QuestionsController
                 $insertVotingStmt = $this->dbConnection->prepare($insertVotingQuery);
                 $insertVotingStmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
                 $insertVotingStmt->execute();
-            }else{
+            } else {
                 $insertVotingQuery = "INSERT INTO Voting (question_code) VALUES (:questionCode)";
                 $insertVotingStmt = $this->dbConnection->prepare($insertVotingQuery);
                 $insertVotingStmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
@@ -223,7 +229,16 @@ class QuestionsController
         $accessToken = $_COOKIE["AccessToken"];
         $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
 
-        $user = $this->userHandler->handle($username);
+        $user = $this->getUserByUsernameHandler->handle($username);
+
+        $getQuestionAuthorQuery = "SELECT author_id FROM Questions WHERE question_code = :code";
+        $stmt = $this->dbConnection->prepare($getQuestionAuthorQuery);
+        $stmt->bindParam(':code', $code);
+        $stmt->execute();
+        $authorId = $stmt->fetchColumn();
+
+        if ($authorId != $user->id && $user->role != EUserRole::ADMIN)
+            throw new APIException("User is not authorized to delete question", 401);
 
         $this->dbConnection->beginTransaction();
 
@@ -233,10 +248,9 @@ class QuestionsController
             $stmt->bindParam(':code', $code);
             $stmt->execute();
 
-            $deleteQuestionQuery = "DELETE FROM Questions WHERE question_code = :code AND author_id = :userId";
+            $deleteQuestionQuery = "DELETE FROM Questions WHERE question_code = :code";
             $stmt = $this->dbConnection->prepare($deleteQuestionQuery);
             $stmt->bindParam(':code', $code);
-            $stmt->bindParam(':userId', $user->id);
             $stmt->execute();
 
             $this->dbConnection->commit();
@@ -247,14 +261,27 @@ class QuestionsController
         }
     }
 
-    function generateQuestionCode($length = 5)
+    private function generateQuestionCode($length = 5)
     {
         $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
-        }
+
+        do {
+            $randomString = '';
+            for ($i = 0; $i < $length; $i++) {
+                $randomString .= $characters[rand(0, $charactersLength - 1)];
+            }
+        } while ($this->doesCodeExists($randomString));
+
         return $randomString;
+    }
+
+    private function doesCodeExists(string $code)
+    {
+        $query = "SELECT COUNT(*) FROM Questions WHERE question_code = :code";
+        $stmt = $this->dbConnection->prepare($query);
+        $stmt->bindParam(':code', $code);
+        $stmt->execute();
+        return $stmt->fetchColumn() > 0;
     }
 }
