@@ -1,0 +1,16 @@
+<div class="subject-container">
+  <div style="width: 100%; padding: 10px; box-sizing: border-box;">
+    <input type="text" [(ngModel)]="newSubjectText" placeholder="Enter new subject">
+    
+  </div>
+
+  <div class="subjects">
+    <h2>Subjects</h2>
+    <ul>
+      <li *ngFor="let subject of subjects">
+        {{ subject.text }}
+        
+      </li>
+    </ul>
+  </div>
+</div>

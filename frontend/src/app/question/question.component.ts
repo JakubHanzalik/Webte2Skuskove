@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-question',
@@ -9,14 +8,5 @@ import { ActivatedRoute } from '@angular/router';
   styleUrl: './question.component.css'
 })
 export class QuestionComponent {
-  // questionId: string;
 
-  constructor(private route: ActivatedRoute) { }
-
-  ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-      // this.questionId = params.get('id');
-      // Tu by ste načítali údaje otázky pomocou this.questionId
-    });
-  }
 }

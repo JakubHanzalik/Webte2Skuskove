@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
-import { AuthenticationService, LoginCredentials } from '../authentication.service';
+import {
+  AuthenticationService,
+  LoginCredentials,
+} from '../authentication.service';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, RouterOutlet } from '@angular/router';
 import { MaterialModule } from '../material';
@@ -15,11 +18,11 @@ import { HttpClientModule } from '@angular/common/http';
     RouterOutlet,
     MaterialModule,
     FormsModule,
-    CommonModule
+    CommonModule,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
-  providers: [ AuthenticationService ]
+  providers: [AuthenticationService],
 })
 export class LoginComponent {
   credentials: LoginCredentials = { username: '', password: '' };
@@ -36,7 +39,7 @@ export class LoginComponent {
       error: (err) => {
         this.errorMessage = 'Failed to login';
         console.error(err);
-      }
+      },
     });
   }
 }

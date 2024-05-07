@@ -1,4 +1,4 @@
-.questions-container {
+.subject-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -38,12 +38,12 @@
     background-color: #6b2632;
   }
   
-  .active-questions, .historical-questions {
+  .subjects {
     width: 100%;
     margin-top: 20px;
   }
   
-  .active-questions h2, .historical-questions h2 {
+  .subjects h2{
     text-align: center;
     color: #333;
   }
@@ -59,6 +59,6 @@
     border-bottom: 1px solid #eee;
     display: flex;
     align-items: right;
-    justify-content: flex-end;
+    justify-content: space-between;
   }
   

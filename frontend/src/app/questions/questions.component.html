@@ -1,18 +1,65 @@
 <div class="questions-container">
     <div style="width: 100%; padding: 10px; box-sizing: border-box;">
-        <input type="text" [(ngModel)]="newQuestionText" placeholder="Enter new question" />
+        <input type="text" [(ngModel)]="newQuestionText" placeholder="Enter new question">
         <button (click)="addNewQuestion()">Add Question</button>
     </div>
     <div class="active-questions">
         <h2>Active Questions</h2>
         <ul>
-            <li **ngFor="let question of activeQuestions">{{ question.text }}</li>
+            <li *ngFor="let question of activeQuestions">
+                <span *ngIf="!question.editing; else editMode">
+                    {{ question.text }}
+                    <button (click)="toggleEditMode(question)">
+                        ✏️ 
+                    </button>
+                    <button (click)="copyQuestion(question)">
+                        📋 
+                    </button>
+                    <button (click)="deleteQuestion(question)">
+                        🗑️ 
+                    </button>
+                    <button (click)="deactivateQuestion(question)">
+                        ❌ 
+                    </button>
+                   
+                    
+                </span>
+                <ng-template #editMode>
+                    <textarea [(ngModel)]="question.text"></textarea>
+                    <button (click)="saveEditedQuestion(question)">
+                        💾 
+                    </button>
+                </ng-template>
+            </li>
         </ul>
     </div>
     <div class="historical-questions">
         <h2>Historical Questions</h2>
         <ul>
-            <li **ngFor="let question of historicalQuestions">{{ question.text }}</li>
+            <li *ngFor="let question of historicalQuestions">
+                <span *ngIf="!question.editing; else editMode">
+                    {{ question.text }}
+                    <button (click)="toggleEditMode(question)">
+                        ✏️ 
+                    </button>
+                    <button (click)="copyQuestion(question)">
+                        📋
+                    </button>
+                    <button (click)="deleteQuestion(question)">
+                        🗑️ 
+                    </button>
+                    <button (click)="activeQuestion(question)">
+                        ✔️ 
+                    </button>
+                    
+                </span>
+                <ng-template #editMode>
+                    <textarea [(ngModel)]="question.text"></textarea>
+                    <button (click)="saveEditedQuestion(question)">
+                        💾 
+                    </button>
+                </ng-template>
+            </li>
         </ul>
     </div>
 </div>
