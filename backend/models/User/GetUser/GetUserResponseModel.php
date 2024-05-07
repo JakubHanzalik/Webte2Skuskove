@@ -1,10 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Stuba\Models\User\GetUser;
 
 use JsonSerializable;
 use OpenApi\Attributes as OA;
-use Stuba\Models\User\EUserRole;
+use Stuba\Db\Models\User\EUserRole;
 
 #[OA\Schema(type: 'object', title: 'GetUserResponseModel')]
 class GetUserResponseModel implements JsonSerializable
@@ -36,11 +38,10 @@ class GetUserResponseModel implements JsonSerializable
     public static function createFromModel($user): GetUserResponseModel
     {
         $obj = new GetUserResponseModel();
-        $obj->id = $user["id"];
         $obj->username = $user["username"];
         $obj->name = $user["name"];
         $obj->surname = $user["surname"];
-        $obj->role = $user["role"];
+        $obj->role = $user["role"]->value;
 
         return $obj;
     }

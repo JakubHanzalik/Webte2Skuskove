@@ -33,6 +33,7 @@ class CodelistController
 
         $response = $statement->fetchAll(PDO::FETCH_CLASS, CodelistResponseModel::class);
 
-        SimpleRouter::response()->json($response)->httpCode(200);
+        SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json($response);
     }
 }

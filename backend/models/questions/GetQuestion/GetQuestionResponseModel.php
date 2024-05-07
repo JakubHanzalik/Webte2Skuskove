@@ -1,10 +1,13 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Stuba\Models\Questions\GetQuestion;
 
+use DateTime;
 use OpenApi\Attributes as OA;
 use JsonSerializable;
-use Stuba\Models\Questions\EQuestionType;
+use Stuba\Db\Models\Questions\EQuestionType;
 
 #[OA\Schema(title: 'GetQuestionResponseModel', schema: 'GetQuestionResponseModel', type: 'object')]
 class GetQuestionResponseModel implements JsonSerializable
@@ -16,16 +19,13 @@ class GetQuestionResponseModel implements JsonSerializable
     public bool $active;
 
     #[OA\Property(title: 'type', type: 'integer', enum: EQuestionType::class)]
-    public EQuestionType $type;
+    public EQuestionType|null $type = null;
 
     #[OA\Property(title: "subjectId", type: 'integer', example: 1)]
     public int $subjectId;
 
     #[OA\Property(title: "creationDate", type: 'string', example: "2024-6-17 13:58:32")]
     public string $creationDate;
-
-    #[OA\Property(title: "authorId", type: 'integer', example: 1)]
-    public int $authorId;
 
     #[OA\Property(title: "code", type: 'string', example: "abcde")]
     public string $code;
@@ -36,12 +36,16 @@ class GetQuestionResponseModel implements JsonSerializable
     public function __construct()
     {
         unset($this->type);
+        unset($this->creationDate);
     }
 
     public function __set($key, $value)
     {
         if ($key === 'type') {
             $this->type = EQuestionType::from($value);
+        }
+        if ($key === 'creationDate') {
+            $this->creationDate = $value->format('Y-m-d H:i:s');
         }
     }
 
@@ -50,12 +54,14 @@ class GetQuestionResponseModel implements JsonSerializable
         $obj = new GetQuestionResponseModel();
         $obj->text = $question["text"];
         $obj->active = $question["active"];
-        $obj->type = $question["type"];
         $obj->subjectId = $question["subjectId"];
         $obj->creationDate = $question["creationDate"];
-        $obj->authorId = $question["authorId"];
         $obj->code = $question["code"];
         $obj->answers = $question["answers"];
+
+        if (isset($question["type"])) {
+            $obj->type = $question["type"]->value;
+        }
 
         return $obj;
     }

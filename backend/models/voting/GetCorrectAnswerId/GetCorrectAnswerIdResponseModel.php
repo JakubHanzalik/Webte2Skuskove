@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Stuba\Models\Voting\GetCorrectAnswerId;
 
@@ -8,8 +10,8 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(title: 'GetCorrectAnswerIdResponseModel', schema: 'GetCorrectAnswerIdResponseModel', type: 'object')]
 class GetCorrectAnswerIdResponseModel implements JsonSerializable
 {
-    #[OA\Property(title: "answerId", type: 'integer', example: 1)]
-    public int $answerId;
+    #[OA\Property(description: 'Correct answer ids', type: 'array', items: new OA\Items(type: 'integer', example: 1))]
+    public array $answerIds;
 
     public function __construct()
     {
@@ -18,7 +20,7 @@ class GetCorrectAnswerIdResponseModel implements JsonSerializable
     public static function constructFromModel($answer): GetCorrectAnswerIdResponseModel
     {
         $obj = new GetCorrectAnswerIdResponseModel();
-        $obj->answerId = $answer["answerId"];
+        $obj->answerIds = $answer["answerId"];
 
         return $obj;
     }

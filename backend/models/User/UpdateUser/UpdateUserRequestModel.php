@@ -1,19 +1,17 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Stuba\Models\User\UpdateUser;
 
-use JsonSerializable;
+use Stuba\Models\BaseRequestModel;
 use OpenApi\Attributes as OA;
-use Stuba\Models\User\EUserRole;
-use Respect\Validation\Validator as v ;
-use Respect\Validation\Exceptions\NestedValidationException;
+use Stuba\Db\Models\User\EUserRole;
+use Respect\Validation\Validator as Validator;
 
 #[OA\Schema(type: 'object', title: 'UpdateUserRequestModel')]
-class UpdateUserRequestModel implements JsonSerializable
+class UpdateUserRequestModel extends BaseRequestModel
 {
-    #[OA\Property(type: 'string', description: 'Username', example: 'Janko123')]
-    public string $username;
-
     #[OA\Property(type: 'string', description: 'Password', example: 'password')]
     public string $password;
 
@@ -24,17 +22,15 @@ class UpdateUserRequestModel implements JsonSerializable
     public string $surname;
 
     #[OA\Property(title: 'type', type: 'integer', enum: EUserRole::class)]
-    public EUserRole $role;
-    private $validator;
+    public EUserRole|null $role = null;
 
     public function __construct()
     {
         unset($this->role);
-        $this->validator = v::attribute('username', v::stringType()->notEmpty()->length(3, 255))
-            ->attribute('password', v::stringType()->notEmpty())
-            ->attribute('name', v::stringType()->notEmpty())
-            ->attribute('surname', v::stringType()->notEmpty())
-            ->attribute('role', v:: instanceOf(EUserRole::class));
+        $this->validator = Validator::attribute('password', Validator::stringType()->notEmpty())
+            ->attribute('name', Validator::stringType()->notEmpty())
+            ->attribute('surname', Validator::stringType()->notEmpty())
+            ->attribute('role', Validator::instance(EUserRole::class));
     }
 
     public function __set($key, $value)
@@ -43,35 +39,17 @@ class UpdateUserRequestModel implements JsonSerializable
             $this->role = EUserRole::from($value);
         }
     }
-    public function isValid(): bool
-    {
-        return $this->validator->validate($this);
-    }
-
-    public function getErrors(): array
-    {
-        try {
-            $this->validator->assert($this);
-        } catch (NestedValidationException $exception) {
-            return $exception->getMessages();
-        }
-        return [];
-    }
 
     public static function createFromModel($user): UpdateUserRequestModel
     {
         $obj = new UpdateUserRequestModel();
-        $obj->username = $user["username"];
-        $obj->password = $user["password"];
-        $obj->name = $user["name"];
-        $obj->surname = $user["surname"];
-        $obj->role = $user["role"];
+        $obj->password = $user["password"] ?? "";
+        $obj->name = $user["name"] ?? "";
+        $obj->surname = $user["surname"] ?? "";
+
+        if (isset($user["role"]))
+            $obj->role = $user["role"];
 
         return $obj;
-    }
-
-    public function jsonSerialize(): array
-    {
-        return get_object_vars($this);
     }
 }

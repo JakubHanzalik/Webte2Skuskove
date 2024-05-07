@@ -1,9 +1,11 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Stuba\Models\User\GetAllUsers;
 
 use OpenApi\Attributes as OA;
-use Stuba\Models\User\EUserRole;
+use Stuba\Db\Models\User\EUserRole;
 use JsonSerializable;
 
 #[OA\Schema(type: 'object', title: 'GetAllUsersResponseModel')]

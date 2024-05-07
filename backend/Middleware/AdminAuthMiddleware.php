@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Stuba\Middleware;
 
@@ -7,7 +9,7 @@ use Pecee\Http\Request;
 
 use Stuba\Handlers\Jwt\JwtHandler;
 use Stuba\Exceptions\APIException;
-use Stuba\Models\User\EUserRole;
+use Stuba\Db\Models\User\EUserRole;
 
 class AdminAuthMiddleware implements IMiddleware
 {
@@ -22,6 +24,7 @@ class AdminAuthMiddleware implements IMiddleware
 
         $jwtHandler = new JwtHandler();
         $newAccessToken = $jwtHandler->authentificate($accessToken, $refreshToken);
+
         if ($newAccessToken != "") {
             setcookie('AccessToken', $newAccessToken, strtotime('+3 minutes', time()), '/', '', true, true);
             $_COOKIE["AccessToken"] = $newAccessToken;

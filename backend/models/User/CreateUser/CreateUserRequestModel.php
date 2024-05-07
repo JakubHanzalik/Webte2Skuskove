@@ -1,15 +1,16 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Stuba\Models\User\CreateUser;
 
-use JsonSerializable;
 use OpenApi\Attributes as OA;
-use Stuba\Models\User\EUserRole;
-use Respect\Validation\Exceptions\NestedValidationException;
+use Stuba\Db\Models\User\EUserRole;
 use Respect\Validation\Validator;
+use Stuba\Models\BaseRequestModel;
 
 #[OA\Schema(type: 'object', title: 'CreateUserRequestModel')]
-class CreateUserRequestModel implements JsonSerializable
+class CreateUserRequestModel extends BaseRequestModel
 {
     #[OA\Property(type: 'string', description: 'Username', example: 'Janko123')]
     public string $username;
@@ -24,9 +25,8 @@ class CreateUserRequestModel implements JsonSerializable
     public string $surname;
 
     #[OA\Property(title: 'type', type: 'integer', enum: EUserRole::class)]
-    public EUserRole $role;
+    public EUserRole|null $role = null;
 
-    private $validator;
     public function __construct()
     {
         unset($this->role);
@@ -44,35 +44,17 @@ class CreateUserRequestModel implements JsonSerializable
         }
     }
 
-    public function isValid(): bool
-    {
-        return $this->validator->validate($this);
-    }
-
-    public function getErrors(): array
-    {
-        try {
-            $this->validator->assert($this);
-        } catch (NestedValidationException $exception) {
-            return $exception->getMessages();
-        }
-        return [];
-    }
-
     public static function createFromModel($user): CreateUserRequestModel
     {
         $obj = new CreateUserRequestModel();
-        $obj->username = $user["username"];
-        $obj->password = $user["password"];
-        $obj->name = $user["name"];
-        $obj->surname = $user["surname"];
-        $obj->role = $user["role"];
+        $obj->username = $user["username"] ?? "";
+        $obj->password = $user["password"] ?? "";
+        $obj->name = $user["name"] ?? "";
+        $obj->surname = $user["surname"] ?? "";
+
+        if (isset($user["role"]))
+            $obj->role = $user["role"];
 
         return $obj;
-    }
-
-    public function jsonSerialize(): array
-    {
-        return get_object_vars($this);
     }
 }

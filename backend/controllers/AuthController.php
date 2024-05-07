@@ -16,8 +16,7 @@ use Stuba\Models\Auth\LoggedUserResponseModel;
 use Stuba\Models\Auth\ChangePassordRequestModel;
 
 use PDO;
-use Stuba\Models\User\EUserRole;
-use Stuba\Models\User\UserModel;
+use Stuba\Db\Models\User\EUserRole;
 
 #[OA\Tag('Auth')]
 class AuthController
@@ -36,6 +35,7 @@ class AuthController
     #[OA\Post(path: '/api/register', tags: ['Auth'])]
     #[OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/RegisterModel'))]
     #[OA\Response(response: 200, description: 'Register user')]
+    #[OA\Response(response: 400, description: 'Invalid input')]
     #[OA\Response(response: 409, description: 'User already exists')]
 
     public function register()
@@ -43,14 +43,11 @@ class AuthController
         $model = new RegisterRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
         if (!$model->isValid()) {
-            SimpleRouter::response()->json($model->getErrors())->httpCode(400);
+            throw new APIException('Invalid input', 400);
         }
+        $user = $this->getUserByUsernameHandler->handle($model->username);
 
-        $query = "SELECT * FROM Users WHERE username = :username";
-        $statement = $this->dbConnection->prepare($query);
-        $statement->bindParam(":username", $model->username);
-        $statement->execute();
-        if ($statement->fetch(PDO::FETCH_ASSOC)) {
+        if (!is_null($user)) {
             throw new APIException('User already exists', 409);
         }
 
@@ -58,13 +55,11 @@ class AuthController
 
         $query = "INSERT INTO Users (username, password, name, surname, role) VALUES (:username, :password, :name,:surname, :role)";
         $statement = $this->dbConnection->prepare($query);
-        $statement->bindParam(":username", $model->username);
-        $statement->bindParam(":password", $hashedPassword);
-        $statement->bindParam(":name", $model->name);
-        $statement->bindParam(":surname", $model->surname);
-        $roleValue = EUserRole::USER->value;
-        $statement->bindParam(":role", $roleValue);
-        //$statement->bindParam(":role", EUserRole::USER->value);
+        $statement->bindValue(":username", $model->username);
+        $statement->bindValue(":password", $hashedPassword);
+        $statement->bindValue(":name", $model->name);
+        $statement->bindValue(":surname", $model->surname);
+        $statement->bindValue(":role", EUserRole::USER->value, PDO::PARAM_INT);
         $statement->execute();
 
         $token = $this->jwtHandler->createAccessToken($model->username, EUserRole::USER);
@@ -74,19 +69,21 @@ class AuthController
         setcookie('RefreshToken', $refreshToken, strtotime('+1 week', time()), '/', '', true, true);
 
         SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json(['message' => 'User registered']);
     }
 
 
     #[OA\Post(path: '/api/login', tags: ['Auth'])]
     #[OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/LoginModel'))]
     #[OA\Response(response: 200, description: 'Login user')]
+    #[OA\Response(response: 400, description: 'Invalid input')]
     #[OA\Response(response: 401, description: 'Invalid credentials')]
     public function login()
     {
         $model = new LoginRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
         if (!$model->isValid()) {
-            SimpleRouter::response()->json($model->getErrors())->httpCode(400);
+            throw new APIException(implode($model->getErrors()), 400);
         }
 
         if (!$this->validateCredentials($model->username, $model->password)) {
@@ -102,11 +99,13 @@ class AuthController
         setcookie('RefreshToken', $refreshToken, strtotime('+1 week', time()), '/', '', true, true);
 
         SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json(['message' => 'Logged in']);
     }
 
     #[OA\Get(path: '/api/login', tags: ['Auth'])]
     #[OA\Response(response: 200, description: 'Get logged user', content: new OA\JsonContent(ref: '#/components/schemas/LoggedUserModel'))]
     #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 404, description: 'User not found')]
 
     public function getLoggedUser()
     {
@@ -115,7 +114,7 @@ class AuthController
 
         $user = $this->getUserByUsernameHandler->handle($decoded["sub"]);
 
-        if (!$user) {
+        if (is_null($user)) {
             throw new APIException('User not found', 404);
         }
 
@@ -126,7 +125,8 @@ class AuthController
             "role" => $user->role
         ]);
 
-        SimpleRouter::response()->json($userModel)->httpCode(200);
+        SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json($userModel);
     }
 
     #[OA\Post(path: '/api/logout', tags: ['Auth'])]
@@ -144,12 +144,15 @@ class AuthController
         setcookie('RefreshToken', '', time() - 3600, '/', '', true, true);
 
         SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json(['message' => 'Logged out']);
     }
 
     #[OA\Post(path: '/api/change-password', tags: ['Auth'], description: 'Change current user password')]
     #[OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/ChangePassordRequestModel'))]
     #[OA\Response(response: 200, description: 'Password changed')]
     #[OA\Response(response: 401, description: 'Invalid credentials')]
+    #[OA\Response(response: 400, description: 'Invalid input')]
+    #[OA\Response(response: 500, description: 'Failed to update password')]
     public function changePassword()
     {
         $accessToken = $_COOKIE["AccessToken"] ?? null;
@@ -160,7 +163,7 @@ class AuthController
         $changePasswordModel = new ChangePassordRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
         if (!$changePasswordModel->isValid()) {
-            SimpleRouter::response()->json($changePasswordModel->getErrors())->httpCode(400);
+            throw new APIException(implode($changePasswordModel->getErrors()), 400);
         }
         if (!$changePasswordModel->password) {
             throw new APIException('New password is required', 400);
@@ -168,7 +171,7 @@ class AuthController
         $hashedPassword = password_hash($changePasswordModel->password, PASSWORD_DEFAULT);
         $updateQuery = "UPDATE Users SET password = :password WHERE username = :username";
         $stmt = $this->dbConnection->prepare($updateQuery);
-        $stmt->bindParam(":password", $hashedPassword);
+        $stmt->bindValue(":password", $hashedPassword);
         $stmt->bindParam(":username", $username);
         $stmt->execute();
 
@@ -176,8 +179,8 @@ class AuthController
             throw new APIException('Failed to update password', 500);
         }
 
-        SimpleRouter::response()->json(['message' => 'Password changed successfully'])->httpCode(200);
-
+        SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json(['message' => 'Password changed']);
     }
 
     /**

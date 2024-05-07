@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Stuba\Handlers\Jwt;
 
@@ -7,7 +9,7 @@ use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Stuba\Handlers\User\GetUserByUsernameHandler;
-use Stuba\Models\User\EUserRole;
+use Stuba\Db\Models\User\EUserRole;
 use Stuba\Exceptions\APIException;
 use Stuba\db\DbAccess;
 use PDO;
@@ -109,10 +111,18 @@ class JwtHandler
 
     public function deleteRefreshToken(string $username): void
     {
-        $query = "DELETE FROM Token WHERE username = :username";
-        $statement = $this->dbConnection->prepare($query);
-        $statement->bindParam(":username", $username);
-        $statement->execute();
+        $this->dbConnection->beginTransaction();
+        try {
+            $query = "DELETE FROM Token WHERE username = :username";
+            $statement = $this->dbConnection->prepare($query);
+            $statement->bindParam(":username", $username);
+            $statement->execute();
+
+            $this->dbConnection->commit();
+        } catch (Exception $e) {
+            $this->dbConnection->rollBack();
+            throw $e;
+        }
     }
 
     /**
@@ -122,8 +132,19 @@ class JwtHandler
      */
     public function decodeAccessToken(string $accessToken): array
     {
+        $accessToken = $_COOKIE["AccessToken"];
         $decoded = JWT::decode($accessToken, new Key($this->secret, 'HS256'));
         return (array) $decoded;
+    }
+
+    public function isAdmin(): bool
+    {
+        if (!isset($_SERVER['HTTP_AUTHORIZATION'])) {
+            return false;
+        }
+        $accessToken = $_SERVER['HTTP_AUTHORIZATION'];
+        $decoded = $this->decodeAccessToken($accessToken);
+        return $decoded['role'] == EUserRole::ADMIN;
     }
 
     /**

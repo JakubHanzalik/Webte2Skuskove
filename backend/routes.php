@@ -1,6 +1,9 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 use Pecee\SimpleRouter\SimpleRouter;
+use Pecee\Http\Request;
 
 use Stuba\Controllers\CodelistController;
 use Stuba\Controllers\OpenAPIController;
@@ -17,18 +20,20 @@ SimpleRouter::group(['prefix' => '/api'], function () {
 
     //Logged user
     SimpleRouter::group(['middleware' => AuthMiddleware::class], function () {
-        // Questions
-        SimpleRouter::get('/question', [QuestionsController::class, 'getAllQuestionsByUser']);
-        SimpleRouter::put('/question', [QuestionsController::class, 'createQuestion']);
-        SimpleRouter::post('/question/{id}', [QuestionsController::class, 'updateQuestion']);
-        SimpleRouter::delete('/question/{id}', [QuestionsController::class, 'deleteQuestion']);
-
         // Auth
         SimpleRouter::get('/login', [AuthController::class, 'getLoggedUser']);
         SimpleRouter::post('/logout', [AuthController::class, 'logout']);
         SimpleRouter::post('/change-password', [AuthController::class, 'changePassword']);
 
+        // Questions
+        SimpleRouter::get('/question', [QuestionsController::class, 'getAllQuestionsByUser']);
+        SimpleRouter::put('/question', [QuestionsController::class, 'createQuestion']);
+        SimpleRouter::post('/question/{id}', [QuestionsController::class, 'updateQuestion']);
+        SimpleRouter::delete('/question/{id}', [QuestionsController::class, 'deleteQuestion']);
     });
+
+    //Auth
+    SimpleRouter::post('/register', [AuthController::class, 'register']);
 
     // Admin
     SimpleRouter::group(['middleware' => AdminAuthMiddleware::class], function () {
@@ -40,6 +45,9 @@ SimpleRouter::group(['prefix' => '/api'], function () {
         SimpleRouter::delete('/user/{id}', [UserController::class, 'deleteUserById']);
     });
 
+    // Questions
+    SimpleRouter::get('/question/{code}', [QuestionsController::class, 'getQuestionByCode']);
+
     // Voting
     SimpleRouter::get('/voting/{code}', [VotingController::class, 'getQuestionWithAnswersByCode']);
     SimpleRouter::post('/voting/{code}', [VotingController::class, 'voteByCode']);
@@ -50,13 +58,14 @@ SimpleRouter::group(['prefix' => '/api'], function () {
     // Documentation
     SimpleRouter::get('/docs', [DocumentationController::class, 'generateDocs']);
 
-    SimpleRouter::get('/question/{id}', [QuestionsController::class, 'getQuestionByCode']);
-
     SimpleRouter::get('/subject', [CodelistController::class, 'handle']);
 
     SimpleRouter::post('/login', [AuthController::class, 'login']);
 
-    SimpleRouter::post('/register', [AuthController::class, 'register']);
-
     SimpleRouter::get('/swagger', [OpenAPIController::class, 'handle']);
 });
+
+/*SimpleRouter::error(function (Request $request, \Exception $exception) {
+    SimpleRouter::response()->httpCode($exception->getCode());
+    SimpleRouter::response()->json(['error' => $exception->getMessage()]);
+});*/

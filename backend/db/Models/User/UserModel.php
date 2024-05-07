@@ -1,6 +1,8 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Stuba\Models\User;
+declare(strict_types=1);
+
+namespace Stuba\Db\Models\User;
 
 class UserModel
 {
@@ -31,7 +33,7 @@ class UserModel
         $obj->password = $user["password"];
         $obj->name = $user["name"];
         $obj->surname = $user["surname"];
-        $obj->role->value = $user["role"];
+        $obj->role = $user["role"];
 
         return $obj;
     }

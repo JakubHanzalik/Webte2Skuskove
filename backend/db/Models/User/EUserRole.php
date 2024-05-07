@@ -1,6 +1,8 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Stuba\Models\User;
+declare(strict_types=1);
+
+namespace Stuba\Db\Models\User;
 
 use OpenApi\Attributes as OA;
 

@@ -2,19 +2,20 @@
 
 namespace Stuba\Controllers;
 
-use OpenApi\Attributes as OA;
-use Pecee\SimpleRouter\SimpleRouter;
-use Stuba\Handlers\Jwt\JwtHandler;
-use Stuba\Handlers\User\GetUserByUsernameHandler;
-use Stuba\Models\Questions\CreateQuestion\CreateQuestionResponseModel;
-use Stuba\Models\Questions\GetAllQuestions\GetQuestionsResponseModel;
-use Stuba\Models\Questions\GetQuestion\GetQuestionResponseModel;
-use Stuba\Models\Questions\AnswerModel;
-use Stuba\Models\Questions\UpdateQuestion\UpdateQuestionRequestModel;
-use Stuba\Models\Questions\CreateQuestion\CreateQuestionRequestModel;
 use PDO;
 use Stuba\Db\DbAccess;
+use OpenApi\Attributes as OA;
+use Pecee\SimpleRouter\SimpleRouter;
 use Stuba\Exceptions\APIException;
+use Stuba\Handlers\Jwt\JwtHandler;
+use Stuba\Handlers\Answer\GetAnswersByQuestionCodeHandler;
+use Stuba\Handlers\User\GetUserByUsernameHandler;
+use Stuba\Handlers\Question\GetQuestionByCodeHandler;
+use Stuba\Models\Questions\CreateQuestion\CreateQuestionResponseModel;
+use Stuba\Models\Questions\GetAllQuestions\GetQuestionsResponseModel;
+use Stuba\Models\Questions\UpdateQuestion\UpdateQuestionRequestModel;
+use Stuba\Models\Questions\CreateQuestion\CreateQuestionRequestModel;
+use Stuba\Models\Questions\GetQuestion\GetQuestionResponseModel;
 use Stuba\Models\User\EUserRole;
 
 #[OA\Tag('Question')]
@@ -22,19 +23,23 @@ class QuestionsController
 {
     private JwtHandler $jwtHandler;
     private PDO $dbConnection;
-
     private GetUserByUsernameHandler $getUserByUsernameHandler;
+    private GetQuestionByCodeHandler $getQuestionByCodeHandler;
+    private GetAnswersByQuestionCodeHandler $getAnswersByQuestionCodeHandler;
 
     public function __construct()
     {
         $this->jwtHandler = new JwtHandler();
         $this->dbConnection = (new DbAccess())->getDbConnection();
         $this->getUserByUsernameHandler = new GetUserByUsernameHandler();
+        $this->getQuestionByCodeHandler = new GetQuestionByCodeHandler();
+        $this->getAnswersByQuestionCodeHandler = new GetAnswersByQuestionCodeHandler();
     }
 
     #[OA\Get(path: '/api/question', tags: ['Question'])]
     #[OA\Response(response: 200, description: "Get all questions of logged user", content: new OA\MediaType(mediaType: 'application/json', schema: new OA\Schema(type: 'array', items: new OA\Items(ref: '#/components/schemas/GetQuestionsResponseModel'))))]
     #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 500, description: 'User does not exists')]
     public function getAllQuestionsByUser()
     {
         $accessToken = $_COOKIE["AccessToken"];
@@ -42,8 +47,9 @@ class QuestionsController
 
         $user = $this->getUserByUsernameHandler->handle($username);
 
-        if ($user == null)
+        if (is_null($user)) {
             throw new APIException("User does not exists", 500);
+        }
 
         $query =
             "SELECT 
@@ -56,49 +62,40 @@ class QuestionsController
         $statement->bindParam(":authorId", $user->id);
 
         $statement->execute();
+
         $response = $statement->fetchAll(PDO::FETCH_CLASS, GetQuestionsResponseModel::class);
 
-        SimpleRouter::response()->json($response)->httpCode(200);
+        SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json($response);
     }
 
     #[OA\Get(path: '/api/question/{code}', description: "Get question by code", tags: ['Question'])]
     #[OA\Parameter(name: "code", in: 'path', required: true, description: "Question code", example: "abcde", schema: new OA\Schema(type: 'string'))]
     #[OA\Response(response: 200, description: 'Get question by id of logged user', content: new OA\JsonContent(ref: '#/components/schemas/GetQuestionResponseModel'))]
     #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 404, description: 'Question not found')]
     public function getQuestionByCode(string $code)
     {
-        $questionQuery =
-            "SELECT 
-            q.question AS text, 
-            q.active AS active, 
-            q.response_type AS type,
-            q.subject_id AS subjectId,
-            q.creation_date AS creationDate,
-            q.author_id AS authorId,
-            q.question_code AS code
-        FROM Questions q
-        WHERE q.question_code = :code";
+        $question = $this->getQuestionByCodeHandler->handle($code);
 
-        $stmt = $this->dbConnection->prepare($questionQuery);
-        $stmt->bindParam(':code', $code);
-        $stmt->setFetchMode(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, GetQuestionResponseModel::class);
-        $stmt->execute();
-        $question = $stmt->fetch();
+        if (is_null($question)) {
+            throw new APIException("Question not found", 404);
+        }
 
-        $answersQuery =
-            "SELECT 
-            a.id AS id,
-            a.answer AS text, 
-            a.correct 
-        FROM Answers a
-        WHERE a.question_code = :code";
+        $answers = $this->getAnswersByQuestionCodeHandler->handle($code);
 
-        $stmt = $this->dbConnection->prepare($answersQuery);
-        $stmt->bindParam(':code', $code);
-        $stmt->execute();
-        $question->answers = $stmt->fetchAll(PDO::FETCH_CLASS, AnswerModel::class);
+        $response = GetQuestionResponseModel::constructFromModel([
+            'text' => $question->question,
+            'active' => $question->active,
+            'type' => $question->response_type,
+            'subjectId' => $question->subject_id,
+            'creationDate' => $question->creation_date,
+            'code' => $question->question_code,
+            'answers' => $answers
+        ]);
 
-        SimpleRouter::response()->json($question)->httpCode(200);
+        SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json($response);
     }
 
     #[OA\Post(path: '/api/question/{code}', tags: ['Question'])]
@@ -116,7 +113,7 @@ class QuestionsController
         $model = new UpdateQuestionRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
         if (!$model->isValid()) {
-            SimpleRouter::response()->json($model->getErrors())->httpCode(400);
+            throw new APIException(implode($model->getErrors()), 400);
         }
         $this->dbConnection->beginTransaction();
 
@@ -152,7 +149,6 @@ class QuestionsController
             $this->dbConnection->rollback();
             throw new APIException('Failed to update question: ' . $e->getMessage(), 500);
         }
-
     }
 
     #[OA\Put(path: '/api/question', tags: ['Question'])]

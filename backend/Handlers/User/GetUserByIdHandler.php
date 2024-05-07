@@ -1,10 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Stuba\Handlers\User;
 
 use PDO;
 use Stuba\Db\DbAccess;
-use Stuba\Models\User\UserModel;
+use Stuba\Db\Models\User\UserModel;
 
 class GetUserByIdHandler
 {
@@ -18,7 +20,7 @@ class GetUserByIdHandler
     /**
      * Get user by username
      * @param string $username
-     * @return \Stuba\Models\User\UserModel|null
+     * @return \Stuba\Db\Models\User\UserModel|null
      */
     public function handle(int $id): UserModel|null
     {

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Stuba\Models\Voting\GetQuestionWithAnswers;
 
@@ -15,12 +17,11 @@ class GetQuestionWithAnswersResponseModel implements JsonSerializable
     #[OA\Property(title: 'type', type: 'integer', enum: EQuestionType::class)]
     public EQuestionType $type;
 
-    #[OA\Property(title: "answers", type: 'array', items: new OA\Items(format: 'string', example: "Bratislava"))]
+    #[OA\Property(title: "answers", type: 'array', items: new OA\Items(ref: '#/components/schemas/GetQuestionAnswerModel'))]
     public array $answers;
 
     public function __construct()
     {
-        unset($this->type);
     }
 
     public function __set($key, $value)
@@ -33,9 +34,11 @@ class GetQuestionWithAnswersResponseModel implements JsonSerializable
     public static function constructFromModel($question): GetQuestionWithAnswersResponseModel
     {
         $model = new GetQuestionWithAnswersResponseModel();
-        $model->question = $question["question"];
-        $model->type->value = $question["type"];
-        $model->answers = $question["answers"];
+        $model->question = $question["question"] ?? "";
+        if (isset($question["type"])) {
+            $model->type = EQuestionType::from($question["type"]);
+        }
+        $model->answers = $question["answers"] ?? [];
         return $model;
     }
 

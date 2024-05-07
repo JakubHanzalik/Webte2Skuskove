@@ -1,6 +1,8 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Stuba\Models\Questions;
+declare(strict_types=1);
+
+namespace Stuba\Db\Models\Questions;
 
 use OpenApi\Attributes as OA;
 
