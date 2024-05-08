@@ -8,10 +8,12 @@
         <ul>
             <li *ngFor="let question of activeQuestions">
                 <span *ngIf="!question.editing; else editMode">
+                    <img *ngIf="question.qrCodeURL" [src]="question.qrCodeURL" alt="QR Code" class="qr-code">
                     {{ question.text }}
                     <button (click)="toggleEditMode(question)">
                         ✏️ 
                     </button>
+                    <button (click)="showQRCode(question)">[=]</button>
                     <button (click)="copyQuestion(question)">
                         📋 
                     </button>

@@ -4,7 +4,9 @@ import { CommonModule } from '@angular/common';
 import { QuestionsService } from '../services/questions.service';
 import { QuestionDTO, Question } from '../models/question.model';
 import { HttpClientModule } from '@angular/common/http';
+
 import { Subject } from 'rxjs';
+import { QrcodeService } from '../services/qrcode.service';
 @Component({
   selector: 'app-questions',
   templateUrl: './questions.component.html',
@@ -23,7 +25,8 @@ export class QuestionsComponent implements OnInit {
   originalQuestionText: string = '';
   constructor(
     private cdr: ChangeDetectorRef,
-    private questionsService: QuestionsService
+    private questionsService: QuestionsService,
+    private qrCodeService: QrcodeService
   ) {}
 
   ngOnInit() {
@@ -33,14 +36,15 @@ export class QuestionsComponent implements OnInit {
             res.forEach((x) => {
                 console.log('Processing question:', x); 
                 const question: Question = {
-                    active: x.active,  
-                    subjectId: x.subjectId,
-                    editing: false,
-                    text: x.text,
-                    type: x.type,
-                    authorId: x.authorId,
-                    answers: x.answers,
-                    question_code: x.question_code
+                  active: x.active,
+                  subjectId: x.subjectId,
+                  editing: false,
+                  text: x.text,
+                  type: x.type,
+                  authorId: x.authorId,
+                  answers: x.answers,
+                  question_code: x.question_code,
+                  
                 };
 
                 console.log('Processed question to add:', question);  
@@ -55,8 +59,21 @@ export class QuestionsComponent implements OnInit {
         error: err => console.error('Error fetching questions:', err)
     });
 }
-
-  
+async showQRCode(question: Question) {
+  try {
+    const qrCodeURL = await this.qrCodeService.generateQR(question.question_code);
+    question.qrCodeURL = qrCodeURL;
+  } catch (error) {
+    console.error("Error generating QR code:", error);
+  }
+}
+/*
+qrCode(question: Question){
+    this.qrCodeService.genetatorQR(question.question_code).then(url =>{
+    console.log(url);
+  });
+}
+*/
 addNewQuestion() {
   if (this.newQuestionText.trim()) {
     const newQuestion: QuestionDTO = {

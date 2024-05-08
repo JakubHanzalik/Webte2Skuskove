@@ -20,6 +20,7 @@
     "@angular/platform-browser": "^17.3.0",
     "@angular/platform-browser-dynamic": "^17.3.0",
     "@angular/router": "^17.3.0",
+    "qrcode": "^1.5.3",
     "rxjs": "~7.8.0",
     "swagger-ui": "^5.17.3",
     "zone.js": "~0.14.3"
@@ -30,6 +31,7 @@
     "@angular/compiler-cli": "^17.3.0",
     "@types/jasmine": "~5.1.0",
     "@types/jquery": "^3.5.30",
+    "@types/qrcode": "^1.5.5",
     "@types/swagger-ui": "^3.52.4",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",

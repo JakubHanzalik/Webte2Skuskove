@@ -17,6 +17,7 @@ export interface Answers {
 }
 
 export interface Question {
+  qrCodeURL?: string;
   question_code: string; 
   text: string;
   active: boolean;
