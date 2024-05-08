@@ -1,4 +1,5 @@
 <div class="users-container">
+    <mat-icon matListIcon>person</mat-icon>
     <h1>Edit users:</h1>
     <div class="table-responsive">
         <table class="table table-hover">
@@ -6,43 +7,75 @@
                 <tr>
                     <th>ID</th>
                     <th>Username</th>
-                    <th>Password</th>
-                    <th>Name</th>
-                    <th>Surname</th>
                     <th>Role</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>#</td>
-                    <td><input [(ngModel)]="newUser.username" class="form-control" placeholder="Username" ></td>
-                    <td><input [(ngModel)]="newUser.password" type="password" class="form-control" placeholder="Password" ></td>
-                    <td><input [(ngModel)]="newUser.name" class="form-control" placeholder="Name" ></td>
-                    <td><input [(ngModel)]="newUser.surname" class="form-control" placeholder="Surname"></td>
-                    <td><input [(ngModel)]="newUser.role" type="number" class="form-control" placeholder="Role"></td>
-                    <td>
-                        <button (click)="addUser()" class="btn btn-add">Add</button>
-                    </td>
-                </tr>
                 <tr *ngFor="let user of users; let i = index">
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.role }}</td>
                     <td>
-                        <a *ngIf="user.id !== undefined" (click)="navigateToUser(user.id)">{{ user.id }}</a>
-                    </td>
-                
-                    <td><input [(ngModel)]="user.username" class="form-control" placeholder="Username" ></td>
-                    <td><input [(ngModel)]="user.password" type="password" class="form-control" placeholder="Password" ></td>
-                    <td><input [(ngModel)]="user.name" class="form-control" placeholder="Name" ></td>
-                    <td><input [(ngModel)]="user.surname" class="form-control" placeholder="Surname"></td>
-                    <td><input [(ngModel)]="user.role" type="number" class="form-control" placeholder="Role"></td>
-                    
-                    <td>
-                        <button (click)="updateUser(user)" class="btn btn-success">Save</button>
-                        <button (click)="onDeleteUser(user.id)" class="btn btn-danger">Delete</button>
+                        <button (click)="editUser(user)" class="btn btn-success"><mat-icon matListIcon>edit</mat-icon></button>
+                        <button (click)="onDeleteUser(user.id)" class="btn btn-danger"><mat-icon matListIcon>delete</mat-icon></button>
                     </td>
                 </tr>
-                
             </tbody>
         </table>
     </div>
-</div>
+    <div *ngIf="!selectedUser" class="add-form">
+        <h2>Add New User</h2>
+        <form (submit)="addUser()">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input [(ngModel)]="newUser.username" type="text" id="username" name="username" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input [(ngModel)]="newUser.password" type="password" id="password" name="password" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input [(ngModel)]="newUser.name" type="text" id="name" name="name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="surname">Surname:</label>
+                <input [(ngModel)]="newUser.surname" type="text" id="surname" name="surname" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="role">Role:</label>
+                <input [(ngModel)]="newUser.role" type="number" id="role" name="role" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-add">Add User</button>
+        </form>
+    </div>
+    <div *ngIf="selectedUser" class="add-form">
+        <h2>Edit User</h2>
+        <form (submit)="updateUser(selectedUser)">
+            <div class="form-group">
+                <label for="id">ID:</label>
+                <input [(ngModel)]="selectedUser.id" type="number" id="id" name="id" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input [(ngModel)]="selectedUser.password" type="password" id="password" name="password" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input [(ngModel)]="selectedUser.name" type="text" id="name" name="name" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="surname">Surname:</label>
+                <input [(ngModel)]="selectedUser.surname" type="text" id="surname" name="surname" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="role">Role:</label>
+                <input [(ngModel)]="selectedUser.role" type="number" id="role" name="role" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-save"><mat-icon matListIcon>check</mat-icon></button>
+            <button type="button" class="btn btn-cancel" (click)="cancelEdit()"><mat-icon matListIcon>close</mat-icon></button>
+        </form>
+        
+    </div>
+    

@@ -22,8 +22,9 @@
   }
   
   button {
-    background-color: #b65770;
+    background-color: #9f2e2ea6;
     text-align: center;
+    box-shadow: #333;
     text-size-adjust: fit;
     color: white;
     border: none;
@@ -35,7 +36,7 @@
   
   
   button:hover {
-    background-color: #6b2632;
+    background-color: #6b263287;
   }
   
   .active-questions, .historical-questions {

@@ -9,7 +9,10 @@
 .sidenav .mat-toolbar {
 	background: inherit;
 }
-
+.mat-list-item{
+	display: flex;
+	align-items: center;
+}
 .mat-toolbar.mat-primary {
 	position: sticky;
 	top: 0;

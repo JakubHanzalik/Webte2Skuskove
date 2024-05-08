@@ -7,12 +7,13 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { Subject } from 'rxjs';
 import { QrcodeService } from '../services/qrcode.service';
+import { MatIconModule } from '@angular/material/icon';
 @Component({
   selector: 'app-questions',
   templateUrl: './questions.component.html',
   styleUrls: ['./questions.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, MatIconModule],
   providers: [QuestionsService],
 })
 export class QuestionsComponent implements OnInit {

@@ -51,4 +51,15 @@ export class AuthenticationService {
       this.router.navigate(['/login']);
     });
   }
+  changePassword(changePassword: ChangePassword): Observable<any> {
+    return this.http.post('/api/change-password', changePassword).pipe(
+      map((res: any) => {
+        console.log('Password changed', res);
+        return res;
+      })
+    );
+  }
+}
+export interface ChangePassword {
+  password: string;
 }

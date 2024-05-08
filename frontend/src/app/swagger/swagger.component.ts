@@ -1,10 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+
 import SwaggerUI from 'swagger-ui';
 
 @Component({
   selector: 'app-swagger',
+  standalone : true,
   templateUrl: './swagger.component.html',
-  styleUrls: ['./swagger.component.scss']
+  styleUrls: ['./swagger.component.scss'],
+  imports:[ ]
 })
 export class SwaggerComponent implements OnInit, OnDestroy {
   private swaggerUI: any;

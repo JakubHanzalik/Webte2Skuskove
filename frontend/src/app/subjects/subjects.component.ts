@@ -5,13 +5,14 @@ import { CommonModule } from '@angular/common';
 import { SubjectService } from '../services/subject.service';
 import { HttpClientModule } from '@angular/common/http';
 import { Subject } from '../models/subject.model'; 
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-subjects',
   templateUrl: './subjects.component.html',
   styleUrls: ['./subjects.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, MatIconModule],
   providers: [SubjectService],
 })
 export class SubjectComponent implements OnInit {

@@ -5,6 +5,7 @@ import { MaterialModule } from '../material';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-register',
@@ -15,7 +16,8 @@ import { HttpClientModule } from '@angular/common/http';
     RouterOutlet,
     MaterialModule,
     FormsModule,
-    CommonModule
+    CommonModule,
+    MatIconModule
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',

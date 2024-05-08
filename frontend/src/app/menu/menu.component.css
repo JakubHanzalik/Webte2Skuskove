@@ -16,7 +16,6 @@ mat-drawer-container {
 	height: calc(100vh - 56px);
 }
 
-/*----- Media query -----*/
 @media only screen and (min-width: 599px) {
 	mat-drawer-container {
 		height: calc(100vh - 64px);
