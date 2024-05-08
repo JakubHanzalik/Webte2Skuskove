@@ -29,7 +29,7 @@ class GetQuestionResponseModel implements JsonSerializable
     #[OA\Property(title: "code", type: 'string', example: "abcde")]
     public string $code;
 
-    #[OA\Property(title: "answers", type: 'array', items: new OA\Items(ref: '#/components/schemas/AnswerModel'))]
+    #[OA\Property(title: "answers", type: 'array', items: new OA\Items(ref: '#/components/schemas/GetQuestionAnswerResponseModel'))]
     public array $answers;
 
     public function __construct()

@@ -13,10 +13,11 @@ use Stuba\Handlers\User\GetUserByUsernameHandler;
 use Stuba\Handlers\Question\GetQuestionByCodeHandler;
 use Stuba\Models\Questions\CreateQuestion\CreateQuestionResponseModel;
 use Stuba\Models\Questions\GetAllQuestions\GetQuestionsResponseModel;
+use Stuba\Models\Questions\GetQuestion\GetQuestionAnswerResponseModel;
 use Stuba\Models\Questions\UpdateQuestion\UpdateQuestionRequestModel;
 use Stuba\Models\Questions\CreateQuestion\CreateQuestionRequestModel;
 use Stuba\Models\Questions\GetQuestion\GetQuestionResponseModel;
-use Stuba\Models\User\EUserRole;
+use Stuba\Db\Models\User\EUserRole;
 
 #[OA\Tag('Question')]
 class QuestionsController
@@ -93,6 +94,16 @@ class QuestionsController
 
         $answers = $this->getAnswersByQuestionCodeHandler->handle($code);
 
+        $answersResponse = [];
+
+        foreach ($answers as $answer) {
+            array_push($answersResponse, GetQuestionAnswerResponseModel::constructFromModel([
+                'id' => $answer->id,
+                'answer' => $answer->answer,
+                'correct' => $answer->correct
+            ]));
+        }
+
         $response = GetQuestionResponseModel::constructFromModel([
             'text' => $question->question,
             'active' => $question->active,
@@ -100,7 +111,7 @@ class QuestionsController
             'subjectId' => $question->subject_id,
             'creationDate' => $question->creation_date,
             'code' => $question->question_code,
-            'answers' => $answers
+            'answers' => $answersResponse
         ]);
 
         SimpleRouter::response()->httpCode(200);

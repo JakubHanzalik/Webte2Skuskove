@@ -30,6 +30,7 @@ SimpleRouter::group(['prefix' => '/api'], function () {
         SimpleRouter::put('/question', [QuestionsController::class, 'createQuestion']);
         SimpleRouter::post('/question/{id}', [QuestionsController::class, 'updateQuestion']);
         SimpleRouter::delete('/question/{id}', [QuestionsController::class, 'deleteQuestion']);
+        SimpleRouter::get('/question/{code}', [QuestionsController::class, 'getQuestionByCode']);
     });
 
     //Auth
@@ -44,9 +45,6 @@ SimpleRouter::group(['prefix' => '/api'], function () {
         SimpleRouter::post('/user/{id}', [UserController::class, 'updateUser']);
         SimpleRouter::delete('/user/{id}', [UserController::class, 'deleteUserById']);
     });
-
-    // Questions
-    SimpleRouter::get('/question/{code}', [QuestionsController::class, 'getQuestionByCode']);
 
     // Voting
     SimpleRouter::get('/voting/{code}', [VotingController::class, 'getQuestionWithAnswersByCode']);
