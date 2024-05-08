@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Error404Service } from './error404.service';
+import { UserService } from './users.service';
 
-describe('Error404Service', () => {
-  let service: Error404Service;
+describe('UsersService', () => {
+  let service: UserService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Error404Service);
+    service = TestBed.inject(UserService);
   });
 
   it('should be created', () => {

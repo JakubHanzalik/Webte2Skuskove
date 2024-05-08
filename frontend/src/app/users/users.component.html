@@ -1,0 +1,38 @@
+<div class="users-container">
+    <h1>Edit users:</h1>
+    <h3>Vypln vsetky polia pre uzivatela</h3>
+    <h3>getom ziskam len tieto informacie tak sa viac neda zobrazit</h3>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Password</th>
+                    <th>Name</th>
+                    <th>Surname</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let user of users; let i = index">
+                    <td>
+                        <a *ngIf="user.id !== undefined" (click)="navigateToUser(user.id)">{{ user.id }}</a>
+                    </td>
+                    
+                    
+                    <td><input [(ngModel)]="user.username" class="form-control" placeholder="Username" ></td>
+                    <td><input [(ngModel)]="user.password" type="password" class="form-control" placeholder="Password" ></td>
+                    <td><input [(ngModel)]="user.name" class="form-control" placeholder="Name" ></td>
+                    <td><input [(ngModel)]="user.surname" class="form-control" placeholder="Surname"></td>
+                    <td><input [(ngModel)]="user.role" type="number" class="form-control" placeholder="Role"></td>
+                    <td>
+                        <button (click)="updateUser(user)" class="btn btn-success">Save</button>
+                        <button (click)="onDeleteUser(user.id)" class="btn btn-danger">Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
