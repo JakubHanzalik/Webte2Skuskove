@@ -16,7 +16,7 @@ use Stuba\Models\Voting\GetQuestionStatistics\GetQuestionStatisticsResponseModel
 use Stuba\Models\Voting\GetQuestionWithAnswers\GetQuestionAnswerModel;
 use Stuba\Models\Voting\VoteByCode\VoteByCodeRequestModel;
 use Stuba\Handlers\Question\GetQuestionByCodeHandler;
-use Stuba\Models\Questions\EQuestionType;
+use Stuba\Db\Models\Questions\EQuestionType;
 
 #[OA\Tag('Voting')]
 class VotingController

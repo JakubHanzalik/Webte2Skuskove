@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Stuba\Models\Questions\GetQuestion;
 
-use DateTime;
 use OpenApi\Attributes as OA;
 use JsonSerializable;
 use Stuba\Db\Models\Questions\EQuestionType;
@@ -19,7 +18,7 @@ class GetQuestionResponseModel implements JsonSerializable
     public bool $active;
 
     #[OA\Property(title: 'type', type: 'integer', enum: EQuestionType::class)]
-    public EQuestionType|null $type = null;
+    public EQuestionType $type;
 
     #[OA\Property(title: "subjectId", type: 'integer', example: 1)]
     public int $subjectId;

@@ -65,7 +65,7 @@ SimpleRouter::group(['prefix' => '/api'], function () {
     SimpleRouter::get('/swagger', [OpenAPIController::class, 'handle']);
 });
 
-SimpleRouter::error(function (Request $request, \Exception $exception) {
+/*SimpleRouter::error(function (Request $request, \Exception $exception) {
     SimpleRouter::response()->httpCode($exception->getCode());
     SimpleRouter::response()->json(['error' => $exception->getMessage()]);
-});
+});*/

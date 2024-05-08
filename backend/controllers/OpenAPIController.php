@@ -11,11 +11,11 @@ class OpenAPIController
 {
     public function handle()
     {
-        $openapi = Generator::scan(['./Controllers', './Models']);
+        $openapi = Generator::scan(['./Controllers', './Models', './Db/Models']);
 
         header('Content-Type: application/json');
 
         SimpleRouter::response()->httpCode(200);
-        SimpleRouter::response()->json(json_decode($openapi->toJson()));
+        echo $openapi->toJson();
     }
 }

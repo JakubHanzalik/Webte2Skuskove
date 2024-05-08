@@ -6,7 +6,7 @@ namespace Stuba\Models\Voting\GetQuestionWithAnswers;
 
 use OpenApi\Attributes as OA;
 use JsonSerializable;
-use Stuba\Models\Questions\EQuestionType;
+use Stuba\Db\Models\Questions\EQuestionType;
 
 #[OA\Schema(title: 'GetQuestionWithAnswersResponseModel', schema: 'GetQuestionWithAnswersResponseModel', type: 'object')]
 class GetQuestionWithAnswersResponseModel implements JsonSerializable

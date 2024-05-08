@@ -4,8 +4,8 @@ namespace Stuba\Models\Questions\CreateQuestion;
 
 use JsonSerializable;
 use OpenApi\Attributes as OA;
-use Stuba\Models\Questions\EQuestionType;
-use Stuba\Models\Questions\AnswerModel;
+use Stuba\Db\Models\Questions\EQuestionType;
+use Stuba\Db\Models\Answers\AnswerModel;
 use Respect\Validation\Validator;
 use Respect\Validation\Exceptions\NestedValidationException;
 
