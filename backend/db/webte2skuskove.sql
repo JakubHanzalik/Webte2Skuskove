@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: May 04, 2024 at 04:34 PM
+-- Generation Time: May 08, 2024 at 12:52 PM
 -- Server version: 8.3.0
 -- PHP Version: 8.2.8
 
@@ -107,21 +107,7 @@ CREATE TABLE `Token` (
 --
 
 INSERT INTO `Token` (`id`, `token`, `username`, `validity`) VALUES
-(4, 'HTS4N0Fo9kTZ8hPWCWsI4DjOV1ve09', 'jano', '1714589754'),
-(5, '7qCtUG4fui7ZPP1Php4LTCv7xCuXMg', 'jano', '1714590048'),
-(6, 'tGAW4IyofacJyCsH0Dwb8DDHS2uJdE', 'jano', '2024-05-02 20:23:25'),
-(7, 'ihZ0kIXIN5QKJgPvOxwLUhcBfN8Gz2', 'jano', '2024-05-07 20:29:31'),
-(8, 'R5Z1jMwZ5WBGEtEkdA29AZZIetJHwO', 'jano', '2024-05-07 21:08:16'),
-(9, 'eqrBaLbhgfPa1LRUdtvwur2fDC5lta', 'jano', '2024-05-07 21:09:27'),
-(10, 'c08hOoJTJny35UQrqa0zgWYH2rOVr2', 'jano', '2024-05-07 21:11:34'),
-(11, '9bwin5twjPLtZYZLsESttBVfcWvyJ1', 'jano', '2024-05-07 21:21:48'),
-(12, 'YkZmjW3ZospVrnfYzICkad7DUUavWr', 'jano', '2024-05-07 22:09:02'),
-(13, '4WQqFcnCAP7boBJESKtFO0opvTBTaV', 'jano', '2024-05-07 22:09:59'),
-(14, '1cSnJKyxCFILY6ZOu6CJsOvbPdqORP', 'jano', '2024-05-07 22:30:16'),
-(15, 'zw3p8X3XYDL7nWB6UNJqmzrEXdYRjG', 'jano', '2024-05-08 13:52:20'),
-(18, 'LunfVS7B2Qhftb3vIGiEPrjOJ2HMUO', 'jano', '2024-05-11 12:03:19'),
-(19, 'xmio2B0kQmM0VQPo6RXqIrdR7CKGLf', 'jano', '2024-05-11 15:08:08'),
-(20, 'rpVeQa8YTbZTOPVP5lR04WAzZKBTYO', 'jano', '2024-05-11 16:33:51');
+(21, 'i5JXd8BSOobMyKf3ejURE40adF6ZUH', 'jano', '2024-05-15 11:43:20');
 
 -- --------------------------------------------------------
 
@@ -153,7 +139,8 @@ INSERT INTO `Users` (`id`, `username`, `password`, `name`, `surname`, `role`) VA
 
 CREATE TABLE `Vote` (
   `id` int NOT NULL,
-  `answer` varchar(512) NOT NULL,
+  `answer_text` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `answer_id` int DEFAULT NULL,
   `voting_id` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -232,7 +219,7 @@ ALTER TABLE `Subject`
 -- AUTO_INCREMENT for table `Token`
 --
 ALTER TABLE `Token`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `Users`
