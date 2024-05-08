@@ -76,3 +76,10 @@
 .btn-danger:hover {
     background-color: #531822;
 }
+.btn-add {
+  background-color: #1e9268;
+}
+
+.btn-add:hover {
+  background-color: #185341;
+}

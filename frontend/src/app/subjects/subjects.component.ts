@@ -2,7 +2,7 @@ import { Component, Injectable, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { SubjectService } from '../subject.service';
+import { SubjectService } from '../services/subject.service';
 import { HttpClientModule } from '@angular/common/http';
 import { Subject } from '../models/subject.model'; 
 

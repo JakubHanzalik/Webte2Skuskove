@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';  
 import { HttpClientModule } from '@angular/common/http';
-import { UserService } from '../users.service';  
+import { UserService } from '../services/users.service';  
 import { User } from '../models/user.model';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -21,6 +21,7 @@ import { Router } from '@angular/router';
 export class UsersComponent implements OnInit {
 
   users: User[] = [];
+  newUser: Partial<User> = {};
   selectedUser: User | null = null;
 
   constructor(private userService: UserService, private router: Router) {}
@@ -28,7 +29,6 @@ export class UsersComponent implements OnInit {
   ngOnInit(): void {
     this.loadUsers();
   }
-
 
   loadUsers(): void {
     this.userService.getUsers().subscribe({
@@ -39,6 +39,7 @@ export class UsersComponent implements OnInit {
       error: (error) => console.error('Error fetching users:', error)
     });
   }
+  
   navigateToUser(userId: number | undefined): void {
     if (userId !== undefined) {
         this.router.navigate(['/user', userId]);
@@ -98,6 +99,21 @@ export class UsersComponent implements OnInit {
       console.error('Attempted to update a user without a valid ID');
     }
   }
+  addUser(): void {
+    if (this.newUser.username && this.newUser.password && this.newUser.name && this.newUser.surname && this.newUser.role) {
+      this.userService.createUser(this.newUser as User).subscribe({
+        next: (newUser) => {
+          console.log('User created successfully', newUser);
+          this.loadUsers(); 
+          this.newUser = {};
+        },
+        error: (err) => console.error('Error creating user:', err)
+      });
+    } else {
+      console.error('Please fill in all fields for the new user.');
+    }
+  }
+  
   
   
   

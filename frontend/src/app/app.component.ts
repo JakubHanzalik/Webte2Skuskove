@@ -6,7 +6,7 @@ import { SideMenuComponent } from './side-menu/side-menu.component';
 import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { routes } from './app.routes';
-import { AuthenticationService } from './authentication.service';
+import { AuthenticationService } from './services/authentication.service';
 @Component({
   selector: 'app-root',
   standalone: true,

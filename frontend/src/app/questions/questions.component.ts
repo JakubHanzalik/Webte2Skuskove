@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { QuestionsService } from '../questions.service';
+import { QuestionsService } from '../services/questions.service';
 import { QuestionDTO, Question } from '../models/question.model';
 import { HttpClientModule } from '@angular/common/http';
 import { Subject } from 'rxjs';

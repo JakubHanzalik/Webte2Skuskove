@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AuthenticationService, RegisterCredentials } from '../authentication.service';
+import { AuthenticationService, RegisterCredentials } from '../services/authentication.service';
 import { RouterModule, RouterOutlet } from '@angular/router';
 import { MaterialModule } from '../material';
 import { FormsModule } from '@angular/forms';

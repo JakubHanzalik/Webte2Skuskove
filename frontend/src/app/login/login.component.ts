@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import {
   AuthenticationService,
   LoginCredentials,
-} from '../authentication.service';
+} from '../services/authentication.service';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, RouterOutlet } from '@angular/router';
 import { MaterialModule } from '../material';
