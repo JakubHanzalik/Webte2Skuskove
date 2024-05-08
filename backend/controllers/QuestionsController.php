@@ -78,6 +78,15 @@ class QuestionsController
     {
         $question = $this->getQuestionByCodeHandler->handle($code);
 
+        $accessToken = $_COOKIE["AccessToken"];
+        $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
+
+        $user = $this->getUserByUsernameHandler->handle($username);
+
+        if ($question->author_id != $user->id) {
+            throw new APIException("User is not authorized to view question", 401);
+        }
+
         if (is_null($question)) {
             throw new APIException("Question not found", 404);
         }
@@ -115,6 +124,12 @@ class QuestionsController
         if (!$model->isValid()) {
             throw new APIException(implode($model->getErrors()), 400);
         }
+
+        $question = $this->getQuestionByCodeHandler->handle($code);
+
+        if ($question->author_id != $user->id) {
+            throw new APIException("User is not authorized to update question", 401);
+        }
         $this->dbConnection->beginTransaction();
 
         try {
@@ -136,7 +151,7 @@ class QuestionsController
                 $insertAnswerQuery = "INSERT INTO Answers (id, question_code, answer, correct) VALUES (:id, :code, :answer, :correct)";
                 $insertAnswerStmt = $this->dbConnection->prepare($insertAnswerQuery);
                 $insertAnswerStmt->bindValue(':code', $code, PDO::PARAM_STR);
-                $insertAnswerStmt->bindValue(':answer', $model->answers[$i]->text, PDO::PARAM_STR);
+                $insertAnswerStmt->bindValue(':answer', $model->answers[$i]->answer, PDO::PARAM_STR);
                 $insertAnswerStmt->bindValue(':correct', $model->answers[$i]->correct, PDO::PARAM_BOOL);
                 $insertAnswerStmt->bindValue(':id', $i, PDO::PARAM_INT);
                 $insertAnswerStmt->execute();
@@ -144,10 +159,9 @@ class QuestionsController
 
             $this->dbConnection->commit();
             SimpleRouter::response()->httpCode(200);
+            SimpleRouter::response()->json(['message' => 'Question updated successfully']);
         } catch (APIException $e) {
-            // Rollback Transaction on Error
             $this->dbConnection->rollback();
-            throw new APIException('Failed to update question: ' . $e->getMessage(), 500);
         }
     }
 
