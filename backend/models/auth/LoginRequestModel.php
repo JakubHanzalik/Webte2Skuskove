@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Stuba\Models\Auth;
 
-use Stuba\Models\BaseRequestModel;
 use OpenApi\Attributes as OA;
 use Respect\Validation\Validator;
+use Stuba\Exceptions\APIException;
+use Respect\Validation\Exceptions\NestedValidationException;
 
 #[OA\Schema(title: 'LoginModel', schema: 'LoginModel', type: 'object')]
-class LoginRequestModel extends BaseRequestModel
+class LoginRequestModel
 {
     #[OA\Property(title: "username", type: 'string', example: "JanKowalski")]
     public string $username;
@@ -18,10 +19,16 @@ class LoginRequestModel extends BaseRequestModel
     public string $password;
     public function __construct($requestParams)
     {
-        $this->username = $requestParams['username'] ?? '';
-        $this->password = $requestParams['password'] ?? '';
+        $validator = Validator::key('username', Validator::stringType()->notEmpty())
+            ->key('password', Validator::stringType()->notEmpty()->length(3, 255));
 
-        $this->validator = Validator::attribute('username', Validator::stringType()->notEmpty())
-            ->attribute('password', Validator::stringType()->notEmpty()->length(3, 255));
+        try {
+            $validator->assert($requestParams);
+        } catch (NestedValidationException $exception) {
+            throw new APIException(implode($exception->getMessages()), 400);
+        }
+
+        $this->username = $requestParams['username'];
+        $this->password = $requestParams['password'];
     }
 }

@@ -2,15 +2,15 @@
 
 namespace Stuba\Models\Questions\CreateQuestion;
 
-use JsonSerializable;
 use OpenApi\Attributes as OA;
 use Stuba\Db\Models\Questions\EQuestionType;
 use Stuba\Db\Models\Answers\AnswerModel;
 use Respect\Validation\Validator;
 use Respect\Validation\Exceptions\NestedValidationException;
+use Stuba\Exceptions\APIException;
 
 #[OA\Schema(title: 'CreateQuestionRequestModel', schema: 'CreateQuestionRequestModel', type: 'object')]
-class CreateQuestionRequestModel implements JsonSerializable
+class CreateQuestionRequestModel
 {
     #[OA\Property(title: "text", type: 'string', example: "What is the capital of Slovakia?")]
     public string $text;
@@ -29,10 +29,22 @@ class CreateQuestionRequestModel implements JsonSerializable
 
     #[OA\Property(title: "answers", type: 'array', items: new OA\Items(ref: '#/components/schemas/AnswerModel'))]
     public array $answers;
-    private $validator;
 
     public function __construct($question)
     {
+        $validator = Validator::key('text', Validator::stringType()->notEmpty())
+            ->key('active', Validator::boolType()->notEmpty())
+            ->key('type', Validator::instance(EQuestionType::class)->notEmpty())
+            ->key('subjectId', Validator::intType()->positive()->notEmpty())
+            ->key('authorId', Validator::intType()->positive()->notEmpty())
+            ->key('answers', Validator::arrayType()->each(Validator::instance(AnswerModel::class))->notEmpty());
+
+        try {
+            $validator->assert($question);
+        } catch (NestedValidationException $exception) {
+            throw new APIException(implode($exception->getMessages()), 400);
+        }
+
         $this->text = $question["text"];
         $this->active = $question["active"];
         $this->type = EQuestionType::from($question["type"]);
@@ -40,32 +52,5 @@ class CreateQuestionRequestModel implements JsonSerializable
         $this->authorId = $question["authorId"];
         $this->answers = [];
         $this->answers = array_map([AnswerModel::class, 'constructFromModel'], $question["answers"]);
-
-        $this->validator = Validator::attribute('text', Validator::stringType()->notEmpty())
-            ->attribute('active', Validator::boolType()->notEmpty())
-            ->attribute('type', Validator::instance(EQuestionType::class)->notEmpty())
-            ->attribute('subjectId', Validator::intType()->positive()->notEmpty())
-            ->attribute('authorId', Validator::intType()->positive()->notEmpty())
-            ->attribute('answers', Validator::arrayType()->each(Validator::instance(AnswerModel::class))->notEmpty());
-    }
-
-    public function isValid(): bool
-    {
-        return $this->validator->validate($this);
-    }
-
-    public function getErrors(): array
-    {
-        try {
-            $this->validator->assert($this);
-        } catch (NestedValidationException $exception) {
-            return $exception->getMessages();
-        }
-        return [];
-    }
-
-    public function jsonSerialize(): array
-    {
-        return get_object_vars($this);
     }
 }

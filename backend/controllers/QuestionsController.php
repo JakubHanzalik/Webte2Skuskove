@@ -11,6 +11,7 @@ use Stuba\Handlers\Jwt\JwtHandler;
 use Stuba\Handlers\Answer\GetAnswersByQuestionCodeHandler;
 use Stuba\Handlers\User\GetUserByUsernameHandler;
 use Stuba\Handlers\Question\GetQuestionByCodeHandler;
+use Stuba\Handlers\Voting\CreateVotingByQuestionCodeHandler;
 use Stuba\Models\Questions\CreateQuestion\CreateQuestionResponseModel;
 use Stuba\Models\Questions\GetAllQuestions\GetQuestionsResponseModel;
 use Stuba\Models\Questions\GetQuestion\GetQuestionAnswerResponseModel;
@@ -27,6 +28,7 @@ class QuestionsController
     private GetUserByUsernameHandler $getUserByUsernameHandler;
     private GetQuestionByCodeHandler $getQuestionByCodeHandler;
     private GetAnswersByQuestionCodeHandler $getAnswersByQuestionCodeHandler;
+    private CreateVotingByQuestionCodeHandler $createVotingByQuestionCodeHandler;
 
     public function __construct()
     {
@@ -35,6 +37,7 @@ class QuestionsController
         $this->getUserByUsernameHandler = new GetUserByUsernameHandler();
         $this->getQuestionByCodeHandler = new GetQuestionByCodeHandler();
         $this->getAnswersByQuestionCodeHandler = new GetAnswersByQuestionCodeHandler();
+        $this->createVotingByQuestionCodeHandler = new CreateVotingByQuestionCodeHandler();
     }
 
     #[OA\Get(path: '/api/question', tags: ['Question'])]
@@ -123,6 +126,7 @@ class QuestionsController
     #[OA\RequestBody(description: 'Update question', required: true, content: new OA\JsonContent(ref: '#/components/schemas/UpdateQuestionRequestModel'))]
     #[OA\Response(response: 200, description: 'Update question')]
     #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 400, description: 'Invalid input')]
     public function updateQuestion(string $code)
     {
         $accessToken = $_COOKIE["AccessToken"];
@@ -131,10 +135,6 @@ class QuestionsController
         $user = $this->getUserByUsernameHandler->handle($username);
 
         $model = new UpdateQuestionRequestModel(SimpleRouter::request()->getInputHandler()->all());
-
-        if (!$model->isValid()) {
-            throw new APIException(implode($model->getErrors()), 400);
-        }
 
         $question = $this->getQuestionByCodeHandler->handle($code);
 
@@ -180,17 +180,16 @@ class QuestionsController
     #[OA\RequestBody(description: 'Create question', required: true, content: new OA\JsonContent(ref: '#/components/schemas/CreateQuestionRequestModel'))]
     #[OA\Response(response: 200, description: 'Create question', content: new OA\JsonContent(ref: '#/components/schemas/CreateQuestionResponseModel'))]
     #[OA\Response(response: 401, description: 'Unauthorized')]
+    #[OA\Response(response: 400, description: 'Invalid input')]
     public function createQuestion()
     {
         $model = new CreateQuestionRequestModel(SimpleRouter::request()->getInputHandler()->all());
-        if (!$model->isValid()) {
-            SimpleRouter::response()->json($model->getErrors())->httpCode(400);
-        }
 
         $accessToken = $_COOKIE["AccessToken"];
         $decoded = $this->jwtHandler->decodeAccessToken($accessToken);
         $user = $this->getUserByUsernameHandler->handle($decoded["sub"]);
 
+        //TODO nechame toto tak?
         if ($model->authorId != $user->id && $user->role != EUserRole::ADMIN)
             throw new APIException("User is not authorized to create question", 401);
 
@@ -210,15 +209,7 @@ class QuestionsController
             $insertQuestionStmt->execute();
 
             if ($model->active) {
-                $insertVotingQuery = "INSERT INTO Voting (question_code, date_from) VALUES (:questionCode, CURDATE())";
-                $insertVotingStmt = $this->dbConnection->prepare($insertVotingQuery);
-                $insertVotingStmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
-                $insertVotingStmt->execute();
-            } else {
-                $insertVotingQuery = "INSERT INTO Voting (question_code) VALUES (:questionCode)";
-                $insertVotingStmt = $this->dbConnection->prepare($insertVotingQuery);
-                $insertVotingStmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
-                $insertVotingStmt->execute();
+                $this->createVotingByQuestionCodeHandler->handle($questionCode);
             }
 
             for ($i = 0; $i < count($model->answers); $i++) {

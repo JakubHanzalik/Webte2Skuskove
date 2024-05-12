@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Stuba\Models\Auth;
 
-use Stuba\Models\BaseRequestModel;
 use OpenApi\Attributes as OA;
 use Respect\Validation\Validator;
+use Stuba\Exceptions\APIException;
+use Respect\Validation\Exceptions\NestedValidationException;
 
 #[OA\Schema(title: 'RegisterModel', schema: 'RegisterModel', type: 'object')]
-class RegisterRequestModel extends BaseRequestModel
+class RegisterRequestModel
 {
     #[OA\Property(title: "username", type: 'string', example: "JanKowalski")]
     public string $username;
@@ -25,14 +26,20 @@ class RegisterRequestModel extends BaseRequestModel
 
     public function __construct($requestParams)
     {
-        $this->username = $requestParams['username'] ?? '';
-        $this->password = $requestParams['password'] ?? '';
-        $this->name = $requestParams['name'] ?? '';
-        $this->surname = $requestParams['surname'] ?? '';
+        $validator = Validator::key('username', Validator::stringType()->notEmpty())
+            ->key('password', Validator::stringType()->notEmpty())
+            ->key('name', Validator::stringType()->notEmpty())
+            ->key('surname', Validator::stringType()->notEmpty());
 
-        $this->validator = Validator::attribute('username', Validator::stringType()->notEmpty())
-            ->attribute('password', Validator::stringType()->notEmpty())
-            ->attribute('name', Validator::stringType()->notEmpty())
-            ->attribute('surname', Validator::stringType()->notEmpty());
+        try {
+            $validator->assert($requestParams);
+        } catch (NestedValidationException $exception) {
+            throw new APIException(implode($exception->getMessages()), 400);
+        }
+
+        $this->username = $requestParams['username'];
+        $this->password = $requestParams['password'];
+        $this->name = $requestParams['name'];
+        $this->surname = $requestParams['surname'];
     }
 }

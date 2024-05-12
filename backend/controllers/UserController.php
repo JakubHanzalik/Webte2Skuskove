@@ -86,11 +86,7 @@ class UserController
     #[OA\Response(response: 409, description: 'User already exists')]
     public function createUser()
     {
-        $model = CreateUserRequestModel::createFromModel(SimpleRouter::request()->getInputHandler()->all());
-
-        if (!$model->isValid()) {
-            throw new APIException(implode($model->getErrors()), 400);
-        }
+        $model = new CreateUserRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
         $user = $this->getUserByUsernameHandler->handle($model->username);
 
@@ -136,11 +132,7 @@ class UserController
     public function updateUser(int $id)
     {
         $inputData = SimpleRouter::request()->getInputHandler()->all();
-        $model = UpdateUserRequestModel::createFromModel($inputData);
-
-        if (!$model->isValid()) {
-            throw new APIException(implode($model->getErrors()), 400);
-        }
+        $model = new UpdateUserRequestModel($inputData);
 
         $user = $this->getUserByIdHandler->handle($id);
 

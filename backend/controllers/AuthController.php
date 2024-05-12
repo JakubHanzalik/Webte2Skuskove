@@ -42,9 +42,6 @@ class AuthController
     {
         $model = new RegisterRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
-        if (!$model->isValid()) {
-            throw new APIException('Invalid input', 400);
-        }
         $user = $this->getUserByUsernameHandler->handle($model->username);
 
         if (!is_null($user)) {
@@ -81,10 +78,6 @@ class AuthController
     public function login()
     {
         $model = new LoginRequestModel(SimpleRouter::request()->getInputHandler()->all());
-
-        if (!$model->isValid()) {
-            throw new APIException(implode($model->getErrors()), 400);
-        }
 
         if (!$this->validateCredentials($model->username, $model->password)) {
             throw new APIException('Invalid credentials', 401);
@@ -162,9 +155,6 @@ class AuthController
 
         $changePasswordModel = new ChangePassordRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
-        if (!$changePasswordModel->isValid()) {
-            throw new APIException(implode($changePasswordModel->getErrors()), 400);
-        }
         if (!$changePasswordModel->password) {
             throw new APIException('New password is required', 400);
         }

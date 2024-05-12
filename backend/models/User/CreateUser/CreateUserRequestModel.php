@@ -7,10 +7,11 @@ namespace Stuba\Models\User\CreateUser;
 use OpenApi\Attributes as OA;
 use Stuba\Db\Models\User\EUserRole;
 use Respect\Validation\Validator;
-use Stuba\Models\BaseRequestModel;
+use Stuba\Exceptions\APIException;
+use Respect\Validation\Exceptions\NestedValidationException;
 
 #[OA\Schema(type: 'object', title: 'CreateUserRequestModel')]
-class CreateUserRequestModel extends BaseRequestModel
+class CreateUserRequestModel
 {
     #[OA\Property(type: 'string', description: 'Username', example: 'Janko123')]
     public string $username;
@@ -25,36 +26,26 @@ class CreateUserRequestModel extends BaseRequestModel
     public string $surname;
 
     #[OA\Property(title: 'type', type: 'integer', enum: EUserRole::class)]
-    public EUserRole|null $role = null;
+    public EUserRole $role;
 
-    public function __construct()
+    public function __construct($user)
     {
-        unset($this->role);
-        $this->validator = Validator::attribute('username', Validator::stringType()->notEmpty())
-            ->attribute('password', Validator::stringType()->notEmpty())
-            ->attribute('name', Validator::stringType()->notEmpty())
-            ->attribute('surname', Validator::stringType()->notEmpty())
-            ->attribute('role', Validator::in([EUserRole::ADMIN, EUserRole::USER])->notEmpty());
-    }
+        $validator = Validator::key('username', Validator::stringType()->notEmpty())
+            ->key('password', Validator::stringType()->notEmpty())
+            ->key('name', Validator::stringType()->notEmpty())
+            ->key('surname', Validator::stringType()->notEmpty())
+            ->key('role', Validator::in([EUserRole::ADMIN, EUserRole::USER])->notEmpty());
 
-    public function __set($key, $value)
-    {
-        if ($key === 'role') {
-            $this->role = EUserRole::from($value);
+        try {
+            $validator->assert($user);
+        } catch (NestedValidationException $exception) {
+            throw new APIException(implode($exception->getMessages()), 400);
         }
-    }
 
-    public static function createFromModel($user): CreateUserRequestModel
-    {
-        $obj = new CreateUserRequestModel();
-        $obj->username = $user["username"] ?? "";
-        $obj->password = $user["password"] ?? "";
-        $obj->name = $user["name"] ?? "";
-        $obj->surname = $user["surname"] ?? "";
-
-        if (isset($user["role"]))
-            $obj->role = $user["role"];
-
-        return $obj;
+        $this->username = $user["username"];
+        $this->password = $user["password"];
+        $this->name = $user["name"];
+        $this->surname = $user["surname"];
+        $this->role = EUserRole::from($user["role"]);
     }
 }

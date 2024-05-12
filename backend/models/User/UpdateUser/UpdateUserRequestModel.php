@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Stuba\Models\User\UpdateUser;
 
-use Stuba\Models\BaseRequestModel;
 use OpenApi\Attributes as OA;
 use Stuba\Db\Models\User\EUserRole;
 use Respect\Validation\Validator as Validator;
+use Stuba\Exceptions\APIException;
+use Respect\Validation\Exceptions\NestedValidationException;
 
 #[OA\Schema(type: 'object', title: 'UpdateUserRequestModel')]
-class UpdateUserRequestModel extends BaseRequestModel
+class UpdateUserRequestModel
 {
     #[OA\Property(type: 'string', description: 'Password', example: 'password')]
     public string $password;
@@ -22,34 +23,24 @@ class UpdateUserRequestModel extends BaseRequestModel
     public string $surname;
 
     #[OA\Property(title: 'type', type: 'integer', enum: EUserRole::class)]
-    public EUserRole|null $role = null;
+    public EUserRole $role;
 
-    public function __construct()
+    public function __construct($user)
     {
-        unset($this->role);
-        $this->validator = Validator::attribute('password', Validator::stringType()->notEmpty())
-            ->attribute('name', Validator::stringType()->notEmpty())
-            ->attribute('surname', Validator::stringType()->notEmpty())
-            ->attribute('role', Validator::instance(EUserRole::class));
-    }
+        $validator = Validator::key('password', Validator::stringType()->notEmpty())
+            ->key('name', Validator::stringType()->notEmpty())
+            ->key('surname', Validator::stringType()->notEmpty())
+            ->key('role', Validator::instance(EUserRole::class));
 
-    public function __set($key, $value)
-    {
-        if ($key === 'role') {
-            $this->role = EUserRole::from($value);
+        try {
+            $validator->assert($user);
+        } catch (NestedValidationException $exception) {
+            throw new APIException(implode($exception->getMessages()), 400);
         }
-    }
 
-    public static function createFromModel($user): UpdateUserRequestModel
-    {
-        $obj = new UpdateUserRequestModel();
-        $obj->password = $user["password"] ?? "";
-        $obj->name = $user["name"] ?? "";
-        $obj->surname = $user["surname"] ?? "";
-
-        if (isset($user["role"]))
-            $obj->role = $user["role"];
-
-        return $obj;
+        $this->password = $user["password"];
+        $this->name = $user["name"];
+        $this->surname = $user["surname"];
+        $this->role = EUserRole::from($user["role"]);
     }
 }

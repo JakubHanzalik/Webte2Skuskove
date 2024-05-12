@@ -65,11 +65,7 @@ class VotingController
 
     public function voteByCode(string $code)
     {
-        $model = VoteByCodeRequestModel::constructFromModel(SimpleRouter::request()->getInputHandler()->all());
-
-        if (!$model->isValid()) {
-            SimpleRouter::response()->json($model->getErrors())->httpCode(400);
-        }
+        $model = new VoteByCodeRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
         $query = "SELECT id FROM Voting WHERE question_code = :code AND date_to = null ORDER BY date_from DESC LIMIT 1";
         $stmt = $this->dbConnection->prepare($query);
@@ -157,5 +153,27 @@ class VotingController
 
         // Return the response
         SimpleRouter::response()->json($statistics)->httpCode(200);
+    }
+
+    #[OA\Post(path: '/api/voting/{code}/create', tags: ['Voting'])]
+    #[OA\Parameter(name: "code", in: 'path', required: true, description: "Question code", example: "abcde", schema: new OA\Schema(type: 'string'))]
+    #[OA\Response(response: 200, description: 'Voting created')]
+    #[OA\Response(response: 400, description: 'Voting already exists')]
+    #[OA\Response(response: 404, description: 'Question not found')]
+
+    public function createVoting(string $questionCode)
+    {
+        //TODO pouzit CreateVotingByQuestionCodeHandler
+
+    }
+
+    #[OA\Post(path: '/api/voting/{code}/close', tags: ['Voting'])]
+    #[OA\Parameter(name: "code", in: 'path', required: true, description: "Question code", example: "abcde", schema: new OA\Schema(type: 'string'))]
+    #[OA\Response(response: 200, description: 'Voting closed')]
+    #[OA\Response(response: 400, description: 'Voting already closed')]
+    #[OA\Response(response: 404, description: 'Question not found')]
+    public function closeVoting(string $questionCode)
+    {
+        //TODO pouzit CloseVotingByQuestionCodeHandler
     }
 }
