@@ -1,1 +1,45 @@
-<p>question works!</p>
+<div *ngIf="questionData" class="container">
+  <h2>{{ questionData.text }}</h2>
+
+  <!-- If user is logged in, allow editing -->
+  <div *ngIf="isLoggedIn">
+    <form (ngSubmit)="updateQuestion()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Question</mat-label>
+        <input matInput [(ngModel)]="questionData.text" name="question" required>
+      </mat-form-field>
+
+      <div *ngFor="let answer of questionData.answers; let i = index">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Answer {{i + 1}}</mat-label>
+          <input matInput [(ngModel)]="answer.answer" name="answer-{{i}}" required>
+        </mat-form-field>
+        <mat-checkbox [(ngModel)]="answer.correct" name="correct-{{i}}">Correct</mat-checkbox>
+      </div>
+
+      <!-- Field for adding new answers -->
+      <div *ngFor="let answer of newAnswers; let i = index">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>New Answer {{i + 1}}</mat-label>
+          <input matInput [(ngModel)]="answer.answer" name="new-answer-{{i}}" (ngModelChange)="onNewAnswerChange(answer, i)">
+        </mat-form-field>
+        <mat-checkbox [(ngModel)]="answer.correct" name="new-correct-{{i}}">Correct</mat-checkbox>
+      </div>
+
+      <button mat-raised-button color="primary" type="submit">Update Question</button>
+    </form>
+  </div>
+
+  <!-- If user is not logged in, allow voting -->
+  <div *ngIf="!isLoggedIn">
+    <form (ngSubmit)="voteOnQuestion()">
+      <h1>{{ questionData.question }}</h1>
+      <mat-radio-group [(ngModel)]="selectedAnswerId" name="selectedAnswer">
+        <div *ngFor="let answer of questionData.answers">
+          <mat-radio-button [value]="answer.id">{{ answer.answer }}</mat-radio-button>
+        </div>
+      </mat-radio-group>
+      <button mat-raised-button color="primary" type="submit">Vote</button>
+    </form>
+  </div>
+</div>
