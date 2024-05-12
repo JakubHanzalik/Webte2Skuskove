@@ -139,9 +139,11 @@ export class QuestionComponent implements OnInit {
     if (this.questionId && !this.isLoggedIn && this.selectedAnswerId !== null) {
       const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
       const voteUrl = `${baseUrl}/voting/${this.questionId}`;
-      const voteData = {
-        answerId: this.selectedAnswerId
-      };
+
+      const voteData: any = {};
+      if (this.selectedAnswerId) {
+        voteData.answerId = this.selectedAnswerId;
+      }
 
       this.http.post(voteUrl, voteData)
         .pipe(
@@ -153,6 +155,8 @@ export class QuestionComponent implements OnInit {
         .subscribe(response => {
           console.log('Voted successfully:', response);
         });
+    } else {
+      console.error('Voting failed: No answer selected');
     }
   }
 

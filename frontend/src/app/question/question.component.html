@@ -33,6 +33,7 @@
   <!-- If user is not logged in, allow voting -->
   <div *ngIf="!isLoggedIn">
     <form (ngSubmit)="voteOnQuestion()">
+      <h1>{{ questionData.question }}</h1>
       <mat-radio-group [(ngModel)]="selectedAnswerId" name="selectedAnswer">
         <div *ngFor="let answer of questionData.answers">
           <mat-radio-button [value]="answer.id">{{ answer.answer }}</mat-radio-button>
