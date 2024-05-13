@@ -18,7 +18,7 @@ use Stuba\Models\User\CreateUser\CreateUserRequestModel;
 use Stuba\Models\User\CreateUser\CreateUserResponseModel;
 use Stuba\Models\User\UpdateUser\UpdateUserRequestModel;
 
-#[OA\Tag('User')]
+#[OA\Tag('User', description: "Endpointy pre spravu pouzivatelov iba pre admina")]
 class UserController
 {
     private PDO $dbConnection;

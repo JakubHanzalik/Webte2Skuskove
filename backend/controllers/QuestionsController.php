@@ -20,7 +20,7 @@ use Stuba\Models\Questions\CreateQuestion\CreateQuestionRequestModel;
 use Stuba\Models\Questions\GetQuestion\GetQuestionResponseModel;
 use Stuba\Db\Models\User\EUserRole;
 
-#[OA\Tag('Question')]
+#[OA\Tag('Question', description: "Endpointy pre spravu otazok prihlaseneho pouzivatela")]
 class QuestionsController
 {
     private JwtHandler $jwtHandler;

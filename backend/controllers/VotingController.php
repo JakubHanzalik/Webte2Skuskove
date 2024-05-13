@@ -18,7 +18,7 @@ use Stuba\Models\Voting\VoteByCode\VoteByCodeRequestModel;
 use Stuba\Handlers\Question\GetQuestionByCodeHandler;
 use Stuba\Db\Models\Questions\EQuestionType;
 
-#[OA\Tag('Voting')]
+#[OA\Tag('Voting', description: "Endpointy pre hlasovanie neprihlaseneho pouzivatela")]
 class VotingController
 {
     private PDO $dbConnection;

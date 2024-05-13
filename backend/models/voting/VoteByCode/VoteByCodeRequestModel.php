@@ -12,8 +12,6 @@ use Respect\Validation\Exceptions\NestedValidationException;
 #[OA\Schema(title: 'VoteByCodeRequestModel', schema: 'VoteByCodeRequestModel', type: 'object')]
 class VoteByCodeRequestModel
 {
-    #[OA\Property(title: "answer id", type: 'integer', example: 0, nullable: true)]
-    public int $answerId;
 
     #[OA\Property(title: "answer ids", type: 'array', items: new OA\Items(type: 'integer', example: 1), nullable: true)]
     public array|null $answerIds;
@@ -24,7 +22,7 @@ class VoteByCodeRequestModel
 
     public function __construct($data)
     {
-        $validator = Validator::key('answerId', Validator::intType()->notEmpty())->callback(
+        $validator = Validator::callback(
             function ($object) {
                 $answerIdEmpty = empty ($object->answerId);
                 $answerIdsEmpty = empty ($object->answerIds);
@@ -42,7 +40,6 @@ class VoteByCodeRequestModel
             throw new APIException(implode($exception->getMessages()), 400);
         }
 
-        $this->answerId = $data["answerId"];
         $this->answerText = $data["answerText"] ?? null;
         $this->answerIds = $data["answerIds"] ?? null;
     }
