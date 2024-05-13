@@ -19,7 +19,7 @@ class UpdateQuestionRequestModel
     public int $subjectId;
 
     #[OA\Property(title: "active", type: 'bool', example: true)]
-    public bool $active = null;
+    public bool $active;
 
     #[OA\Property(title: "answers", type: 'array', items: new OA\Items(ref: '#/components/schemas/UpdateQuestionAnswerRequestModel'))]
     public array $answers = [];
