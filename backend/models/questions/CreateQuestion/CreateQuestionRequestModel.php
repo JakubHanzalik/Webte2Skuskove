@@ -4,7 +4,6 @@ namespace Stuba\Models\Questions\CreateQuestion;
 
 use OpenApi\Attributes as OA;
 use Stuba\Db\Models\Questions\EQuestionType;
-use Stuba\Db\Models\Answers\AnswerModel;
 use Respect\Validation\Validator;
 use Respect\Validation\Exceptions\NestedValidationException;
 use Stuba\Exceptions\APIException;
@@ -24,20 +23,17 @@ class CreateQuestionRequestModel
     #[OA\Property(title: "subjectId", type: 'integer', example: 5)]
     public int $subjectId;
 
-    #[OA\Property(title: "authorId", type: 'integer', example: 5)]
-    public int $authorId;
-
-    #[OA\Property(title: "answers", type: 'array', items: new OA\Items(ref: '#/components/schemas/AnswerModel'))]
+    #[OA\Property(title: "answers", type: 'array', items: new OA\Items(ref: '#/components/schemas/CreateQuestionAnswerRequestModel'))]
     public array $answers;
 
     public function __construct($question)
     {
         $validator = Validator::key('text', Validator::stringType()->notEmpty())
             ->key('active', Validator::boolType()->notEmpty())
-            ->key('type', Validator::instance(EQuestionType::class)->notEmpty())
-            ->key('subjectId', Validator::intType()->positive()->notEmpty())
-            ->key('authorId', Validator::intType()->positive()->notEmpty())
-            ->key('answers', Validator::arrayType()->each(Validator::instance(AnswerModel::class))->notEmpty());
+            ->key('type', Validator::callback(function ($object) {
+                return EQuestionType::tryFrom($object) !== null;
+            })->setName('Invalid type')->notEmpty())
+            ->key('subjectId', Validator::intType()->positive()->notEmpty());
 
         try {
             $validator->assert($question);
@@ -49,8 +45,13 @@ class CreateQuestionRequestModel
         $this->active = $question["active"];
         $this->type = EQuestionType::from($question["type"]);
         $this->subjectId = $question["subjectId"];
-        $this->authorId = $question["authorId"];
         $this->answers = [];
-        $this->answers = array_map([AnswerModel::class, 'constructFromModel'], $question["answers"]);
+
+        if ($this->type == EQuestionType::SINGLE_CHOICE || $this->type == EQuestionType::MULTIPLE_CHOICE) {
+            $this->answers = array_map(function ($args) {
+                return new CreateQuestionAnswerRequestModel($args);
+            }, $question["answers"]);
+        }
+
     }
 }

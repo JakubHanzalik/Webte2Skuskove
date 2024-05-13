@@ -78,7 +78,7 @@ class UserController
         SimpleRouter::response()->json($responseModel);
     }
 
-    #[OA\Put(path: '/api/user', tags: ['User'])]
+    #[OA\Post(path: '/api/user', tags: ['User'])]
     #[OA\RequestBody(description: 'Create user', required: true, content: new OA\JsonContent(ref: '#/components/schemas/CreateUserRequestModel'))]
     #[OA\Response(response: 200, description: 'User created', content: new OA\JsonContent(ref: '#/components/schemas/CreateUserResponseModel'))]
     #[OA\Response(response: 400, description: 'Invalid input')]
@@ -122,7 +122,7 @@ class UserController
         SimpleRouter::response()->json($responseModel);
     }
 
-    #[OA\Post(path: '/api/user/{id}', tags: ['User'])]
+    #[OA\Put(path: '/api/user/{id}', tags: ['User'])]
     #[OA\Parameter(name: "id", in: 'path', required: true, description: "User id", example: 5, schema: new OA\Schema(type: 'integer'))]
     #[OA\RequestBody(description: 'Update user', required: true, content: new OA\JsonContent(ref: '#/components/schemas/UpdateUserRequestModel'))]
     #[OA\Response(response: 200, description: 'User updated successfully')]

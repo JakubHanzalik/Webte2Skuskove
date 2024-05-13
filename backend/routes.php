@@ -27,8 +27,8 @@ SimpleRouter::group(['prefix' => '/api'], function () {
 
         // Questions
         SimpleRouter::get('/question', [QuestionsController::class, 'getAllQuestionsByUser']);
-        SimpleRouter::put('/question', [QuestionsController::class, 'createQuestion']);
-        SimpleRouter::post('/question/{id}', [QuestionsController::class, 'updateQuestion']);
+        SimpleRouter::post('/question', [QuestionsController::class, 'createQuestion']);
+        SimpleRouter::put('/question/{id}', [QuestionsController::class, 'updateQuestion']);
         SimpleRouter::delete('/question/{id}', [QuestionsController::class, 'deleteQuestion']);
         SimpleRouter::get('/question/{code}', [QuestionsController::class, 'getQuestionByCode']);
     });
@@ -41,8 +41,8 @@ SimpleRouter::group(['prefix' => '/api'], function () {
         // User
         SimpleRouter::get('/user', [UserController::class, 'getAllUsers']);
         SimpleRouter::get('/user/{id}', [UserController::class, 'getUserById']);
-        SimpleRouter::put('/user', [UserController::class, 'createUser']);
-        SimpleRouter::post('/user/{id}', [UserController::class, 'updateUser']);
+        SimpleRouter::post('/user', [UserController::class, 'createUser']);
+        SimpleRouter::put('/user/{id}', [UserController::class, 'updateUser']);
         SimpleRouter::delete('/user/{id}', [UserController::class, 'deleteUserById']);
     });
 
@@ -51,7 +51,8 @@ SimpleRouter::group(['prefix' => '/api'], function () {
     SimpleRouter::post('/voting/{code}', [VotingController::class, 'voteByCode']);
     SimpleRouter::get('/voting/{code}/correct', [VotingController::class, 'getCorrectAnswerId']);
     SimpleRouter::get('/voting/{code}/statistics', [VotingController::class, 'getQuestionStatistics']);
-
+    SimpleRouter::post('/voting/{code}/create', [VotingController::class, 'createVoting']);
+    SimpleRouter::post('/voting/{code}/close', [VotingController::class, 'closeVoting']);
 
     // Documentation
     SimpleRouter::get('/docs', [DocumentationController::class, 'generateDocs']);

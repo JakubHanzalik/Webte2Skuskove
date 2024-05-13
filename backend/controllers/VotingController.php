@@ -60,7 +60,6 @@ class VotingController
     #[OA\RequestBody(description: 'Vote by code', required: true, content: new OA\JsonContent(ref: '#/components/schemas/VoteByCodeRequestModel'))]
     #[OA\Response(response: 200, description: 'Vote successful')]
     #[OA\Response(response: 400, description: 'Invalid input')]
-    #[OA\Response(response: 401, description: 'Already voted or voting hasn\'t been started yet')]
     #[OA\Response(response: 404, description: 'Question not found')]
 
     public function voteByCode(string $code)
@@ -73,7 +72,7 @@ class VotingController
         $stmt->execute();
 
         if ($stmt->rowCount() == 0) {
-            throw new APIException("Voting hasn't been started yet", 401);
+            throw new APIException("Voting hasn't been started yet", 400);
         }
 
         $votingId = $stmt->fetchColumn();
@@ -84,19 +83,39 @@ class VotingController
             throw new APIException('Question not found', 404);
         }
 
-        if ($question->response_type == EQuestionType::TEXT) {
-            $field = 'answer_text';
-            $param = $model->answerText;
-        } else {
-            $field = 'selected_answer';
-            $param = $model->answerId;
+        if ($model->getFilledType() != $question->response_type) {
+            throw new APIException('Input does not match question type', 400);
         }
 
-        $insertQuery = "INSERT INTO Vote (voting_id, $field) VALUES (:votingId, :param)";
-        $insertStmt = $this->dbConnection->prepare($insertQuery);
-        $insertStmt->bindParam(':votingId', $votingId);
-        $insertStmt->bindParam(':param', $param);
-        $insertStmt->execute();
+        $this->dbConnection->beginTransaction();
+        try {
+            if ($model->getFilledType() == EQuestionType::TEXT) {
+                $insertQuery = "INSERT INTO Vote (voting_id, answer_text) VALUES (:votingId, :answerText)";
+                $stmt = $this->dbConnection->prepare($insertQuery);
+                $stmt->bindParam(':votingId', $votingId);
+                $stmt->bindParam(':answerText', $model->answerText);
+                $stmt->execute();
+            } else if ($model->getFilledType() == EQuestionType::SINGLE_CHOICE) {
+                $insertQuery = "INSERT INTO Vote (voting_id, answer_id) VALUES (:votingId, :answerId)";
+                $stmt = $this->dbConnection->prepare($insertQuery);
+                $stmt->bindParam(':votingId', $votingId);
+                $stmt->bindParam(':answerId', $model->answerIds[0]);
+                $stmt->execute();
+            } else if ($model->getFilledType() == EQuestionType::MULTIPLE_CHOICE) {
+                $insertQuery = "INSERT INTO Vote (voting_id, answer_id) VALUES (:votingId, :answerId)";
+                $stmt = $this->dbConnection->prepare($insertQuery);
+                $stmt->bindParam(':votingId', $votingId);
+                foreach ($model->answerIds as $answerId) {
+                    $stmt->bindParam(':answerId', $answerId);
+                    $stmt->execute();
+                }
+            }
+
+            $this->dbConnection->commit();
+        } catch (APIException $e) {
+            $this->dbConnection->rollBack();
+            throw $e;
+        }
 
         SimpleRouter::response()->httpCode(200);
     }
@@ -164,7 +183,6 @@ class VotingController
     public function createVoting(string $questionCode)
     {
         //TODO pouzit CreateVotingByQuestionCodeHandler
-
     }
 
     #[OA\Post(path: '/api/voting/{code}/close', tags: ['Voting'])]

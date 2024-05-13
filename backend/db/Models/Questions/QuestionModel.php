@@ -30,7 +30,7 @@ class QuestionModel
 
     public function __set($key, $value)
     {
-        if ($key === 'response_type' && !empty($value)) {
+        if ($key === 'response_type' && EQuestionType::tryFrom($value) !== null) {
             $this->response_type = EQuestionType::from($value);
         }
         if ($key === 'creation_date' && !empty($value)) {

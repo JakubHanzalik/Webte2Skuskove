@@ -59,7 +59,7 @@ class GetQuestionResponseModel implements JsonSerializable
         $obj->answers = $question["answers"];
 
         if (isset($question["type"])) {
-            $obj->type = $question["type"]->value;
+            $obj->type = $question["type"];
         }
 
         return $obj;

@@ -121,7 +121,7 @@ class QuestionsController
         SimpleRouter::response()->json($response);
     }
 
-    #[OA\Post(path: '/api/question/{code}', tags: ['Question'])]
+    #[OA\Put(path: '/api/question/{code}', tags: ['Question'])]
     #[OA\Parameter(name: "code", in: 'path', required: true, description: "Question code", example: "abcde", schema: new OA\Schema(type: 'string'))]
     #[OA\RequestBody(description: 'Update question', required: true, content: new OA\JsonContent(ref: '#/components/schemas/UpdateQuestionRequestModel'))]
     #[OA\Response(response: 200, description: 'Update question')]
@@ -176,7 +176,7 @@ class QuestionsController
         }
     }
 
-    #[OA\Put(path: '/api/question', tags: ['Question'])]
+    #[OA\Post(path: '/api/question', tags: ['Question'])]
     #[OA\RequestBody(description: 'Create question', required: true, content: new OA\JsonContent(ref: '#/components/schemas/CreateQuestionRequestModel'))]
     #[OA\Response(response: 200, description: 'Create question', content: new OA\JsonContent(ref: '#/components/schemas/CreateQuestionResponseModel'))]
     #[OA\Response(response: 401, description: 'Unauthorized')]
@@ -189,22 +189,18 @@ class QuestionsController
         $decoded = $this->jwtHandler->decodeAccessToken($accessToken);
         $user = $this->getUserByUsernameHandler->handle($decoded["sub"]);
 
-        //TODO nechame toto tak?
-        if ($model->authorId != $user->id && $user->role != EUserRole::ADMIN)
-            throw new APIException("User is not authorized to create question", 401);
-
         $this->dbConnection->beginTransaction();
 
         try {
             $questionCode = $this->generateQuestionCode();
 
-            $insertQuestionQuery = "INSERT INTO Questions (question, active, response_type, subject_id, author_id, question_code) VALUES (:question, :active, :type, :subjectId, :authorId, :questionCode)";
+            $insertQuestionQuery = "INSERT INTO Questions (question_code, active, response_type, subject_id, author_id, question) VALUES (:questionCode, :active, :type, :subjectId, :authorId, :question)";
             $insertQuestionStmt = $this->dbConnection->prepare($insertQuestionQuery);
             $insertQuestionStmt->bindValue(':question', $model->text, PDO::PARAM_STR);
             $insertQuestionStmt->bindValue(':active', $model->active, PDO::PARAM_BOOL);
             $insertQuestionStmt->bindValue(':type', $model->type->value, PDO::PARAM_INT);
             $insertQuestionStmt->bindValue(':subjectId', $model->subjectId, PDO::PARAM_INT);
-            $insertQuestionStmt->bindValue(':authorId', $model->authorId, PDO::PARAM_INT);
+            $insertQuestionStmt->bindValue(':authorId', $user->id, PDO::PARAM_INT);
             $insertQuestionStmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
             $insertQuestionStmt->execute();
 
@@ -216,7 +212,7 @@ class QuestionsController
                 $insertAnswerQuery = "INSERT INTO Answers (id, question_code, answer, correct) VALUES (:id, :code, :answer, :correct)";
                 $insertAnswerStmt = $this->dbConnection->prepare($insertAnswerQuery);
                 $insertAnswerStmt->bindValue(':code', $questionCode, PDO::PARAM_STR);
-                $insertAnswerStmt->bindValue(':answer', $model->answers[$i]->text, PDO::PARAM_STR);
+                $insertAnswerStmt->bindValue(':answer', $model->answers[$i]->answer, PDO::PARAM_STR);
                 $insertAnswerStmt->bindValue(':correct', $model->answers[$i]->correct, PDO::PARAM_BOOL);
                 $insertAnswerStmt->bindValue(':id', $i, PDO::PARAM_INT);
                 $insertAnswerStmt->execute();

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: May 08, 2024 at 12:52 PM
+-- Generation Time: May 13, 2024 at 01:38 PM
 -- Server version: 8.3.0
 -- PHP Version: 8.2.8
 
@@ -39,10 +39,8 @@ CREATE TABLE `Answers` (
 --
 
 INSERT INTO `Answers` (`id`, `question_code`, `answer`, `correct`) VALUES
-(0, 'EKSP6', 'Bratislava', b'0'),
-(0, 'F7E8P', 'Praha', b'0'),
-(1, 'EKSP6', 'Salzburg', b'1'),
-(1, 'F7E8P', 'Brno', b'1');
+(0, 'NVCO1', 'Bratislava', b'1'),
+(1, 'NVCO1', 'Kosice', b'0');
 
 -- --------------------------------------------------------
 
@@ -65,8 +63,7 @@ CREATE TABLE `Questions` (
 --
 
 INSERT INTO `Questions` (`question_code`, `active`, `question`, `response_type`, `subject_id`, `creation_date`, `author_id`) VALUES
-('EKSP6', b'1', 'What is the capital of Slovakiafsdfd?', 1, 5, '2024-04-30 21:40:08', '1'),
-('F7E8P', b'1', 'Hlavne mesto', 2, 1, '2024-05-04 12:02:02', '1');
+('NVCO1', b'1', 'Ake je hlavne mesto Slovenska?', 2, 2, '2024-05-13 13:38:08', '1');
 
 -- --------------------------------------------------------
 
@@ -107,7 +104,7 @@ CREATE TABLE `Token` (
 --
 
 INSERT INTO `Token` (`id`, `token`, `username`, `validity`) VALUES
-(21, 'i5JXd8BSOobMyKf3ejURE40adF6ZUH', 'jano', '2024-05-15 11:43:20');
+(22, 'Kk3ybA0nvpqxlL4PMzYCoUCCdchk9E', 'jano', '2024-05-20 13:38:02');
 
 -- --------------------------------------------------------
 
@@ -152,11 +149,18 @@ CREATE TABLE `Vote` (
 
 CREATE TABLE `Voting` (
   `id` int NOT NULL,
-  `question_code` int NOT NULL,
+  `question_code` varchar(5) NOT NULL,
   `date_from` date NOT NULL,
-  `date_to` date NOT NULL,
+  `date_to` date DEFAULT NULL,
   `note` varchar(512) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `Voting`
+--
+
+INSERT INTO `Voting` (`id`, `question_code`, `date_from`, `date_to`, `note`) VALUES
+(1, 'NVCO1', '2024-05-13', NULL, NULL);
 
 --
 -- Indexes for dumped tables
@@ -219,7 +223,7 @@ ALTER TABLE `Subject`
 -- AUTO_INCREMENT for table `Token`
 --
 ALTER TABLE `Token`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `Users`
@@ -237,7 +241,7 @@ ALTER TABLE `Vote`
 -- AUTO_INCREMENT for table `Voting`
 --
 ALTER TABLE `Voting`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
