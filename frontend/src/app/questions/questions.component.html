@@ -10,27 +10,27 @@
             <li *ngFor="let question of activeQuestions">
                 <span *ngIf="!question.editing; else editMode">
                     <img *ngIf="question.qrCodeURL" [src]="question.qrCodeURL" alt="QR Code" class="qr-code">
-                    {{ question.text }}
+                    <span [routerLink]="['/', question.question_code]" routerLinkActive="router-link-active">{{ question.text }}</span>
                     <button (click)="toggleEditMode(question)">
-                        <mat-icon matListIcon>edit</mat-icon> 
+                        <mat-icon matListIcon>edit</mat-icon>
                     </button>
                     <button (click)="showQRCode(question)"> <mat-icon matListIcon>art_track</mat-icon> </button>
                     <button (click)="copyQuestion(question)">
-                        <mat-icon matListIcon>file_copy</mat-icon> 
+                        <mat-icon matListIcon>file_copy</mat-icon>
                     </button>
                     <button (click)="deleteQuestion(question)">
-                        <mat-icon matListIcon>delete</mat-icon> 
+                        <mat-icon matListIcon>delete</mat-icon>
                     </button>
                     <button (click)="deactivateQuestion(question)">
                         <mat-icon matListIcon>close</mat-icon>
                     </button>
-                   
-                    
+
+
                 </span>
                 <ng-template #editMode>
                     <textarea [(ngModel)]="question.text"></textarea>
                     <button (click)="saveEditedQuestion(question)">
-                        <mat-icon matListIcon>file_copy</mat-icon> 
+                        <mat-icon matListIcon>file_copy</mat-icon>
                     </button>
                 </ng-template>
             </li>
@@ -43,23 +43,23 @@
                 <span *ngIf="!question.editing; else editMode">
                     {{ question.text }}
                     <button (click)="toggleEditMode(question)">
-                        <mat-icon matListIcon>edit</mat-icon> 
+                        <mat-icon matListIcon>edit</mat-icon>
                     </button>
                     <button (click)="copyQuestion(question)">
                         <mat-icon matListIcon>file_copy</mat-icon>
                     </button>
                     <button (click)="deleteQuestion(question)">
-                        <mat-icon matListIcon>delete</mat-icon> 
+                        <mat-icon matListIcon>delete</mat-icon>
                     </button>
                     <button (click)="activeQuestion(question)">
                         <mat-icon matListIcon>check</mat-icon>
                     </button>
-                    
+
                 </span>
                 <ng-template #editMode>
                     <textarea [(ngModel)]="question.text"></textarea>
                     <button (click)="saveEditedQuestion(question)">
-                        <mat-icon matListIcon>file_copy</mat-icon> 
+                        <mat-icon matListIcon>file_copy</mat-icon>
                     </button>
                 </ng-template>
             </li>

@@ -12,12 +12,13 @@ import { Router } from '@angular/router';
 })
 export class HomeComponent{
   questionCode!: string;
- 
+
   constructor(private router: Router) {}
 
   submitCode(): void {
     if (this.questionCode) {
-      this.router.navigate(['/questions'], { queryParams: { code: this.questionCode } });
+      // Correct the navigate method to use an array with dynamic segment
+      this.router.navigate(['/', this.questionCode]);
     } else {
       console.log('Zadajte kód otázky');
     }

@@ -8,16 +8,17 @@ import { HttpClientModule } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { QrcodeService } from '../services/qrcode.service';
 import { MatIconModule } from '@angular/material/icon';
+import { RouterModule } from '@angular/router';
 @Component({
   selector: 'app-questions',
   templateUrl: './questions.component.html',
   styleUrls: ['./questions.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule, MatIconModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, MatIconModule, RouterModule],
   providers: [QuestionsService],
 })
 export class QuestionsComponent implements OnInit {
- 
+
 
   activeQuestions: Question[] = [];
   historicalQuestions: Question[] = [];
@@ -33,9 +34,9 @@ export class QuestionsComponent implements OnInit {
   ngOnInit() {
     this.questionsService.getAllQuestions().subscribe({
         next: (res: QuestionDTO[]) => {
-            console.log('Fetched questions:', res);  
+            console.log('Fetched questions:', res);
             res.forEach((x) => {
-                console.log('Processing question:', x); 
+                console.log('Processing question:', x);
                 const question: Question = {
                   active: x.active,
                   subjectId: x.subjectId,
@@ -45,10 +46,10 @@ export class QuestionsComponent implements OnInit {
                   authorId: x.authorId,
                   answers: x.answers,
                   question_code: x.question_code,
-                  
+
                 };
 
-                console.log('Processed question to add:', question);  
+                console.log('Processed question to add:', question);
 
                 if (x.active) {
                     this.activeQuestions.push(question);
@@ -101,14 +102,14 @@ addNewQuestion() {
     this.questionsService.createQuestion(newQuestion).subscribe({
       next: () => {
         console.log('Question created successfully');
-       
-        this.newQuestionText = ''; 
+
+        this.newQuestionText = '';
       },
       error: (err) => {
         console.error('Error creating question:', err);
       },
     });
-  
+
       this.cdr.detectChanges();
     }
   }
@@ -170,7 +171,7 @@ saveEditedQuestion(question: Question) {
   const questionData = {
     text: question.text,
     subjectId: question.subjectId,
-    active: question.active === false, 
+    active: question.active === false,
     answers: question.answers.map(answer => {
       return {id: answer.id, text: answer.text, correct: answer.correct};
     })
@@ -200,7 +201,7 @@ saveEditedQuestion(question: Question) {
       },
     });
   }
-  
+
   activeQuestion(question: Question) {
     question.active = true;
     this.historicalQuestions = this.historicalQuestions.filter((q) => q !== question);
@@ -214,7 +215,7 @@ saveEditedQuestion(question: Question) {
       },
     });
   }
-  
+
 
   toggleEditMode(question: Question) {
     question.editing = !question.editing;
