@@ -99,18 +99,20 @@ class QuestionsController
 
         $answersResponse = [];
 
-        foreach ($answers as $answer) {
-            array_push($answersResponse, GetQuestionAnswerResponseModel::constructFromModel([
-                'id' => $answer->id,
-                'answer' => $answer->answer,
-                'correct' => $answer->correct
-            ]));
+        if (!is_null($answers)) {
+            foreach ($answers as $answer) {
+                array_push($answersResponse, GetQuestionAnswerResponseModel::constructFromModel([
+                    'id' => $answer->id,
+                    'answer' => $answer->answer,
+                    'correct' => $answer->correct
+                ]));
+            }
         }
 
         $response = GetQuestionResponseModel::constructFromModel([
             'text' => $question->question,
             'active' => $question->active,
-            'type' => $question->response_type,
+            'type' => $question->response_type->value,
             'subjectId' => $question->subject_id,
             'creationDate' => $question->creation_date,
             'code' => $question->question_code,
@@ -220,7 +222,10 @@ class QuestionsController
 
             $this->dbConnection->commit();
 
-            SimpleRouter::response()->json(CreateQuestionResponseModel::constructFromModel(['code' => $questionCode]))->httpCode(200);
+            SimpleRouter::response()->httpCode(200);
+            SimpleRouter::response()->json(CreateQuestionResponseModel::constructFromModel([
+                'code' => $questionCode
+            ]));
         } catch (\Exception $e) {
             $this->dbConnection->rollback();
             throw new APIException('Failed to create question: ' . $e->getMessage(), 500);
