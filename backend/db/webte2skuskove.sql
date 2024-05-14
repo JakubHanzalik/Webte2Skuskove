@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: May 13, 2024 at 01:38 PM
+-- Generation Time: May 14, 2024 at 05:13 PM
 -- Server version: 8.3.0
 -- PHP Version: 8.2.8
 
@@ -39,8 +39,12 @@ CREATE TABLE `Answers` (
 --
 
 INSERT INTO `Answers` (`id`, `question_code`, `answer`, `correct`) VALUES
+(0, 'KZ3HI', 'Janka', b'1'),
 (0, 'NVCO1', 'Bratislava', b'1'),
-(1, 'NVCO1', 'Kosice', b'0');
+(1, 'KZ3HI', 'Jakub', b'0'),
+(1, 'NVCO1', 'Kosice', b'0'),
+(2, 'KZ3HI', 'Alex', b'0'),
+(3, 'KZ3HI', 'Lubo', b'1');
 
 -- --------------------------------------------------------
 
@@ -63,7 +67,9 @@ CREATE TABLE `Questions` (
 --
 
 INSERT INTO `Questions` (`question_code`, `active`, `question`, `response_type`, `subject_id`, `creation_date`, `author_id`) VALUES
-('NVCO1', b'1', 'Ake je hlavne mesto Slovenska?', 2, 2, '2024-05-13 13:38:08', '1');
+('KZ3HI', b'1', 'Kto robi frontend?', 1, 1, '2024-05-14 17:13:27', '1'),
+('NVCO1', b'1', 'Ake je hlavne mesto Slovenska?', 0, 2, '2024-05-13 13:38:08', '1'),
+('XNMWC', b'1', 'Aky je vas nazor na tento predmet?', 2, 1, '2024-05-14 17:11:33', '1');
 
 -- --------------------------------------------------------
 
@@ -104,7 +110,7 @@ CREATE TABLE `Token` (
 --
 
 INSERT INTO `Token` (`id`, `token`, `username`, `validity`) VALUES
-(22, 'Kk3ybA0nvpqxlL4PMzYCoUCCdchk9E', 'jano', '2024-05-20 13:38:02');
+(23, '9Ucvd09tDPHzZgCTUXRN9vO2RtcfgQ', 'jano', '2024-05-21 17:10:41');
 
 -- --------------------------------------------------------
 
@@ -160,7 +166,9 @@ CREATE TABLE `Voting` (
 --
 
 INSERT INTO `Voting` (`id`, `question_code`, `date_from`, `date_to`, `note`) VALUES
-(1, 'NVCO1', '2024-05-13', NULL, NULL);
+(1, 'NVCO1', '2024-05-13', NULL, NULL),
+(2, 'XNMWC', '2024-05-14', NULL, NULL),
+(3, 'KZ3HI', '2024-05-14', NULL, NULL);
 
 --
 -- Indexes for dumped tables
@@ -223,7 +231,7 @@ ALTER TABLE `Subject`
 -- AUTO_INCREMENT for table `Token`
 --
 ALTER TABLE `Token`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `Users`
@@ -241,7 +249,7 @@ ALTER TABLE `Vote`
 -- AUTO_INCREMENT for table `Voting`
 --
 ALTER TABLE `Voting`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
