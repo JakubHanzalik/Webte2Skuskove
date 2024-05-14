@@ -28,20 +28,32 @@ class UpdateQuestionRequestModel
         $validator = Validator::key('text', Validator::stringType()->notEmpty())
             ->key('active', Validator::boolType())
             ->key('subjectId', Validator::intType()->positive()->notEmpty())
-            ->key('answers', Validator::arrayType()->each(Validator::instance(UpdateQuestionAnswerRequestModel::class))->notEmpty());
+            ->key('answers', Validator::arrayType()->each(
+                Validator::callback(function ($answer) {
+                    try {
+                        new UpdateQuestionAnswerRequestModel($answer);
+                        return true;
+                    } catch (APIException $exception) {
+                        throw $exception;
+                    }
+                })
+            )->notEmpty(), false);
 
         try {
             $validator->assert($question);
         } catch (NestedValidationException $exception) {
-            throw new APIException(implode($exception->getMessages()), 400);
+            throw APIException::constructFromArray($exception->getMessages(), 400);
+        } catch (APIException $exception) {
+            throw $exception;
         }
 
         $this->text = $question["text"];
         $this->subjectId = $question["subjectId"];
         $this->active = $question["active"];
         $this->answers = [];
-        $this->answers = array_map(function ($args) {
-            return new UpdateQuestionAnswerRequestModel($args);
-        }, $question["answers"]);
+        if (isset($question["answers"]))
+            $this->answers = array_map(function ($args) {
+                return new UpdateQuestionAnswerRequestModel($args);
+            }, $question["answers"]);
     }
 }

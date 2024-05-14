@@ -12,6 +12,8 @@ use Respect\Validation\Exceptions\NestedValidationException;
 #[OA\Schema(title: 'UpdateQuestionAnswerRequestModel', schema: 'UpdateQuestionAnswerRequestModel', type: 'object')]
 class UpdateQuestionAnswerRequestModel
 {
+    #[OA\Property(title: "id", type: 'integer', example: 1)]
+    public int $id;
     #[OA\Property(title: "answer", type: 'string', example: "Dobrý")]
     public string $answer;
 
@@ -21,14 +23,16 @@ class UpdateQuestionAnswerRequestModel
     public function __construct($answer)
     {
         $validator = Validator::key('answer', Validator::stringType()->notEmpty())
-            ->key('correct', Validator::boolType()->notEmpty());
+            ->key('correct', Validator::boolType())
+            ->key('id', Validator::intType());
 
         try {
             $validator->assert($answer);
         } catch (NestedValidationException $exception) {
-            throw new APIException(implode($exception->getMessages()), 400);
+            throw APIException::constructFromArray($exception->getMessages(), 400);
         }
 
+        $this->id = $answer["id"];
         $this->answer = $answer["answer"];
         $this->correct = $answer["correct"];
     }

@@ -268,6 +268,7 @@ class QuestionsController
 
             $this->dbConnection->commit();
             SimpleRouter::response()->httpCode(200);
+            SimpleRouter::response()->json(['message' => 'Question deleted successfully']);
         } catch (\Exception $e) {
             $this->dbConnection->rollback();
             throw new APIException('Failed to delete question: ' . $e->getMessage(), 500);

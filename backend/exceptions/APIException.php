@@ -1,4 +1,7 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 namespace Stuba\Exceptions;
 
 use Exception;
@@ -16,5 +19,10 @@ class APIException extends Exception
         parent::__construct($message, $code);
         $this->message = $message;
         $this->code = $code;
+    }
+
+    public static function constructFromArray(array $array, int $code): APIException
+    {
+        return new APIException(var_export($array) ?? "", $code);
     }
 }
