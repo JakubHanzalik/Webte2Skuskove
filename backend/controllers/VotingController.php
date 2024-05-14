@@ -52,7 +52,8 @@ class VotingController
         $stmt->execute();
         $response->answers = $stmt->fetchAll(PDO::FETCH_CLASS, GetQuestionAnswerModel::class);
 
-        SimpleRouter::response()->json($response)->httpCode(200);
+        SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json($response);
     }
 
     #[OA\Post(path: '/api/voting/{code}', tags: ['Voting'])]
@@ -66,7 +67,7 @@ class VotingController
     {
         $model = new VoteByCodeRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
-        $query = "SELECT id FROM Voting WHERE question_code = :code AND date_to = null ORDER BY date_from DESC LIMIT 1";
+        $query = "SELECT id FROM Voting WHERE question_code = :code AND date_to IS NULL ORDER BY date_from DESC LIMIT 1";
         $stmt = $this->dbConnection->prepare($query);
         $stmt->bindParam(':code', $code, PDO::PARAM_STR);
         $stmt->execute();
@@ -118,6 +119,7 @@ class VotingController
         }
 
         SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json(['message' => 'Vote successful']);
     }
 
     #[OA\Get(path: '/api/voting/{code}/correct', tags: ['Voting'])]
@@ -140,7 +142,8 @@ class VotingController
         $responseModel = new GetCorrectAnswerIdResponseModel();
         $responseModel->answerIds = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
 
-        SimpleRouter::response()->json($responseModel)->httpCode(200);
+        SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json($responseModel);
     }
 
     #[OA\Get(path: '/api/voting/{code}/statistics', tags: ['Voting'])]
@@ -161,7 +164,8 @@ class VotingController
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (!$results) {
-            SimpleRouter::response()->json(['error' => 'No data found for this question'])->httpCode(404);
+            SimpleRouter::response()->httpCode(404);
+            SimpleRouter::response()->json(['error' => 'No data found for this question']);
             return;
         }
 
@@ -171,7 +175,8 @@ class VotingController
         }, $results);
 
         // Return the response
-        SimpleRouter::response()->json($statistics)->httpCode(200);
+        SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json($statistics);
     }
 
     #[OA\Post(path: '/api/voting/{code}/create', tags: ['Voting'])]
