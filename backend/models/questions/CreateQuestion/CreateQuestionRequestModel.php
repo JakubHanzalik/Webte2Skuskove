@@ -32,7 +32,7 @@ class CreateQuestionRequestModel
             ->key('active', Validator::boolType()->notEmpty())
             ->key('type', Validator::callback(function ($object) {
                 return EQuestionType::tryFrom($object) !== null;
-            })->setName('Invalid type')->notEmpty())
+            }))
             ->key('subjectId', Validator::intType()->positive()->notEmpty());
 
         try {
