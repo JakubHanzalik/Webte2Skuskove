@@ -78,6 +78,17 @@ export class AuthenticationService {
     );
   }
 
+  document(): Observable<Blob> {
+    return this.http.get('/api/docs', { responseType: 'blob' }).pipe(
+      tap(data => {
+        console.log('PDF fetched successfully');
+      }),
+      catchError(err => {
+        console.error('Failed to fetch PDF', err);
+        return throwError(err);
+      })
+    );
+  }
   changePassword(changePassword: ChangePassword): Observable<any> {
     return this.http.post('/api/change-password', changePassword).pipe(
       map((res: any) => {

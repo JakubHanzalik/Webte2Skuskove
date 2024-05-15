@@ -1,2 +1,18 @@
 
+button {
+    padding: 10px;
+    background-color: #b65770;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
   
+  button:hover {
+    background-color: #6b2632;
+  }
+  @media print {
+	button {
+		display: none;
+	  }
+    }

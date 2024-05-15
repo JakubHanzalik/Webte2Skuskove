@@ -22,3 +22,36 @@
 body {
 	margin: 0;
 }
+@media print {
+	.sidenav , .sidenav-container, .mat-toolbar, .mat-list-item, .mat-toolbar.mat-primary {
+		display: none;
+	  }
+
+    .side-menu, .menu-component, .hamburger-menu, header, footer, .non-essential {
+      display: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: none;
+      color: #000;
+    }
+
+    .tutorial-container {
+      width: 100%;
+      padding: 20px;
+      margin: 0 auto;
+      box-shadow: none;
+      border: none;
+      font-size: 12pt;
+    }
+
+    h1, h2 {
+      page-break-after: avoid;
+    }
+
+    p {
+      line-height: 1.6;
+    }
+  }

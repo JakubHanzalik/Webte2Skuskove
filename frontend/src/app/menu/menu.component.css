@@ -21,3 +21,36 @@ mat-drawer-container {
 		height: calc(100vh - 64px);
 	}
 }
+@media print {
+	.responsive-img, .list-menu, .text-white , mat-toolbar , mat-drawer-container{
+		display: none;
+	  }
+
+    .side-menu, .menu-component, .hamburger-menu, header, footer, .non-essential {
+      display: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: none;
+      color: #000;
+    }
+
+    .tutorial-container {
+      width: 100%;
+      padding: 20px;
+      margin: 0 auto;
+      box-shadow: none;
+      border: none;
+      font-size: 12pt;
+    }
+
+    h1, h2 {
+      page-break-after: avoid;
+    }
+
+    p {
+      line-height: 1.6;
+    }
+  }
