@@ -85,7 +85,9 @@ class VotingController
         }
 
         if ($model->getFilledType() != $question->response_type) {
-            throw new APIException('Input does not match question type', 400);
+            if ($question->response_type != EQuestionType::MULTIPLE_CHOICE && $model->getFilledType() != EQuestionType::SINGLE_CHOICE) {
+                throw new APIException('Input does not match question type', 400);
+            }
         }
 
         $this->dbConnection->beginTransaction();
