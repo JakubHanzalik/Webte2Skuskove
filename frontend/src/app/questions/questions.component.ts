@@ -2,29 +2,77 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { QuestionsService } from '../services/questions.service';
-import { QuestionDTO, Question } from '../models/question.model';
 import { HttpClientModule } from '@angular/common/http';
 
 import { Subject } from 'rxjs';
 import { QrcodeService } from '../services/qrcode.service';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+
+interface Answer {
+  id?: number;  // ID môže byť voliteľné, keď vytvárame novú odpoveď
+  answer: string;
+  correct: boolean;
+}
+
+interface QuestionDTO {
+  question_code?: string;  // question_code môže byť voliteľné
+  text: string;
+  active: boolean;
+  subjectId: number;
+  type: number;
+  authorId?: number;
+  answers: Answer[];
+}
+
+interface Question extends QuestionDTO {
+  editing?: boolean;
+  qrCodeURL?: string;
+}
+
+enum QuestionType {
+  SINGLE_CHOICE = 0,
+  MULTIPLE_CHOICE = 1,
+  TEXT = 2,
+}
+
 @Component({
   selector: 'app-questions',
   templateUrl: './questions.component.html',
   styleUrls: ['./questions.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule, MatIconModule, RouterModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    HttpClientModule,
+    MatIconModule,
+    RouterModule,
+    MatCardModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatCheckboxModule,
+  ],
   providers: [QuestionsService],
 })
 export class QuestionsComponent implements OnInit {
-
-
   activeQuestions: Question[] = [];
   historicalQuestions: Question[] = [];
 
   newQuestionText: string = '';
   originalQuestionText: string = '';
+  newQuestionSubjectId: number = 1;
+  newQuestionType: QuestionType = QuestionType.SINGLE_CHOICE;
+  newQuestionAnswers: Answer[] = [
+    { answer: '', correct: false },
+    { answer: '', correct: false },
+  ];
+
   constructor(
     private cdr: ChangeDetectorRef,
     private questionsService: QuestionsService,
@@ -33,189 +81,190 @@ export class QuestionsComponent implements OnInit {
 
   ngOnInit() {
     this.questionsService.getAllQuestions().subscribe({
-        next: (res: QuestionDTO[]) => {
-            console.log('Fetched questions:', res);
-            res.forEach((x) => {
-                console.log('Processing question:', x);
-                const question: Question = {
-                  active: x.active,
-                  subjectId: x.subjectId,
-                  editing: false,
-                  text: x.text,
-                  type: x.type,
-                  authorId: x.authorId,
-                  answers: x.answers,
-                  question_code: x.question_code,
+      next: (res: QuestionDTO[]) => {
+        res.forEach((x) => {
+          const question: Question = {
+            active: x.active,
+            subjectId: x.subjectId,
+            editing: false,
+            text: x.text,
+            type: x.type,
+            authorId: x.authorId,
+            answers: x.answers,
+            question_code: x.question_code,
+          };
 
-                };
-
-                console.log('Processed question to add:', question);
-
-                if (x.active) {
-                    this.activeQuestions.push(question);
-                } else {
-                    this.historicalQuestions.push(question);
-                }
-            });
-        },
-        error: err => console.error('Error fetching questions:', err)
+          if (x.active) {
+            this.activeQuestions.push(question);
+          } else {
+            this.historicalQuestions.push(question);
+          }
+        });
+      },
+      error: (err) => console.error('Error fetching questions:', err),
     });
-}
-async showQRCode(question: Question) {
-  try {
-    const qrCodeURL = await this.qrCodeService.generateQR(question.question_code);
-    question.qrCodeURL = qrCodeURL;
-  } catch (error) {
-    console.error("Error generating QR code:", error);
   }
-}
-/*
-qrCode(question: Question){
-    this.qrCodeService.genetatorQR(question.question_code).then(url =>{
-    console.log(url);
-  });
-}
-*/
-addNewQuestion() {
-  if (this.newQuestionText.trim()) {
-    const newQuestion: QuestionDTO = {
-      text: this.newQuestionText,
-      active: true,
-      question_code: "dfvvsd",
-      answers: [
-        {
-          id: 0,
-          text: 'aaasss',
-          correct: false,
+
+  async showQRCode(question: Question) {
+    if (question.question_code) {
+      try {
+        const qrCodeURL = await this.qrCodeService.generateQR(question.question_code);
+        question.qrCodeURL = qrCodeURL;
+      } catch (error) {
+        console.error("Error generating QR code:", error);
+      }
+    } else {
+      console.error("Question code is undefined.");
+    }
+  }
+
+  addNewQuestion() {
+    if (this.newQuestionText.trim()) {
+      const newQuestion: QuestionDTO = {
+        text: this.newQuestionText,
+        active: true,
+        answers: this.newQuestionAnswers.map((answer) => ({
+          answer: answer.answer,
+          correct: answer.correct,
+        })),
+        subjectId: this.newQuestionSubjectId,
+        type: this.newQuestionType,
+      };
+
+      console.log('Creating new question with data:', newQuestion);
+
+      this.questionsService.createQuestion(newQuestion).subscribe({
+        next: () => {
+          console.log('Question created successfully');
+          this.newQuestionText = '';
+          this.newQuestionAnswers = [
+            { answer: '', correct: false },
+            { answer: '', correct: false },
+          ];
+          this.cdr.detectChanges();
         },
-        {
-          id: 1,
-          text: 'ssssss',
-          correct: true,
+        error: (err) => {
+          console.error('Error creating question:', err);
         },
-      ],
-      authorId: 2,
-      subjectId: 1,
-      type: 0,
-    };
-
-    this.questionsService.createQuestion(newQuestion).subscribe({
-      next: () => {
-        console.log('Question created successfully');
-
-        this.newQuestionText = '';
-      },
-      error: (err) => {
-        console.error('Error creating question:', err);
-      },
-    });
-
-      this.cdr.detectChanges();
+      });
     }
   }
 
   copyQuestion(question: Question) {
     const copiedQuestion: Question = { ...question };
 
-    //const newQuestionCode = this.generateQuestionCode();
-
-    /*     copiedQuestion.question_code = newQuestionCode; */
     if (copiedQuestion.active) {
       this.activeQuestions.unshift(copiedQuestion);
     } else {
       this.historicalQuestions.unshift(copiedQuestion);
     }
   }
-  deleteQuestion(question: Question) {
-  console.log('Attempting to delete question:', question);
 
-  if (!question.question_code) {
-    console.error('Attempted to delete a question without a valid question code.');
-    return;
+  deleteQuestion(question: Question) {
+    if (question.question_code) {
+      this.questionsService.deleteQuestion(question.question_code).subscribe({
+        next: () => {
+          this.updateQuestionsAfterDeletion(question);
+        },
+        error: (err) => console.error('Error deleting question:', err),
+      });
+    } else {
+      console.error('Attempted to delete a question without a valid question code.');
+    }
   }
 
-  this.questionsService.deleteQuestion(question.question_code).subscribe({
-      next: () => {
-          console.log('Deleted question:', question);
-          this.updateQuestionsAfterDeletion(question);
-      },
-      error: err => console.error('Error deleting question:', err)
-  });
-}
-
-
-updateQuestionsAfterDeletion(question: Question) {
+  updateQuestionsAfterDeletion(question: Question) {
     if (question.active) {
-        this.activeQuestions = this.activeQuestions.filter(q => q.question_code !== question.question_code);
+      this.activeQuestions = this.activeQuestions.filter(
+        (q) => q.question_code !== question.question_code
+      );
     } else {
-        this.historicalQuestions = this.historicalQuestions.filter(q => q.question_code !== question.question_code);
+      this.historicalQuestions = this.historicalQuestions.filter(
+        (q) => q.question_code !== question.question_code
+      );
     }
-}
-editQuestion(question: Question) {
-  this.questionsService.getQuestionByCode(question.question_code).subscribe({
-    next: (fetchedQuestion: Question) => {
-      if (fetchedQuestion) {
-        this.originalQuestionText = fetchedQuestion.text;
-        fetchedQuestion.active = fetchedQuestion.active === true;
-        question.editing = true;
-      } else {
-        console.error('Otázka nebyla nalezena.');
-      }
-    },
-    error: (err) => {
-      console.error('Chyba při získávání otázky:', err);
-    }
-  });
-}
-saveEditedQuestion(question: Question) {
-  const questionData = {
-    text: question.text,
-    subjectId: question.subjectId,
-    active: question.active === false,
-    answers: question.answers.map(answer => {
-      return {id: answer.id, text: answer.text, correct: answer.correct};
-    })
-  };
+  }
 
-  this.questionsService.updateQuestion(question.question_code, questionData).subscribe({
-    next: (response) => {
-      console.log('Question updated successfully:', response);
-    },
-    error: (error) => {
-      console.error('Error updating question:', error);
+  editQuestion(question: Question) {
+    if (question.question_code) {
+      this.questionsService.getQuestionByCode(question.question_code).subscribe({
+        next: (fetchedQuestion: Question) => {
+          if (fetchedQuestion) {
+            this.originalQuestionText = fetchedQuestion.text;
+            fetchedQuestion.active = fetchedQuestion.active === true;
+            question.editing = true;
+          } else {
+            console.error('Otázka nebola nájdená.');
+          }
+        },
+        error: (err) => {
+          console.error('Chyba pri získavaní otázky:', err);
+        },
+      });
+    } else {
+      console.error('Question code is undefined.');
     }
-  });
-}
+  }
 
+  saveEditedQuestion(question: Question) {
+    if (question.question_code) {
+      const questionData = {
+        text: question.text,
+        subjectId: question.subjectId,
+        active: question.active === false,
+        answers: question.answers.map((answer) => {
+          return { id: answer.id, answer: answer.answer, correct: answer.correct };
+        }),
+      };
+
+      this.questionsService.updateQuestion(question.question_code, questionData).subscribe({
+        next: (response) => {
+          console.log('Question updated successfully:', response);
+        },
+        error: (error) => {
+          console.error('Error updating question:', error);
+        },
+      });
+    } else {
+      console.error('Question code is undefined.');
+    }
+  }
 
   deactivateQuestion(question: Question) {
-    question.active = false;
-    this.activeQuestions = this.activeQuestions.filter((q) => q !== question);
-    this.historicalQuestions.unshift(question);
-    this.questionsService.updateQuestion(question.question_code, { active: false }).subscribe({
-      next: () => {
-        console.log('Question deactivated successfully');
-      },
-      error: (err) => {
-        console.error(err);
-      },
-    });
+    if (question.question_code) {
+      question.active = false;
+      this.activeQuestions = this.activeQuestions.filter((q) => q !== question);
+      this.historicalQuestions.unshift(question);
+      this.questionsService.updateQuestion(question.question_code, { active: false }).subscribe({
+        next: () => {
+          console.log('Question deactivated successfully');
+        },
+        error: (err) => {
+          console.error(err);
+        },
+      });
+    } else {
+      console.error('Question code is undefined.');
+    }
   }
 
   activeQuestion(question: Question) {
-    question.active = true;
-    this.historicalQuestions = this.historicalQuestions.filter((q) => q !== question);
-    this.activeQuestions.unshift(question);
-    this.questionsService.updateQuestion(question.question_code, { active: true }).subscribe({
-      next: () => {
-        console.log('Question activated successfully');
-      },
-      error: (err) => {
-        console.error(err);
-      },
-    });
+    if (question.question_code) {
+      question.active = true;
+      this.historicalQuestions = this.historicalQuestions.filter((q) => q !== question);
+      this.activeQuestions.unshift(question);
+      this.questionsService.updateQuestion(question.question_code, { active: true }).subscribe({
+        next: () => {
+          console.log('Question activated successfully');
+        },
+        error: (err) => {
+          console.error(err);
+        },
+      });
+    } else {
+      console.error('Question code is undefined.');
+    }
   }
-
 
   toggleEditMode(question: Question) {
     question.editing = !question.editing;
