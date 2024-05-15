@@ -1,40 +1,44 @@
-<div class="container" >
+<div class="container">
   <mat-nav-list class="side-menu">
     <mat-list-item routerLink="/" routerLinkActive="active-link">
       <mat-icon matListIcon>home</mat-icon>
-      <span matLine>  Home</span>
+      <span matLine>Home</span>
     </mat-list-item>
-    <mat-list-item routerLink="/login" routerLinkActive="active-link">
+    <mat-list-item id="login-item" routerLink="/login">
       <mat-icon matListIcon>login</mat-icon>
-      <span matLine>  Login</span>
+      <span matLine>Login</span>
     </mat-list-item>
-    <mat-list-item routerLink="/register" routerLinkActive="active-link">
+    <mat-list-item id="logout-item" (click)="logout()">
+      <mat-icon matListIcon>exit_to_app</mat-icon>
+      <span matLine>Logout</span>
+    </mat-list-item>
+    
+    <mat-list-item id="register-item" routerLink="/register" routerLinkActive="active-link">
       <mat-icon matListIcon>person_add</mat-icon>
-      <span matLine>  Register</span>
+      <span matLine>Register</span>
     </mat-list-item>
-    <mat-list-item routerLink="/swagger" routerLinkActive="active-link">
+
+
+    <mat-list-item id="swagger-item" routerLink="/swagger" routerLinkActive="active-link">
       <mat-icon matListIcon>image</mat-icon>
-      <span matLine>  Swagger</span>
+      <span matLine>Swagger</span>
     </mat-list-item>
-    <mat-list-item routerLink="/subjects" routerLinkActive="active-link" >
+    <mat-list-item id="subject-item" routerLink="/subjects" routerLinkActive="active-link">
       <mat-icon matListIcon>school</mat-icon>
-      <span matLine>  Subject</span>
+      <span matLine>Subject</span>
     </mat-list-item>
-    <mat-list-item routerLink="/users" routerLinkActive="active-link">
+    <mat-list-item id="user-item" routerLink="/users" routerLinkActive="active-link">
       <mat-icon matListIcon>person</mat-icon>
-      <span matLine>  User</span>
+      <span matLine>User</span>
     </mat-list-item>
-    <mat-list-item routerLink="/questions" routerLinkActive="active-link">
+    <mat-list-item id="question-item" routerLink="/questions" routerLinkActive="active-link">
       <mat-icon matListIcon>help</mat-icon>
-      <span matLine>  Questions</span>
+      <span matLine>Questions</span>
     </mat-list-item>
-    <mat-list-item routerLink="/error404" routerLinkActive="active-link">
-      <mat-icon matListIcon>warning</mat-icon>
-      <span matLine>  Warning</span>
-    </mat-list-item>
-    <mat-list-item routerLink="/tutorial" routerLinkActive="active-link">
+   
+    <mat-list-item id="tutorial-item" routerLink="/tutorial" routerLinkActive="active-link">
       <mat-icon matListIcon>book</mat-icon>
-      <span matLine>  Tutorial</span>
+      <span matLine>Tutorial</span>
     </mat-list-item>
   </mat-nav-list>
 </div>

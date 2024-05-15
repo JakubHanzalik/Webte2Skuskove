@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { AuthenticationService, RegisterCredentials } from '../services/authentication.service';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { MaterialModule } from '../material';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -32,13 +32,15 @@ export class RegisterComponent {
   };
   errorMessage: string = '';
 
-  constructor(private authService: AuthenticationService) {}
+  constructor(private authService: AuthenticationService, private router : Router) {}
 
   register(): void {
+    this.router.navigate(['/']); 
     this.authService.register(this.credentials).subscribe({
       next: () => {
+        this.authService.loggedInStatus.next(true);
         console.log('Registration successful');
-        // Môžete presmerovať na prihlasovaciu stránku alebo na dashboard
+        window.location.reload();
       },
       error: (err) => {
         this.errorMessage = 'Registration failed';

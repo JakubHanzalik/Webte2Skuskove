@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { catchError, tap, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 
 export interface LoginCredentials {
   username: string;
@@ -16,41 +16,68 @@ export interface RegisterCredentials {
   surname: string;
 }
 
+export interface ChangePassword {
+  password: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthenticationService {
+  public loggedInStatus = new BehaviorSubject<boolean>(this.checkInitialLogin());
 
-  constructor(private http: HttpClient, private router: Router) { }
+  isLoggedIn$ = this.loggedInStatus.asObservable();
+
+  constructor(private http: HttpClient, private router: Router) {}
+
+  private checkInitialLogin(): boolean {
+    return localStorage.getItem('isLoggedIn') === 'true';
+  }
 
   login(credentials: LoginCredentials): Observable<any> {
     return this.http.post('/api/login', credentials).pipe(
-      map((res: any) => {
-        console.log('Logged in' , res);
-        return res;
+      tap((res: any) => {
+        console.log('Logged in:', res);
+        localStorage.setItem('isLoggedIn', 'true');
+        this.loggedInStatus.next(true);
+        this.router.navigate(['/']);  
+      }),
+      catchError(err => {
+        console.error('Login error:', err);
+        return throwError(err);
       })
     );
   }
-
+  
   register(credentials: RegisterCredentials): Observable<any> {
-    console.log(credentials);
     return this.http.post('/api/register', credentials).pipe(
-      map((res: any) => {
-        console.log('Registration done', res);
-        return res
+      tap((res: any) => {
+        console.log('Registration successful:', res);
+        localStorage.setItem('isLoggedIn', 'true');
+        this.loggedInStatus.next(true);
+        this.router.navigate(['/']); 
+      }),
+      catchError(err => {
+        console.error('Registration error:', err);
+        return throwError(err);
+      })
+    );
+  }
+  
+  logout(): Observable<any> {
+    return this.http.post('/api/logout', {}).pipe(
+      tap(() => {
+        localStorage.removeItem('isLoggedIn');
+        this.loggedInStatus.next(false);
+        this.router.navigate(['/login']);  
+      }),
+      catchError(err => {
+        console.error('Logout error:', err);
+        return throwError(err);
       })
     );
   }
 
-  isLoggedIn(): boolean {
-    return document.cookie.includes('loggedin=true');
-  }
-
-  logout(): void {
-    this.http.post('/api/logout', {}).subscribe(() => {
-      this.router.navigate(['/login']);
-    });
-  }
   changePassword(changePassword: ChangePassword): Observable<any> {
     return this.http.post('/api/change-password', changePassword).pipe(
       map((res: any) => {
@@ -59,7 +86,4 @@ export class AuthenticationService {
       })
     );
   }
-}
-export interface ChangePassword {
-  password: string;
 }

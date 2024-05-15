@@ -24,22 +24,8 @@
 <mat-toolbar color="primary">
   <span style="margin-left: 8px;">Wise    </span>
   <a routerLink="/home">
-    <img src="../../favicon.ico" alt="Logo">
+    <img src="../../favicon.ico" alt="Logo"  style width="28px">
   </a>
   <span></span>
-  <span style="flex:  1 1 auto;"></span>
-  <div>
-    <a routerLink="/login" mat-flat-button style="text-transform: uppercase;font-weight: bold;" style="margin: 5px" color="accent" class="text-white">Prihlásiť sa</a>
-    <a routerLink="/register" mat-flat-button style="text-transform: uppercase;font-weight: bold " style="margin: 5px" color="accent" class="text-white">Registruj sa</a>
-  </div>
-  <ng-template #logout>
-    <mat-menu #menu="matMenu">
-      <button mat-menu-item>Settings</button>
-      <button mat-menu-item>Odhlásiť sa</button>
-    </mat-menu>
 
-    <button mat-icon-button [matMenuTriggerFor]="menu">
-      <mat-icon aria-label="User menu icon">person</mat-icon>
-    </button>
-  </ng-template>
 </mat-toolbar>

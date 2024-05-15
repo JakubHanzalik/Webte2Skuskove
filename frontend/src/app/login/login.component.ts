@@ -4,7 +4,7 @@ import {
   LoginCredentials,
 } from '../services/authentication.service';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { MaterialModule } from '../material';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
@@ -30,18 +30,26 @@ export class LoginComponent {
   credentials: LoginCredentials = { username: '', password: '' };
   errorMessage: string = '';
 
-  constructor(private authService: AuthenticationService) {}
+  constructor(private authService: AuthenticationService, private router : Router) {}
 
   login(): void {
+    this.router.navigate(['/']); 
     this.authService.login(this.credentials).subscribe({
       next: () => {
+        this.authService.loggedInStatus.next(true);
         console.log('User logged in successfully');
-        // Navigate to home or dashboard page
+        window.location.reload();
+       
+
       },
       error: (err) => {
         this.errorMessage = 'Failed to login';
         console.error(err);
       },
+      
     });
   }
 }
+
+
+
