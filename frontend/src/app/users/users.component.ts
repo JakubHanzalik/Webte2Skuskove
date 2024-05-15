@@ -25,7 +25,7 @@ export class UsersComponent implements OnInit {
   users: User[] = [];
   newUser: Partial<User> = {};
   selectedUser: User | null = null;
-  editedUser: User | null = null;
+  
 
   constructor(private userService: UserService, private router: Router) {}
 
@@ -46,9 +46,6 @@ export class UsersComponent implements OnInit {
   editUser(user: User): void {
     if (user.id !== undefined) {
         this.selectedUser = { ...user };
-        this.editedUser = { ...user }; 
-        console.log('Edited user:', this.editedUser);
-        console.log("deteily editselected : ", this.selectedUser.id);
         this.loadUserDetails(user.id);
     } else {
         console.error('User ID is undefined.');
@@ -62,7 +59,7 @@ export class UsersComponent implements OnInit {
         this.userService.getUserById(userId).subscribe({
             next: (user) => {
                 console.log('User details:', user);
-                this.selectedUser = { ...user };
+                this.selectedUser = { ...user , id: userId};
           
             },
             error: (error) => console.error('Error fetching user details:', error)
@@ -135,6 +132,7 @@ updateUser(user: User): void {
   
   cancelEdit(): void {
     this.selectedUser = null;
+
 }
 
   addUser(): void {

@@ -32,7 +32,7 @@ export class UserService {
   
 
   createUser(user: User): Observable<User> {
-    return this.http.put<User>(this.apiUrl, user).pipe(
+    return this.http.post<User>(this.apiUrl, user).pipe(
       catchError(error => {
         console.error('Failed to create user:', error);
         return throwError(() => new Error('Failed to create user'));
@@ -50,7 +50,7 @@ export class UserService {
       role: user.role
     };
   
-    return this.http.post<User>(`${this.apiUrl}/${id}`, updatedUserData).pipe(
+    return this.http.put<User>(`${this.apiUrl}/${id}`, updatedUserData).pipe(
       catchError(error => {
         console.error('Failed to update user:', error);
         return throwError(() => new Error('Failed to update user'));
