@@ -74,9 +74,9 @@
     gap: 20px;
   }
 
-  .new-question-card, .active-questions-card, .historical-questions-card {
+  /* .new-question-card, .active-questions-card, .historical-questions-card {
     margin-bottom: 20px;
-  }
+  } */
 
   .answer-input {
     display: flex;

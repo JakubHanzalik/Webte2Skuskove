@@ -9,21 +9,37 @@
         <input matInput [(ngModel)]="questionData.text" name="question" required>
       </mat-form-field>
 
-      <div *ngFor="let answer of questionData.answers; let i = index">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Answer {{i + 1}}</mat-label>
-          <input matInput [(ngModel)]="answer.answer" name="answer-{{i}}" required>
-        </mat-form-field>
-        <mat-checkbox [(ngModel)]="answer.correct" name="correct-{{i}}">Correct</mat-checkbox>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Question Type</mat-label>
+        <mat-select [(ngModel)]="questionData.type" name="type" required>
+          <mat-option *ngFor="let type of questionTypes" [value]="type.value">{{ type.viewValue }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div *ngIf="questionData.type === 0 || questionData.type === 1">
+        <div *ngFor="let answer of questionData.answers; let i = index">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Answer {{i + 1}}</mat-label>
+            <input matInput [(ngModel)]="answer.answer" name="answer-{{i}}" required>
+          </mat-form-field>
+          <mat-checkbox *ngIf="questionData.type === 1" [(ngModel)]="answer.correct" name="correct-{{i}}">Correct</mat-checkbox>
+        </div>
+
+        <!-- Field for adding new answers -->
+        <div *ngFor="let answer of newAnswers; let i = index">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>New Answer {{i + 1}}</mat-label>
+            <input matInput [(ngModel)]="answer.answer" name="new-answer-{{i}}" (ngModelChange)="onNewAnswerChange(answer, i)">
+          </mat-form-field>
+          <mat-checkbox *ngIf="questionData.type === 1" [(ngModel)]="answer.correct" name="new-correct-{{i}}">Correct</mat-checkbox>
+        </div>
       </div>
 
-      <!-- Field for adding new answers -->
-      <div *ngFor="let answer of newAnswers; let i = index">
+      <div *ngIf="questionData.type === 2">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>New Answer {{i + 1}}</mat-label>
-          <input matInput [(ngModel)]="answer.answer" name="new-answer-{{i}}" (ngModelChange)="onNewAnswerChange(answer, i)">
+          <mat-label>Text Answer</mat-label>
+          <input matInput [(ngModel)]="questionData.textAnswer" name="textAnswer">
         </mat-form-field>
-        <mat-checkbox [(ngModel)]="answer.correct" name="new-correct-{{i}}">Correct</mat-checkbox>
       </div>
 
       <button mat-raised-button color="primary" type="submit">Update Question</button>
@@ -34,11 +50,28 @@
   <div *ngIf="!isLoggedIn">
     <form (ngSubmit)="voteOnQuestion()">
       <h1>{{ questionData.question }}</h1>
-      <mat-radio-group [(ngModel)]="selectedAnswerId" name="selectedAnswer">
+
+      <div *ngIf="questionData.type === 0">
+        <mat-radio-group [(ngModel)]="selectedAnswerId" name="selectedAnswer">
+          <div *ngFor="let answer of questionData.answers">
+            <mat-radio-button [value]="answer.id">{{ answer.answer }}</mat-radio-button>
+          </div>
+        </mat-radio-group>
+      </div>
+
+      <div *ngIf="questionData.type === 1">
         <div *ngFor="let answer of questionData.answers">
-          <mat-radio-button [value]="answer.id">{{ answer.answer }}</mat-radio-button>
+          <mat-checkbox [(ngModel)]="answer.correct" name="answer-{{answer.id}}">{{ answer.answer }}</mat-checkbox>
         </div>
-      </mat-radio-group>
+      </div>
+
+      <div *ngIf="questionData.type === 2">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Text Answer</mat-label>
+          <input matInput [(ngModel)]="questionData.textAnswer" name="textAnswer">
+        </mat-form-field>
+      </div>
+
       <button mat-raised-button color="primary" type="submit">Vote</button>
     </form>
   </div>

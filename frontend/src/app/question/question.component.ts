@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +26,8 @@ import { MatRadioModule } from '@angular/material/radio';
     MatButtonModule,
     MatFormFieldModule,
     MatCheckboxModule,
-    MatRadioModule
+    MatRadioModule,
+    MatSelectModule,
   ],
   templateUrl: './question.component.html',
   styleUrls: ['./question.component.css']
@@ -36,6 +38,11 @@ export class QuestionComponent implements OnInit {
   isLoggedIn: boolean = false;
   selectedAnswerId: number | null = null;
   newAnswers: any[] = [{ answer: '', correct: false }];
+  questionTypes = [
+    { value: 0, viewValue: 'Single Choice' },
+    { value: 1, viewValue: 'Multiple Choice' },
+    { value: 2, viewValue: 'Text' },
+  ];
 
   constructor(
     private route: ActivatedRoute,
@@ -120,7 +127,9 @@ export class QuestionComponent implements OnInit {
         answers: [...this.questionData.answers, ...this.newAnswers.filter(a => a.answer.trim() !== '')]
       };
 
-      this.http.post(questionUrl, updatedQuestionData)
+      console.log('Updating question with data:', updatedQuestionData);
+
+      this.http.put(questionUrl, updatedQuestionData, { responseType: 'json' })
         .pipe(
           catchError(err => {
             console.error('Error updating question:', err);
@@ -136,14 +145,37 @@ export class QuestionComponent implements OnInit {
   }
 
   voteOnQuestion(): void {
-    if (this.questionId && !this.isLoggedIn && this.selectedAnswerId !== null) {
+    if (this.questionId && !this.isLoggedIn) {
       const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
       const voteUrl = `${baseUrl}/voting/${this.questionId}`;
 
-      const voteData: any = {};
-      if (this.selectedAnswerId) {
-        voteData.answerId = this.selectedAnswerId;
+      let voteData: any;
+
+      if (this.questionData.type === 0) {
+        if (this.selectedAnswerId !== null) {
+          voteData = { answerIds: [this.selectedAnswerId] };
+        } else {
+          console.error('Voting failed: No answer selected');
+          return;
+        }
+      } else if (this.questionData.type === 1) {
+        const selectedAnswerIds = this.questionData.answers.filter((answer: any) => answer.correct).map((answer: any) => answer.id);
+        if (selectedAnswerIds.length > 0) {
+          voteData = { answerIds: selectedAnswerIds };
+        } else {
+          console.error('Voting failed: No answers selected');
+          return;
+        }
+      } else if (this.questionData.type === 2) {
+        if (this.questionData.textAnswer && this.questionData.textAnswer.trim() !== '') {
+          voteData = { answerText: this.questionData.textAnswer };
+        } else {
+          console.error('Voting failed: No text answer provided');
+          return;
+        }
       }
+
+      console.log('Voting with data:', voteData);
 
       this.http.post(voteUrl, voteData)
         .pipe(
@@ -155,8 +187,6 @@ export class QuestionComponent implements OnInit {
         .subscribe(response => {
           console.log('Voted successfully:', response);
         });
-    } else {
-      console.error('Voting failed: No answer selected');
     }
   }
 
