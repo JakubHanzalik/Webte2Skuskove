@@ -1,68 +1,106 @@
 <div class="questions-container">
-    <mat-icon matListIcon>help</mat-icon>
-    <div style="width: 100%; padding: 10px; box-sizing: border-box;">
-        <input type="text" [(ngModel)]="newQuestionText" placeholder="Enter new question">
-        <button (click)="addNewQuestion()">Add Question</button>
-    </div>
-    <div class="active-questions">
-        <h2>Active Questions</h2>
-        <ul>
-            <li *ngFor="let question of activeQuestions">
-                <span *ngIf="!question.editing; else editMode">
-                    <img *ngIf="question.qrCodeURL" [src]="question.qrCodeURL" alt="QR Code" class="qr-code">
-                    <span [routerLink]="['/', question.question_code]" routerLinkActive="router-link-active">{{ question.text }}</span>
-                    <button (click)="toggleEditMode(question)">
-                        <mat-icon matListIcon>edit</mat-icon>
-                    </button>
-                    <button (click)="showQRCode(question)"> <mat-icon matListIcon>art_track</mat-icon> </button>
-                    <button (click)="copyQuestion(question)">
-                        <mat-icon matListIcon>file_copy</mat-icon>
-                    </button>
-                    <button (click)="deleteQuestion(question)">
-                        <mat-icon matListIcon>delete</mat-icon>
-                    </button>
-                    <button (click)="deactivateQuestion(question)">
-                        <mat-icon matListIcon>close</mat-icon>
-                    </button>
+  <mat-card class="new-question-card">
+    <mat-card-header>
+      <mat-card-title>New Question</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-form-field appearance="fill">
+        <mat-label>Question Text</mat-label>
+        <input matInput type="text" [(ngModel)]="newQuestionText" placeholder="Enter new question">
+      </mat-form-field>
 
+      <mat-form-field appearance="fill">
+        <mat-label>Subject</mat-label>
+        <mat-select [(ngModel)]="newQuestionSubjectId">
+          <mat-option [value]="1">Subject 1</mat-option>
+          <mat-option [value]="2">Subject 2</mat-option>
+          <!-- Add more subject options as needed -->
+        </mat-select>
+      </mat-form-field>
 
-                </span>
-                <ng-template #editMode>
-                    <textarea [(ngModel)]="question.text"></textarea>
-                    <button (click)="saveEditedQuestion(question)">
-                        <mat-icon matListIcon>file_copy</mat-icon>
-                    </button>
-                </ng-template>
-            </li>
-        </ul>
-    </div>
-    <div class="historical-questions">
-        <h2>Historical Questions</h2>
-        <ul>
-            <li *ngFor="let question of historicalQuestions">
-                <span *ngIf="!question.editing; else editMode">
-                    {{ question.text }}
-                    <button (click)="toggleEditMode(question)">
-                        <mat-icon matListIcon>edit</mat-icon>
-                    </button>
-                    <button (click)="copyQuestion(question)">
-                        <mat-icon matListIcon>file_copy</mat-icon>
-                    </button>
-                    <button (click)="deleteQuestion(question)">
-                        <mat-icon matListIcon>delete</mat-icon>
-                    </button>
-                    <button (click)="activeQuestion(question)">
-                        <mat-icon matListIcon>check</mat-icon>
-                    </button>
+      <mat-form-field appearance="fill">
+        <mat-label>Question Type</mat-label>
+        <mat-select [(ngModel)]="newQuestionType">
+          <mat-option [value]="0">Single Choice</mat-option>
+          <mat-option [value]="1">Multiple Choice</mat-option>
+          <mat-option [value]="2">Text</mat-option>
+        </mat-select>
+      </mat-form-field>
 
-                </span>
-                <ng-template #editMode>
-                    <textarea [(ngModel)]="question.text"></textarea>
-                    <button (click)="saveEditedQuestion(question)">
-                        <mat-icon matListIcon>file_copy</mat-icon>
-                    </button>
-                </ng-template>
-            </li>
-        </ul>
-    </div>
+      <div *ngFor="let answer of newQuestionAnswers; let i = index" class="answer-input">
+        <mat-form-field appearance="fill">
+          <mat-label>Answer Text</mat-label>
+          <input matInput type="text" [(ngModel)]="answer.answer" placeholder="Answer text">
+        </mat-form-field>
+        <mat-checkbox [(ngModel)]="answer.correct">Correct</mat-checkbox>
+      </div>
+
+      <button mat-raised-button color="primary" (click)="addNewQuestion()">Add Question</button>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="active-questions-card">
+    <mat-card-header>
+      <mat-card-title>Active Questions</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <ul>
+        <li *ngFor="let question of activeQuestions">
+          <span *ngIf="!question.editing; else editMode">
+            <img *ngIf="question.qrCodeURL" [src]="question.qrCodeURL" alt="QR Code" class="qr-code">
+            <span [routerLink]="['/', question.question_code]" routerLinkActive="router-link-active">{{ question.text }}</span>
+
+            <button mat-icon-button (click)="showQRCode(question)">
+              <mat-icon>art_track</mat-icon>
+            </button>
+            <button mat-icon-button (click)="copyQuestion(question)">
+              <mat-icon>file_copy</mat-icon>
+            </button>
+            <button mat-icon-button (click)="deleteQuestion(question)">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button mat-icon-button (click)="deactivateQuestion(question)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </span>
+          <ng-template #editMode>
+            <textarea [(ngModel)]="question.text"></textarea>
+            <button mat-icon-button (click)="saveEditedQuestion(question)">
+              <mat-icon>save</mat-icon>
+            </button>
+          </ng-template>
+        </li>
+      </ul>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="historical-questions-card">
+    <mat-card-header>
+      <mat-card-title>Historical Questions</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <ul>
+        <li *ngFor="let question of historicalQuestions">
+          <span *ngIf="!question.editing; else editMode">
+            {{ question.text }}
+            <button mat-icon-button (click)="copyQuestion(question)">
+              <mat-icon>file_copy</mat-icon>
+            </button>
+            <button mat-icon-button (click)="deleteQuestion(question)">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button mat-icon-button (click)="activeQuestion(question)">
+              <mat-icon>check</mat-icon>
+            </button>
+          </span>
+          <ng-template #editMode>
+            <textarea [(ngModel)]="question.text"></textarea>
+            <button mat-icon-button (click)="saveEditedQuestion(question)">
+              <mat-icon>save</mat-icon>
+            </button>
+          </ng-template>
+        </li>
+      </ul>
+    </mat-card-content>
+  </mat-card>
 </div>
