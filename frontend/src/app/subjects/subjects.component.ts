@@ -1,10 +1,10 @@
-import { Component, Injectable, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { SubjectService } from '../services/subject.service';
-import { HttpClientModule } from '@angular/common/http';
 import { Subject } from '../models/subject.model'; 
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -19,7 +19,7 @@ export class SubjectComponent implements OnInit {
   subjects: Subject[] = [];
   newSubjectText: string = '';
 
-  constructor(private subjectService: SubjectService) { }
+  constructor(private subjectService: SubjectService, private router: Router) {}
 
   ngOnInit() {
     this.loadSubjects();
@@ -33,4 +33,11 @@ export class SubjectComponent implements OnInit {
       error: (err) => console.error('Failed to load subjects:', err)
     });
   }
+
+  goToQuestions(subjectId: number) {
+    console.log('Navigating to questions with subjectId:', subjectId);  
+    this.router.navigate(['/questions'], { state: { subjectValue: subjectId } });
+  }
+  
+ 
 }

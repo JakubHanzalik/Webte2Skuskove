@@ -62,6 +62,7 @@
     align-items: right;
     justify-content: flex-end;
   }
+
   .qr-code {
     display: inline-block;
     width: 100px;

@@ -3,11 +3,10 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { QuestionsService } from '../services/questions.service';
 import { HttpClientModule } from '@angular/common/http';
-
 import { Subject } from 'rxjs';
 import { QrcodeService } from '../services/qrcode.service';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -15,13 +14,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 interface Answer {
-  id?: number;  // ID môže byť voliteľné, keď vytvárame novú odpoveď
+  id?: number;  
   answer: string;
   correct: boolean;
 }
 
 interface QuestionDTO {
-  question_code?: string;  // question_code môže byť voliteľné
+  question_code?: string;  
   text: string;
   active: boolean;
   subjectId: number;
@@ -39,6 +38,9 @@ enum QuestionType {
   SINGLE_CHOICE = 0,
   MULTIPLE_CHOICE = 1,
   TEXT = 2,
+}
+interface RouterState {
+  subjectValue: number;
 }
 
 @Component({
@@ -76,34 +78,45 @@ export class QuestionsComponent implements OnInit {
   constructor(
     private cdr: ChangeDetectorRef,
     private questionsService: QuestionsService,
-    private qrCodeService: QrcodeService
+    private qrCodeService: QrcodeService,
+    private router: Router
   ) {}
 
+ 
   ngOnInit() {
-    this.questionsService.getAllQuestions().subscribe({
-      next: (res: QuestionDTO[]) => {
-        res.forEach((x) => {
-          const question: Question = {
-            active: x.active,
-            subjectId: x.subjectId,
-            editing: false,
-            text: x.text,
-            type: x.type,
-            authorId: x.authorId,
-            answers: x.answers,
-            question_code: x.question_code,
-          };
-
-          if (x.active) {
-            this.activeQuestions.push(question);
-          } else {
-            this.historicalQuestions.push(question);
-          }
-        });
-      },
-      error: (err) => console.error('Error fetching questions:', err),
-    });
+    const navigation = this.router.getCurrentNavigation();
+    console.log('Current navigation:', navigation);  
+    const state = navigation?.extras.state as RouterState;
+    console.log('Router state:', state);  
+    const subjectValue = state?.subjectValue;
+    console.log('Subject value from state:', subjectValue);  
+    this.loadQuestions(subjectValue);
   }
+  
+ 
+ loadQuestions(subjectFilter?: number) {
+  console.log('Subject Filter received in loadQuestions:', subjectFilter);
+  this.questionsService.getAllQuestions().subscribe({
+     next: (res: QuestionDTO[]) => {
+        console.log('Received data:', res);
+
+        const filteredQuestions = subjectFilter !== undefined
+           ? res.filter(q => q.subjectId === subjectFilter)
+           : res;
+
+        console.log('Filtered Questions:', filteredQuestions);
+
+        this.activeQuestions = filteredQuestions.filter(q => q.active);
+        this.historicalQuestions = filteredQuestions.filter(q => !q.active);
+
+        console.log('Active Questions:', this.activeQuestions);
+        console.log('Historical Questions:', this.historicalQuestions);
+     },
+     error: (err) => console.error('Error fetching questions:', err)
+  });
+}
+
+  
 
   async showQRCode(question: Question) {
     if (question.question_code) {

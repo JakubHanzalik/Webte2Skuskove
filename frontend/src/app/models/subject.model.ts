@@ -1,5 +1,5 @@
 export interface Subject {
-    value: string;
+    value: number;
     text: string;
   }
   
