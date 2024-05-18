@@ -24,3 +24,16 @@ mat-radio-group {
 button {
   width: 100%;
 }
+
+.correct-answer {
+  font-weight: bold;
+  color: green;
+}
+.wrong-answer {
+  font-weight: bold;
+  color: red;
+}
+.correct-unselected-answer {
+  font-weight: bold;
+  color: blue;
+}

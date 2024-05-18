@@ -5,12 +5,12 @@
   <div *ngIf="isLoggedIn">
     <form (ngSubmit)="updateQuestion()">
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Question</mat-label>
+        <mat-label>Otázka</mat-label>
         <input matInput [(ngModel)]="questionData.text" name="question" required>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Question Type</mat-label>
+        <mat-label>Typ otázky</mat-label>
         <mat-select [(ngModel)]="questionData.type" name="type" required>
           <mat-option *ngFor="let type of questionTypes" [value]="type.value">{{ type.viewValue }}</mat-option>
         </mat-select>
@@ -19,36 +19,36 @@
       <div *ngIf="questionData.type === 0 || questionData.type === 1">
         <div *ngFor="let answer of questionData.answers; let i = index">
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Answer {{i + 1}}</mat-label>
+            <mat-label>Odpoveď {{i + 1}}</mat-label>
             <input matInput [(ngModel)]="answer.answer" name="answer-{{i}}" required>
           </mat-form-field>
-          <mat-checkbox *ngIf="questionData.type === 1" [(ngModel)]="answer.correct" name="correct-{{i}}">Correct</mat-checkbox>
+          <mat-checkbox *ngIf="questionData.type === 1" [(ngModel)]="answer.correct" name="correct-{{i}}">Správna</mat-checkbox>
         </div>
 
         <!-- Field for adding new answers -->
         <div *ngFor="let answer of newAnswers; let i = index">
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>New Answer {{i + 1}}</mat-label>
+            <mat-label>Nová odpoveď {{i + 1}}</mat-label>
             <input matInput [(ngModel)]="answer.answer" name="new-answer-{{i}}" (ngModelChange)="onNewAnswerChange(answer, i)">
           </mat-form-field>
-          <mat-checkbox *ngIf="questionData.type === 1" [(ngModel)]="answer.correct" name="new-correct-{{i}}">Correct</mat-checkbox>
+          <mat-checkbox *ngIf="questionData.type === 1" [(ngModel)]="answer.correct" name="new-correct-{{i}}">Správna</mat-checkbox>
         </div>
       </div>
 
       <div *ngIf="questionData.type === 2">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Text Answer</mat-label>
+          <mat-label>Textová odpoveď</mat-label>
           <input matInput [(ngModel)]="questionData.textAnswer" name="textAnswer">
         </mat-form-field>
       </div>
 
-      <button mat-raised-button color="primary" type="submit">Update Question</button>
+      <button mat-raised-button color="primary" type="submit">Aktualizovať otázku</button>
     </form>
   </div>
 
   <!-- If user is not logged in, allow voting -->
   <div *ngIf="!isLoggedIn">
-    <form (ngSubmit)="voteOnQuestion()">
+    <form *ngIf="!showResults" (ngSubmit)="voteOnQuestion()">
       <h1>{{ questionData.question }}</h1>
 
       <div *ngIf="questionData.type === 0">
@@ -67,12 +67,36 @@
 
       <div *ngIf="questionData.type === 2">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Text Answer</mat-label>
+          <mat-label>Textová odpoveď</mat-label>
           <input matInput [(ngModel)]="questionData.textAnswer" name="textAnswer">
         </mat-form-field>
       </div>
 
-      <button mat-raised-button color="primary" type="submit">Vote</button>
+      <button mat-raised-button color="primary" type="submit">Hlasovať</button>
     </form>
+
+    <!-- Display answers with correct ones highlighted -->
+    <div *ngIf="showResults">
+      <h3>Odpovede:</h3>
+      <div *ngFor="let answer of questionData.answers">
+        <div [ngClass]="{
+          'correct-answer': isUserAnswerCorrect(answer.id),
+          'wrong-answer': isUserAnswerWrong(answer.id),
+          'correct-unselected-answer': isCorrectAnswer(answer.id) && !userAnswerIds.includes(answer.id)
+        }">
+          {{ answer.answer }}
+        </div>
+      </div>
+
+      <!-- Display text answer if question type is text -->
+      <div *ngIf="questionData.type === 2">
+        <div [ngClass]="{
+          'correct-answer': isCorrectAnswer(1),
+          'wrong-answer': !isCorrectAnswer(1)
+        }">
+          {{ questionData.textAnswer }}
+        </div>
+      </div>
+    </div>
   </div>
 </div>

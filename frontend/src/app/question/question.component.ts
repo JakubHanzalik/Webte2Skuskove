@@ -38,11 +38,14 @@ export class QuestionComponent implements OnInit {
   isLoggedIn: boolean = false;
   selectedAnswerId: number | null = null;
   newAnswers: any[] = [{ answer: '', correct: false }];
+  correctAnswerIds: number[] = [];
+  userAnswerIds: number[] = [];
   questionTypes = [
     { value: 0, viewValue: 'Single Choice' },
     { value: 1, viewValue: 'Multiple Choice' },
     { value: 2, viewValue: 'Text' },
   ];
+  showResults: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -154,6 +157,7 @@ export class QuestionComponent implements OnInit {
       if (this.questionData.type === 0) {
         if (this.selectedAnswerId !== null) {
           voteData = { answerIds: [this.selectedAnswerId] };
+          this.userAnswerIds = [this.selectedAnswerId];
         } else {
           console.error('Voting failed: No answer selected');
           return;
@@ -162,6 +166,7 @@ export class QuestionComponent implements OnInit {
         const selectedAnswerIds = this.questionData.answers.filter((answer: any) => answer.correct).map((answer: any) => answer.id);
         if (selectedAnswerIds.length > 0) {
           voteData = { answerIds: selectedAnswerIds };
+          this.userAnswerIds = selectedAnswerIds;
         } else {
           console.error('Voting failed: No answers selected');
           return;
@@ -169,6 +174,7 @@ export class QuestionComponent implements OnInit {
       } else if (this.questionData.type === 2) {
         if (this.questionData.textAnswer && this.questionData.textAnswer.trim() !== '') {
           voteData = { answerText: this.questionData.textAnswer };
+          this.userAnswerIds = [1];  // Assuming 1 for text answer, need actual implementation if needed.
         } else {
           console.error('Voting failed: No text answer provided');
           return;
@@ -186,11 +192,46 @@ export class QuestionComponent implements OnInit {
         )
         .subscribe(response => {
           console.log('Voted successfully:', response);
+          this.showResults = true;
+          this.getCorrectAnswers();
+        });
+    }
+  }
+
+  getCorrectAnswers(): void {
+    if (this.questionId) {
+      const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+      const correctAnswersUrl = `${baseUrl}/voting/${this.questionId}/correct`;
+
+      this.http.get(correctAnswersUrl)
+        .pipe(
+          catchError(err => {
+            console.error('Error fetching correct answers:', err);
+            return of(null);
+          })
+        )
+        .subscribe((response: any) => {
+          console.log('Correct answers:', response);
+          if (response && response.answerIds) {
+            this.correctAnswerIds = response.answerIds;
+          }
         });
     }
   }
 
   redirectToError(): void {
     this.router.navigate(['/error404']);
+  }
+
+  isCorrectAnswer(answerId: number): boolean {
+    return this.correctAnswerIds.includes(answerId);
+  }
+
+  isUserAnswerWrong(answerId: number): boolean {
+    return this.userAnswerIds.includes(answerId) && !this.correctAnswerIds.includes(answerId);
+  }
+
+  isUserAnswerCorrect(answerId: number): boolean {
+    return this.userAnswerIds.includes(answerId) && this.correctAnswerIds.includes(answerId);
   }
 }
