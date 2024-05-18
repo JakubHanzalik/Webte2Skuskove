@@ -3,7 +3,6 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { QuestionsService } from '../services/questions.service';
 import { HttpClientModule } from '@angular/common/http';
-import { Subject } from 'rxjs';
 import { QrcodeService } from '../services/qrcode.service';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -75,6 +74,8 @@ export class QuestionsComponent implements OnInit {
     { answer: '', correct: false },
   ];
 
+  QuestionType = QuestionType; // Make QuestionType accessible in the template
+
   constructor(
     private cdr: ChangeDetectorRef,
     private questionsService: QuestionsService,
@@ -83,15 +84,14 @@ export class QuestionsComponent implements OnInit {
     private route: ActivatedRoute
   ) {}
 
-
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       const subjectId = +params.get('subjectId')!;
       console.log('Subject value from route:', subjectId);
+      this.newQuestionSubjectId = subjectId;
       this.loadQuestions(subjectId);
     });
   }
-
 
   loadQuestions(subjectFilter?: number) {
     console.log('Subject Filter received in loadQuestions:', subjectFilter);
@@ -115,8 +115,6 @@ export class QuestionsComponent implements OnInit {
     });
   }
 
-
-
   async showQRCode(question: Question) {
     if (question.question_code) {
       try {
@@ -135,7 +133,7 @@ export class QuestionsComponent implements OnInit {
       const newQuestion: QuestionDTO = {
         text: this.newQuestionText,
         active: true,
-        answers: this.newQuestionAnswers.map((answer) => ({
+        answers: this.newQuestionAnswers.filter(answer => answer.answer.trim()).map((answer) => ({
           answer: answer.answer,
           correct: answer.correct,
         })),
@@ -154,11 +152,18 @@ export class QuestionsComponent implements OnInit {
             { answer: '', correct: false },
           ];
           this.cdr.detectChanges();
+          this.loadQuestions(this.newQuestionSubjectId); // Refresh the question list
         },
         error: (err) => {
           console.error('Error creating question:', err);
         },
       });
+    }
+  }
+
+  addAnswerField() {
+    if (this.newQuestionAnswers[this.newQuestionAnswers.length - 1].answer.trim()) {
+      this.newQuestionAnswers.push({ answer: '', correct: false });
     }
   }
 
