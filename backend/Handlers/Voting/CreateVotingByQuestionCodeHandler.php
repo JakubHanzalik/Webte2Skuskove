@@ -35,6 +35,11 @@ class CreateVotingByQuestionCodeHandler
             $statement->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
             $statement->execute();
 
+            $updateQuestionQuery = "UPDATE Questions SET active = 1 WHERE question_code = :questionCode";
+            $stmt = $this->dbConnection->prepare($updateQuestionQuery);
+            $stmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
+            $stmt->execute();
+
 
             $this->dbConnection->commit();
             return (int) $this->dbConnection->lastInsertId();
