@@ -30,7 +30,7 @@ class UpdateUserRequestModel
         $validator = Validator::key('password', Validator::stringType()->notEmpty())
             ->key('name', Validator::stringType()->notEmpty())
             ->key('surname', Validator::stringType()->notEmpty())
-            ->key('role', Validator::instance(EUserRole::class));
+            ->key('role', Validator::in([0, 1]));
 
         try {
             $validator->assert($user);

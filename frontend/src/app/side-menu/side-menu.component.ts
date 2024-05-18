@@ -24,7 +24,7 @@ export class SideMenuComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
   private authSubscription!: Subscription;
 
-
+  
   constructor( private cdr: ChangeDetectorRef,private authService: AuthenticationService, private router: Router, private renderer: Renderer2, private el: ElementRef) {}
 
   ngOnInit(): void {

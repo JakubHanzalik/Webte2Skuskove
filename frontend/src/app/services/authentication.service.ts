@@ -53,9 +53,9 @@ export class AuthenticationService {
     return this.http.post('/api/register', credentials).pipe(
       tap((res: any) => {
         console.log('Registration successful:', res);
-        localStorage.setItem('isLoggedIn', 'true');
-        this.loggedInStatus.next(true);
-        this.router.navigate(['/']); 
+        localStorage.setItem('isLoggedIn', 'true'); 
+        this.loggedInStatus.next(true);  
+        this.router.navigate(['/']);  
       }),
       catchError(err => {
         console.error('Registration error:', err);
@@ -63,6 +63,7 @@ export class AuthenticationService {
       })
     );
   }
+  
   
   logout(): Observable<any> {
     return this.http.post('/api/logout', {}).pipe(

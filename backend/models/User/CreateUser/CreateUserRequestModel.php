@@ -25,16 +25,16 @@ class CreateUserRequestModel
     #[OA\Property(type: 'string', description: 'Surname', example: 'Hrasko')]
     public string $surname;
 
-    #[OA\Property(title: 'type', type: 'integer', enum: EUserRole::class)]
+    #[OA\Property(title: 'type', type: 'integer', enum: [0, 1])]
     public EUserRole $role;
 
-    public function __construct($user)
+    public function __construct(array $user)
     {
         $validator = Validator::key('username', Validator::stringType()->notEmpty())
             ->key('password', Validator::stringType()->notEmpty())
             ->key('name', Validator::stringType()->notEmpty())
             ->key('surname', Validator::stringType()->notEmpty())
-            ->key('role', Validator::in([EUserRole::ADMIN, EUserRole::USER])->notEmpty());
+            ->key('role', Validator::intVal()->in([0, 1]));
 
         try {
             $validator->assert($user);

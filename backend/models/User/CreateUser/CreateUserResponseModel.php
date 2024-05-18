@@ -1,11 +1,14 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Stuba\Models\User\CreateUser;
 
 use JsonSerializable;
 use OpenApi\Attributes as OA;
+use Stuba\Db\Models\User\EUserRole; 
 
-#[OA\Schema(type: 'object', title: 'CreateUserRequestModel')]
+#[OA\Schema(type: 'object', title: 'CreateUserResponseModel')]
 class CreateUserResponseModel implements JsonSerializable
 {
     #[OA\Property(type: 'integer', description: 'User id', example: 1)]

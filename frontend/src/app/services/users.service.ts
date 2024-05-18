@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { User } from '../models/user.model';
+import { UserUpdate } from '../models/user-update.model';
 
 @Injectable({
   providedIn: 'root'
@@ -29,10 +30,9 @@ export class UserService {
       })
     );
   }
-  
 
-  createUser(user: User): Observable<User> {
-    return this.http.post<User>(this.apiUrl, user).pipe(
+  createUser(userCreate: User): Observable<User> {
+    return this.http.post<User>(this.apiUrl, userCreate).pipe(
       catchError(error => {
         console.error('Failed to create user:', error);
         return throwError(() => new Error('Failed to create user'));
@@ -40,24 +40,15 @@ export class UserService {
     );
   }
 
-  updateUser(id: number, user: User): Observable<User> {
-    const updatedUserData = {
-      id: user.id,
-      username: user.username,
-      password: user.password,
-      name: user.name,
-      surname: user.surname,
-      role: user.role
-    };
-  
-    return this.http.put<User>(`${this.apiUrl}/${id}`, updatedUserData).pipe(
+  updateUser(id: number, userUpdate: UserUpdate): Observable<User> {
+    return this.http.put<User>(`${this.apiUrl}/${id}`, userUpdate).pipe(
       catchError(error => {
         console.error('Failed to update user:', error);
         return throwError(() => new Error('Failed to update user'));
       })
     );
   }
-  
+
   deleteUser(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`).pipe(
       catchError(error => {
@@ -66,4 +57,5 @@ export class UserService {
       })
     );
   }
+ 
 }
