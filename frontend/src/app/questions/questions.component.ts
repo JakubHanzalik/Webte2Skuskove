@@ -6,7 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { QrcodeService } from '../services/qrcode.service';
 import { MatIconModule } from '@angular/material/icon';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -14,13 +14,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 interface Answer {
-  id?: number;  
+  id?: number;
   answer: string;
   correct: boolean;
 }
 
 interface QuestionDTO {
-  question_code?: string;  
+  question_code?: string;
   text: string;
   active: boolean;
   subjectId: number;
@@ -79,30 +79,29 @@ export class QuestionsComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private questionsService: QuestionsService,
     private qrCodeService: QrcodeService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
- 
+
   ngOnInit() {
-    const navigation = this.router.getCurrentNavigation();
-    console.log('Current navigation:', navigation);  
-    const state = navigation?.extras.state as RouterState;
-    console.log('Router state:', state);  
-    const subjectValue = state?.subjectValue;
-    console.log('Subject value from state:', subjectValue);  
-    this.loadQuestions(subjectValue);
+    this.route.paramMap.subscribe(params => {
+      const subjectId = +params.get('subjectId')!;
+      console.log('Subject value from route:', subjectId);
+      this.loadQuestions(subjectId);
+    });
   }
-  
- 
- loadQuestions(subjectFilter?: number) {
-  console.log('Subject Filter received in loadQuestions:', subjectFilter);
-  this.questionsService.getAllQuestions().subscribe({
-     next: (res: QuestionDTO[]) => {
+
+
+  loadQuestions(subjectFilter?: number) {
+    console.log('Subject Filter received in loadQuestions:', subjectFilter);
+    this.questionsService.getAllQuestions().subscribe({
+      next: (res: QuestionDTO[]) => {
         console.log('Received data:', res);
 
         const filteredQuestions = subjectFilter !== undefined
-           ? res.filter(q => q.subjectId === subjectFilter)
-           : res;
+          ? res.filter(q => q.subjectId === subjectFilter)
+          : res;
 
         console.log('Filtered Questions:', filteredQuestions);
 
@@ -111,12 +110,12 @@ export class QuestionsComponent implements OnInit {
 
         console.log('Active Questions:', this.activeQuestions);
         console.log('Historical Questions:', this.historicalQuestions);
-     },
-     error: (err) => console.error('Error fetching questions:', err)
-  });
-}
+      },
+      error: (err) => console.error('Error fetching questions:', err)
+    });
+  }
 
-  
+
 
   async showQRCode(question: Question) {
     if (question.question_code) {

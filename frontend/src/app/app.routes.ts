@@ -21,7 +21,7 @@ export const routes: Routes = [
   { path: 'users' , component: UsersComponent },
   { path: 'subjects' , component: SubjectComponent },
   { path: 'error404', component: Error404Component },
-  { path: 'questions' , component: QuestionsComponent },
+  { path: 'questions/:subjectId', component: QuestionsComponent },
   { path: ':id' , component: QuestionComponent },
   // to do errors a dalsie cesty
   { path: '**' , redirectTo: '' }

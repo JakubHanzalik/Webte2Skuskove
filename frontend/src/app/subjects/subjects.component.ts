@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SubjectService } from '../services/subject.service';
-import { Subject } from '../models/subject.model'; 
+import { Subject } from '../models/subject.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
@@ -28,16 +28,16 @@ export class SubjectComponent implements OnInit {
   loadSubjects() {
     this.subjectService.getSubjects().subscribe({
       next: (data) => {
-        this.subjects = data; 
+        this.subjects = data;
       },
       error: (err) => console.error('Failed to load subjects:', err)
     });
   }
 
   goToQuestions(subjectId: number) {
-    console.log('Navigating to questions with subjectId:', subjectId);  
-    this.router.navigate(['/questions'], { state: { subjectValue: subjectId } });
+    console.log('Navigating to questions with subjectId:', subjectId);
+    this.router.navigate(['/questions', subjectId]);
   }
-  
- 
+
+
 }
