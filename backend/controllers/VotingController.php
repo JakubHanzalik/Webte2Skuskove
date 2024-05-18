@@ -17,17 +17,24 @@ use Stuba\Models\Voting\GetQuestionWithAnswers\GetQuestionAnswerModel;
 use Stuba\Models\Voting\VoteByCode\VoteByCodeRequestModel;
 use Stuba\Handlers\Question\GetQuestionByCodeHandler;
 use Stuba\Db\Models\Questions\EQuestionType;
+use Stuba\Handlers\Voting\CreateVotingByQuestionCodeHandler;
+use Stuba\Handlers\Voting\CloseVotingByQuestionCodeHandler;
 
 #[OA\Tag('Voting', description: "Endpointy pre hlasovanie neprihlaseneho pouzivatela")]
 class VotingController
 {
     private PDO $dbConnection;
     private GetQuestionByCodeHandler $getQuestionByCodeHandler;
+    private CreateVotingByQuestionCodeHandler $createVotingByQuestionCodeHandler;
+    private CloseVotingByQuestionCodeHandler $closeVotingByQuestionCodeHandler;
 
     public function __construct()
     {
         $this->dbConnection = (new DbAccess())->getDbConnection();
         $this->getQuestionByCodeHandler = new GetQuestionByCodeHandler();
+        $this->createVotingByQuestionCodeHandler = new CreateVotingByQuestionCodeHandler();
+        $this->closeVotingByQuestionCodeHandler = new CloseVotingByQuestionCodeHandler();
+
     }
 
     #[OA\Get(path: '/api/voting/{code}', tags: ['Voting'])]
@@ -189,7 +196,9 @@ class VotingController
 
     public function createVoting(string $questionCode)
     {
-        //TODO pouzit CreateVotingByQuestionCodeHandler
+        $this->createVotingByQuestionCodeHandler->handle($questionCode);
+        SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json(['message' => 'Voting created']);
     }
 
     #[OA\Post(path: '/api/voting/{code}/close', tags: ['Voting'])]
@@ -199,6 +208,8 @@ class VotingController
     #[OA\Response(response: 404, description: 'Question not found')]
     public function closeVoting(string $questionCode)
     {
-        //TODO pouzit CloseVotingByQuestionCodeHandler
+        $this->closeVotingByQuestionCodeHandler->handle($questionCode);
+        SimpleRouter::response()->httpCode(200);
+        SimpleRouter::response()->json(['message' => 'Voting closed']);
     }
 }

@@ -20,7 +20,16 @@ class CloseVotingByQuestionCodeHandler
     {
         $this->dbConnection->beginTransaction();
         try {
-            //TODO
+            $updateQuery = "UPDATE Voting SET date_to = CURDATE() WHERE question_code = :questionCode AND date_to IS NULL";
+            $stmt = $this->dbConnection->prepare($updateQuery);
+            $stmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
+            $stmt->execute();
+
+            $updateQuestionQuery = "UPDATE Questions SET active = 0 WHERE question_code = :questionCode";
+            $stmt = $this->dbConnection->prepare($updateQuestionQuery);
+            $stmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
+            $stmt->execute();
+
             $this->dbConnection->commit();
             return (int) $this->dbConnection->lastInsertId();
         } catch (\Exception $e) {
