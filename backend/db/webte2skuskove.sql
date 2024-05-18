@@ -214,8 +214,7 @@ ALTER TABLE `Vote`
 -- Indexes for table `Voting`
 --
 ALTER TABLE `Voting`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `question_code` (`question_code`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
