@@ -10,14 +10,29 @@
   margin: auto;
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.header mat-icon {
+  margin-right: 10px;
+}
+
+.header h1 {
+  margin: 0;
+}
+
 .table-responsive {
-  margin: 20px;
+  width: 100%;
+  margin: 20px 0;
   overflow-x: auto;
 }
 
 .table {
   width: 100%;
-  max-width: 100%;
   margin-bottom: 20px;
   background-color: transparent;
 }
@@ -39,8 +54,8 @@
 
 .form-control {
   display: block;
-  width: 80%; 
-  max-width: 300px; 
+  width: 80%;
+  max-width: 300px;
   padding: .375rem .75rem;
   font-size: 1rem;
   line-height: 1.5;
@@ -50,7 +65,7 @@
   border: 1px solid #ced4da;
   border-radius: .25rem;
   transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
-  margin: 0 auto; 
+  margin: 0 auto;
 }
 
 .btn {
@@ -88,7 +103,7 @@
 }
 
 .add-form {
-  width: 80%; 
+  width: 80%;
   max-width: 500px;
   margin: 20px auto;
   padding: 20px;
@@ -96,6 +111,7 @@
   border-radius: 5px;
   background-color: #f9f9f9;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center; 
 }
 
 .add-form h2 {
@@ -111,7 +127,7 @@
 .add-form label {
   display: block;
   font-weight: bold;
-  text-align: left; 
+  text-align: left;
 }
 
 .add-form .button-group {

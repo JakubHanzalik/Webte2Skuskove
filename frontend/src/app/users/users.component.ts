@@ -7,6 +7,8 @@ import { UserUpdate } from '../models/user-update.model';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { UserDialogComponent } from '../user-dialog/user-dialog.component';
 
 @Component({
   selector: 'app-users',
@@ -27,8 +29,11 @@ export class UsersComponent implements OnInit {
   newUser: Partial<User> = {};  
   selectedUser: User | null = null;
 
-  constructor(private userService: UserService, private router: Router) {}
-
+  constructor(
+    private userService: UserService,
+    private router: Router,
+    private dialog: MatDialog
+  ) {}
   ngOnInit(): void {
     this.loadUsers();
   }
@@ -42,7 +47,17 @@ export class UsersComponent implements OnInit {
       error: (error) => console.error('Error fetching users:', error)
     });
   }
-
+  openDialog(title: string, message: string): void {
+    const dialogRef = this.dialog.open(UserDialogComponent, {
+      width: '300px',
+      data: { title: title, message: message }
+    });
+  
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+      this.loadUsers(); 
+    });
+  }
   editUser(user: User): void {
     if (user.id !== undefined) {
       this.selectedUser = { ...user };
@@ -74,14 +89,18 @@ export class UsersComponent implements OnInit {
         surname: user.surname,
         role: user.role
       };
-
+  
       this.userService.updateUser(user.id, updatedUserData).subscribe({
         next: (updatedUser) => {
           console.log('User updated:', updatedUser);
           this.selectedUser = null;
-          this.loadUsers(); 
+          this.loadUsers();
+          this.openDialog('Update Successful', 'User updated successfully!');
         },
-        error: (error) => console.error('Error updating user:', error)
+        error: (error) => {
+          console.error('Error updating user:', error);
+          this.openDialog('Update Failed', 'X');
+        }
       });
     } else {
       console.error('Attempted to update a user without a valid ID');
@@ -104,43 +123,65 @@ export class UsersComponent implements OnInit {
     }
   }
 
-  createUser(user: User): void { 
+  createUser(user: User): void {
     this.userService.createUser(user).subscribe({
       next: (newUser) => {
         console.log('User created successfully', newUser);
         this.resetNewUser();
         this.loadUsers(); 
+        this.openDialog('Created Successful', 'User created successfully!');
       },
-      error: (err) => console.error('Error creating user:', err)
+      error: (err) => {
+        console.error('Error creating user:', err);
+        this.openDialog('Update SuccessfulFail', 'X');
+      }
     });
   }
-
+  
   onDeleteUser(id: number | undefined): void {
-    if (id !== undefined) {
-      this.userService.deleteUser(id).subscribe({
-        next: () => {
-          console.log('User deleted successfully');
-          this.users = this.users.filter(user => user.id !== id);
-        },
-        error: (error) => console.error('Error deleting user:', error)
-      });
-    } else {
+    if (id === undefined) {
       console.error('Attempted to delete a user without a valid ID.');
+      return;
     }
+  
+    const dialogRef = this.dialog.open(UserDialogComponent, {
+      width: '300px',
+      data: { 
+        title: 'Confirm Deletion', 
+        message: 'Are you sure you want to delete this user?', 
+        confirmable: true 
+      }
+    });
+  
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'confirm') {
+        this.userService.deleteUser(id).subscribe({
+          next: () => {
+            console.log('User deleted successfully');
+            this.users = this.users.filter(user => user.id !== id);
+            this.openDialog('Deletion Successful', 'User deleted successfully!');
+          },
+          error: (error) => {
+            console.error('Error deleting user:', error);
+            this.openDialog('Deletion Failed', 'Failed to delete user.');
+          }
+        });
+      }
+    });
   }
-
+  
   cancelEdit(): void {
     this.selectedUser = null;
   }
 
   addUser(): void {
     if (!this.newUser.username || !this.newUser.password || !this.newUser.name || !this.newUser.surname || this.newUser.role === undefined) {
-      console.error('Please fill in all fields for the new user.');
+      this.openDialog('Validation Error', 'Please fill in all fields.');
       return;
     }
-
+  
     if (this.newUser.role !== 0 && this.newUser.role !== 1) {
-      console.error('Role must be either 0 or 1.');
+      this.openDialog('Validation Error', 'Role must be either 0 or 1.');
       return;
     }
 
