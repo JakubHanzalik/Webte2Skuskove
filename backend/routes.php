@@ -30,7 +30,10 @@ SimpleRouter::group(['prefix' => '/api'], function () {
         SimpleRouter::post('/question', [QuestionsController::class, 'createQuestion']);
         SimpleRouter::put('/question/{id}', [QuestionsController::class, 'updateQuestion']);
         SimpleRouter::delete('/question/{id}', [QuestionsController::class, 'deleteQuestion']);
+        SimpleRouter::get('/question/export', [QuestionsController::class, 'exportQuestionsByUser']);
         SimpleRouter::get('/question/{code}', [QuestionsController::class, 'getQuestionByCode']);
+
+
     });
 
     //Auth
@@ -64,7 +67,7 @@ SimpleRouter::group(['prefix' => '/api'], function () {
     SimpleRouter::get('/swagger', [OpenAPIController::class, 'handle']);
 });
 
-SimpleRouter::error(function (Request $request, \Exception $exception) {
+/*SimpleRouter::error(function (Request $request, \Exception $exception) {
     SimpleRouter::response()->httpCode($exception->getCode());
     SimpleRouter::response()->json(['error' => $exception->getMessage()]);
-});
+});*/

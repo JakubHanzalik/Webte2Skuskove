@@ -13,6 +13,10 @@ use Stuba\Handlers\User\GetUserByUsernameHandler;
 use Stuba\Handlers\Question\GetQuestionByCodeHandler;
 use Stuba\Handlers\Voting\CreateVotingByQuestionCodeHandler;
 use Stuba\Models\Questions\CreateQuestion\CreateQuestionResponseModel;
+use Stuba\Models\Questions\ExportQuestion\ExportAnswerModel;
+use Stuba\Models\Questions\ExportQuestion\ExportQuestionModel;
+use Stuba\Models\Questions\ExportQuestion\ExportVoteModel;
+use Stuba\Models\Questions\ExportQuestion\ExportVotingModel;
 use Stuba\Models\Questions\GetAllQuestions\GetQuestionsResponseModel;
 use Stuba\Models\Questions\GetQuestion\GetQuestionAnswerResponseModel;
 use Stuba\Models\Questions\UpdateQuestion\UpdateQuestionRequestModel;
@@ -80,6 +84,109 @@ class QuestionsController
             SimpleRouter::response()->httpCode(500);
             SimpleRouter::response()->json(['error' => 'Internal Server Error']);
         }
+    }
+
+    #[OA\Get(path: '/api/question/export', tags: ['Question'])]
+    public function exportQuestionsByUser()
+    {
+        $accessToken = $_COOKIE["AccessToken"];
+        $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
+
+        $user = $this->getUserByUsernameHandler->handle($username);
+
+        if (is_null($user)) {
+            throw new APIException("User does not exists", 500);
+        }
+
+        $getQuestionsQuery =
+            "SELECT 
+                q.question_code AS code,
+                q.question AS text, 
+                q.response_type AS type,
+                s.text AS subject,
+                q.creation_date AS creationDate,
+                u.username AS author,
+                q.active AS isActive
+                
+            FROM Questions q 
+            JOIN Subject s ON q.subject_id = s.id
+            JOIN Users u ON q.author_id = u.id
+            WHERE q.author_id = :authorId";
+        $questionsStmt = $this->dbConnection->prepare($getQuestionsQuery);
+        $questionsStmt->bindParam(":authorId", $user->id);
+
+        $questionsStmt->execute();
+
+        $questions = $questionsStmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, ExportQuestionModel::class);
+
+        foreach ($questions as $question) {
+            $getAnswersQuery =
+                "SELECT id,
+                    answer AS text,
+                    correct AS isCorrect
+                FROM Answers WHERE question_code = :code";
+            $answersStmt = $this->dbConnection->prepare($getAnswersQuery);
+            $answersStmt->bindParam(":code", $question->code);
+            $answersStmt->execute();
+
+            $answers = $answersStmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, ExportAnswerModel::class);
+            $question->answers = $answers;
+
+            $getVotingsQuery =
+                "SELECT date_from AS startDate,
+                    id,
+                    date_to AS endDate,
+                    note
+                FROM Voting v WHERE v.question_code = :code";
+
+            $votingsStmt = $this->dbConnection->prepare($getVotingsQuery);
+            $votingsStmt->bindParam(":code", $question->code);
+            $votingsStmt->execute();
+
+            $votings = $votingsStmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, ExportVotingModel::class);
+            $question->votings = $votings;
+
+            foreach ($votings as $voting) {
+                $getIdVotesQuery =
+                    "SELECT a.answer AS answerText,
+                        COUNT(v.id) AS count
+                    FROM Vote v
+                    JOIN Answers a ON v.answer_id = a.id AND a.question_code = :code
+                    WHERE v.voting_id = :votingId
+                    GROUP BY a.id";
+
+                $getIdVotesStmt = $this->dbConnection->prepare($getIdVotesQuery);
+                $getIdVotesStmt->bindParam(":votingId", $voting->id);
+                $getIdVotesStmt->bindParam(":code", $question->code);
+                $getIdVotesStmt->execute();
+
+                $votes = $getIdVotesStmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, ExportVoteModel::class);
+                $voting->votes = $votes;
+
+                $getTextVotesQuery =
+                    "SELECT v.answer_text AS answerText,
+                        COUNT(v.id) AS count
+                    FROM Vote v
+                    WHERE v.voting_id = :votingId AND v.answer_text IS NOT NULL
+                    GROUP BY v.answer_text";
+
+                $getTextVotesStmt = $this->dbConnection->prepare($getTextVotesQuery);
+                $getTextVotesStmt->bindParam(":votingId", $voting->id);
+                $getTextVotesStmt->execute();
+
+                $votes = $getTextVotesStmt->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, ExportVoteModel::class);
+                $voting->votes = array_merge($voting->votes, $votes);
+            }
+        }
+
+        $jsonData = json_encode($questions, JSON_PRETTY_PRINT);
+
+        SimpleRouter::response()->httpCode(200);
+
+        header('Content-Type: application/json');
+        header('Content-Disposition: attachment; filename="export.json"');
+        header('Content-Length: ' . strlen($jsonData));
+        echo $jsonData;
     }
 
     #[OA\Get(path: '/api/question/{code}', description: "Get question by code", tags: ['Question'])]
