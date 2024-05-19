@@ -206,9 +206,7 @@ class QuestionsController
             $insertQuestionStmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
             $insertQuestionStmt->execute();
 
-            if ($model->active) {
-                $this->createVotingByQuestionCodeHandler->handle($questionCode);
-            }
+            
 
             for ($i = 0; $i < count($model->answers); $i++) {
                 $insertAnswerQuery = "INSERT INTO Answers (id, question_code, answer, correct) VALUES (:id, :code, :answer, :correct)";
@@ -221,6 +219,10 @@ class QuestionsController
             }
 
             $this->dbConnection->commit();
+
+            if ($model->active) {
+                $this->createVotingByQuestionCodeHandler->handle($questionCode);
+            }
 
             SimpleRouter::response()->httpCode(200);
             SimpleRouter::response()->json(CreateQuestionResponseModel::constructFromModel([
