@@ -78,6 +78,7 @@ class QuestionsController
     }
 
     #[OA\Get(path: '/api/question/export', tags: ['Question'])]
+    #[OA\Response(response: 200, description: "Export all questions of logged user", content: new OA\MediaType(mediaType: 'application/json', ))]
     public function exportQuestionsByUser()
     {
         $accessToken = $_COOKIE["AccessToken"];
@@ -313,7 +314,7 @@ class QuestionsController
             $insertQuestionStmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
             $insertQuestionStmt->execute();
 
-            
+
 
             for ($i = 0; $i < count($model->answers); $i++) {
                 $insertAnswerQuery = "INSERT INTO Answers (id, question_code, answer, correct) VALUES (:id, :code, :answer, :correct)";
