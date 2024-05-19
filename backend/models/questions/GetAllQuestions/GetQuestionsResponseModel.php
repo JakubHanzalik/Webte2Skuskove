@@ -6,6 +6,7 @@ namespace Stuba\Models\Questions\GetAllQuestions;
 
 use JsonSerializable;
 use OpenApi\Attributes as OA;
+use DateTime;
 
 #[OA\Schema(title: 'GetQuestionsResponseModel', schema: 'GetQuestionsResponseModel', type: 'object')]
 class GetQuestionsResponseModel implements JsonSerializable
@@ -23,14 +24,20 @@ class GetQuestionsResponseModel implements JsonSerializable
     public string $code;
 
     #[OA\Property(title: "creationDate", type: 'string', example: "2024-6-17 13:58:32")]
-    public string $creationDate;
+    public DateTime $creationDate;
 
-    
+
 
     public function __construct()
     {
     }
-    
+
+    public function __set($key, $value)
+    {
+        if ($key === 'creationDate') {
+            $this->creationDate = new DateTime($value);
+        }
+    }
 
     public static function constructFromModel($question): GetQuestionsResponseModel
     {
@@ -40,8 +47,6 @@ class GetQuestionsResponseModel implements JsonSerializable
         $obj->subjectId = $question["subjectId"];
         $obj->code = $question["code"];
         $obj->creationDate = $question["creationDate"];
-
-        
 
         return $obj;
     }
