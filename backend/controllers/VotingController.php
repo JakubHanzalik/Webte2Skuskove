@@ -202,7 +202,7 @@ class VotingController
 
             if ($responseType === 2) {
                 // If response_type is 2, fetch all answers as a list
-                $query = "SELECT answer_id AS questionText 
+                $query = "SELECT answer_text AS questionText 
                       FROM Vote 
                       WHERE voting_id = :votingId";
                 $stmt = $this->dbConnection->prepare($query);
