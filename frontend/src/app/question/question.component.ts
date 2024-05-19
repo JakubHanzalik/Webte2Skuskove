@@ -234,7 +234,8 @@ export class QuestionComponent implements OnInit {
         )
         .subscribe((response: any) => {
           console.log('Question statistics:', response);
-          this.questionStatistics = response;
+          // Zoradenie štatistík podľa počtu odpovedí
+          this.questionStatistics = response.sort((a: any, b: any) => b.count - a.count);
         });
     }
   }

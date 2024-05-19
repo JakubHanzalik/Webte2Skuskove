@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { QuestionsService } from '../services/questions.service';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { QrcodeService } from '../services/qrcode.service';
 import { MatIconModule } from '@angular/material/icon';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -81,7 +81,8 @@ export class QuestionsComponent implements OnInit {
     private questionsService: QuestionsService,
     private qrCodeService: QrcodeService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private http: HttpClient
   ) {}
 
   ngOnInit() {
@@ -288,5 +289,17 @@ export class QuestionsComponent implements OnInit {
     if (question.editing) {
       this.originalQuestionText = question.text;
     }
+  }
+
+  exportQuestions() {
+    const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+    const exportUrl = `${baseUrl}/question/export`;
+
+    this.http.get(exportUrl).subscribe({
+      next: (response) => {
+
+      },
+      error: (err) => console.error('Error exporting questions:', err),
+    });
   }
 }
