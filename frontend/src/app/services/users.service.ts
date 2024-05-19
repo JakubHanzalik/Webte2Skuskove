@@ -51,7 +51,7 @@ export class UserService {
   checkUsernameExists(username: string): Observable<boolean> {
     return this.http.get<boolean>(`${this.apiUrl}/check-username/${username}`);
   }
-  
+
   deleteUser(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`).pipe(
       catchError(error => {
@@ -60,5 +60,5 @@ export class UserService {
       })
     );
   }
- 
+
 }
