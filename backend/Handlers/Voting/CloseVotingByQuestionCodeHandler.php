@@ -16,13 +16,14 @@ class CloseVotingByQuestionCodeHandler
         $this->dbConnection = (new DbAccess())->getDbConnection();
     }
 
-    public function handle(string $questionCode): int
+    public function handle(string $questionCode, string $note): int
     {
         $this->dbConnection->beginTransaction();
         try {
-            $updateQuery = "UPDATE Voting SET date_to = CURDATE() WHERE question_code = :questionCode AND date_to IS NULL";
-            $stmt = $this->dbConnection->prepare($updateQuery);
+            $updateVotingQuery = "UPDATE Voting SET date_to = CURDATE(), note = :note WHERE question_code = :questionCode AND date_to IS NULL";
+            $stmt = $this->dbConnection->prepare($updateVotingQuery);
             $stmt->bindValue(':questionCode', $questionCode, PDO::PARAM_STR);
+            $stmt->bindValue(':note', $note, PDO::PARAM_STR);
             $stmt->execute();
 
             $updateQuestionQuery = "UPDATE Questions SET active = 0 WHERE question_code = :questionCode";

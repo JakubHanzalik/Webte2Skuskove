@@ -203,12 +203,15 @@ class VotingController
 
     #[OA\Post(path: '/api/voting/{code}/close', tags: ['Voting'])]
     #[OA\Parameter(name: "code", in: 'path', required: true, description: "Question code", example: "abcde", schema: new OA\Schema(type: 'string'))]
+    #[OA\RequestBody(description: 'Close voting request', required: true, content: new OA\JsonContent(properties: [new OA\Property(property: 'note', type: 'string', example: 'Closing note')]))]
     #[OA\Response(response: 200, description: 'Voting closed')]
     #[OA\Response(response: 400, description: 'Voting already closed')]
     #[OA\Response(response: 404, description: 'Question not found')]
     public function closeVoting(string $questionCode)
     {
-        $this->closeVotingByQuestionCodeHandler->handle($questionCode);
+        $requestData = SimpleRouter::request()->getInputHandler()->all();
+        $note = $requestData['note'] ?? '';
+        $this->closeVotingByQuestionCodeHandler->handle($questionCode,$note);
         SimpleRouter::response()->httpCode(200);
         SimpleRouter::response()->json(['message' => 'Voting closed']);
     }
