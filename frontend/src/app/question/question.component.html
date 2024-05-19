@@ -1,7 +1,7 @@
 <div *ngIf="questionData" class="container">
   <h2>{{ questionData.text }}</h2>
 
-  <!-- If user is logged in, allow editing -->
+  <!-- Ak je používateľ prihlásený, umožniť editáciu -->
   <div *ngIf="isLoggedIn">
     <form (ngSubmit)="updateQuestion()">
       <mat-form-field appearance="outline" class="full-width">
@@ -25,7 +25,7 @@
           <mat-checkbox *ngIf="questionData.type === 1" [(ngModel)]="answer.correct" name="correct-{{i}}">Správna</mat-checkbox>
         </div>
 
-        <!-- Field for adding new answers -->
+        <!-- Polia pre pridanie nových odpovedí -->
         <div *ngFor="let answer of newAnswers; let i = index">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Nová odpoveď {{i + 1}}</mat-label>
@@ -46,7 +46,7 @@
     </form>
   </div>
 
-  <!-- If user is not logged in, allow voting -->
+  <!-- Ak používateľ nie je prihlásený, umožniť hlasovanie -->
   <div *ngIf="!isLoggedIn">
     <form *ngIf="!showResults" (ngSubmit)="voteOnQuestion()">
       <h1>{{ questionData.question }}</h1>
@@ -75,7 +75,7 @@
       <button mat-raised-button color="primary" type="submit">Hlasovať</button>
     </form>
 
-    <!-- Display answers with correct ones highlighted -->
+    <!-- Zobrazenie odpovedí s vyznačením správnych -->
     <div *ngIf="showResults">
       <h3>Odpovede:</h3>
       <div *ngFor="let answer of questionData.answers">
@@ -88,7 +88,7 @@
         </div>
       </div>
 
-      <!-- Display text answer if question type is text -->
+      <!-- Zobrazenie textovej odpovede ak je typ otázky text -->
       <div *ngIf="questionData.type === 2">
         <div [ngClass]="{
           'correct-answer': isCorrectAnswer(1),
@@ -98,5 +98,17 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Zobrazenie štatistík ak sú dostupné -->
+  <div *ngIf="questionStatistics">
+    <h3>Štatistika otázky</h3>
+    <ul>
+      <li *ngFor="let stat of questionStatistics">
+        <span [ngClass]="{'correct-answer': isCorrectAnswer(stat.answerId)}">
+          Odpoveď: {{ stat.questionText }}, Počet: {{ stat.count }}
+        </span>
+      </li>
+    </ul>
   </div>
 </div>

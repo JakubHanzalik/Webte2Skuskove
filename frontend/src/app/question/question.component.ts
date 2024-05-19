@@ -46,6 +46,7 @@ export class QuestionComponent implements OnInit {
     { value: 2, viewValue: 'Text' },
   ];
   showResults: boolean = false;
+  questionStatistics: any = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -109,6 +110,7 @@ export class QuestionComponent implements OnInit {
           this.isLoggedIn = true;
           this.questionData = response;
           console.log('User\'s question:', response);
+          this.getQuestionStatistics();
         }
       });
   }
@@ -124,7 +126,6 @@ export class QuestionComponent implements OnInit {
       const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
       const questionUrl = `${baseUrl}/question/${this.questionId}`;
 
-      // Combine existing and new answers
       const updatedQuestionData = {
         ...this.questionData,
         answers: [...this.questionData.answers, ...this.newAnswers.filter(a => a.answer.trim() !== '')]
@@ -141,7 +142,6 @@ export class QuestionComponent implements OnInit {
         )
         .subscribe(response => {
           console.log('Question updated:', response);
-          // Clear new answers
           this.newAnswers = [{ answer: '', correct: false }];
         });
     }
@@ -194,6 +194,7 @@ export class QuestionComponent implements OnInit {
           console.log('Voted successfully:', response);
           this.showResults = true;
           this.getCorrectAnswers();
+          this.getQuestionStatistics();  // Fetch the statistics after voting
         });
     }
   }
@@ -215,6 +216,25 @@ export class QuestionComponent implements OnInit {
           if (response && response.answerIds) {
             this.correctAnswerIds = response.answerIds;
           }
+        });
+    }
+  }
+
+  getQuestionStatistics(): void {  // Method to fetch statistics
+    if (this.questionId) {
+      const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+      const statisticsUrl = `${baseUrl}/voting/${this.questionId}/statistics`;
+
+      this.http.get(statisticsUrl)
+        .pipe(
+          catchError(err => {
+            console.error('Error fetching question statistics:', err);
+            return of(null);
+          })
+        )
+        .subscribe((response: any) => {
+          console.log('Question statistics:', response);
+          this.questionStatistics = response;
         });
     }
   }
