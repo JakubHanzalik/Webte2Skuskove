@@ -30,6 +30,7 @@ class GetQuestionsResponseModel implements JsonSerializable
 
     public function __construct()
     {
+        unset($this->creationDate);
     }
 
     public function __set($key, $value)
@@ -46,7 +47,7 @@ class GetQuestionsResponseModel implements JsonSerializable
         $obj->active = $question["active"];
         $obj->subjectId = $question["subjectId"];
         $obj->code = $question["code"];
-        $obj->creationDate = $question["creationDate"];
+        $obj->creationDate = new DateTime($question["creationDate"]);
 
         return $obj;
     }

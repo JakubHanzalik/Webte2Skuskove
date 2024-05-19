@@ -50,33 +50,33 @@ class QuestionsController
     #[OA\Response(response: 500, description: 'User does not exists')]
     public function getAllQuestionsByUser()
     {
-        try{
-        $accessToken = $_COOKIE["AccessToken"];
-        $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
+        try {
+            $accessToken = $_COOKIE["AccessToken"];
+            $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
 
-        $user = $this->getUserByUsernameHandler->handle($username);
+            $user = $this->getUserByUsernameHandler->handle($username);
 
-        if (is_null($user)) {
-            throw new APIException("User does not exists", 500);
-        }
+            if (is_null($user)) {
+                throw new APIException("User does not exists", 500);
+            }
 
-        $query =
-            "SELECT 
+            $query =
+                "SELECT 
                 q.question AS text, 
                 q.active AS active, 
                 q.subject_id AS subjectId,
                 q.question_code AS code,
-                q.creation_date
+                q.creation_date AS creationDate
             FROM Questions q WHERE q.author_id = :authorId";
-        $statement = $this->dbConnection->prepare($query);
-        $statement->bindParam(":authorId", $user->id);
+            $statement = $this->dbConnection->prepare($query);
+            $statement->bindParam(":authorId", $user->id);
 
-        $statement->execute();
+            $statement->execute();
 
-        $response = $statement->fetchAll(PDO::FETCH_CLASS, GetQuestionsResponseModel::class);
+            $response = $statement->fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, GetQuestionsResponseModel::class);
 
-        SimpleRouter::response()->httpCode(200);
-        SimpleRouter::response()->json($response);
+            SimpleRouter::response()->httpCode(200);
+            SimpleRouter::response()->json($response);
         } catch (\PDOException $e) {
             SimpleRouter::response()->httpCode(500);
             SimpleRouter::response()->json(['error' => 'Database error: ' . $e->getMessage()]);
