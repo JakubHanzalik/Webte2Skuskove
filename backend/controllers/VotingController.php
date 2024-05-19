@@ -202,7 +202,7 @@ class VotingController
 
             if ($responseType === 2) {
                 // If response_type is 2, fetch all answers as a list
-                $query = "SELECT answer AS questionText 
+                $query = "SELECT answer_id AS questionText 
                       FROM Vote 
                       WHERE voting_id = :votingId";
                 $stmt = $this->dbConnection->prepare($query);
@@ -222,7 +222,7 @@ class VotingController
                 // Fetch voting statistics
                 $query = "SELECT a.id AS answerId, a.answer AS questionText, COUNT(v.id) AS count
                       FROM Answers a
-                      LEFT JOIN Vote v ON a.id = v.answer
+                      LEFT JOIN Vote v ON a.id = v.answer_id
                       WHERE a.question_code = :code
                       GROUP BY a.id";
                 $stmt = $this->dbConnection->prepare($query);
