@@ -72,6 +72,7 @@ class VotingController
 
     public function voteByCode(string $code)
     {
+        try{
         $model = new VoteByCodeRequestModel(SimpleRouter::request()->getInputHandler()->all());
 
         $query = "SELECT id FROM Voting WHERE question_code = :code AND date_to IS NULL ORDER BY date_from DESC LIMIT 1";
@@ -129,6 +130,13 @@ class VotingController
 
         SimpleRouter::response()->httpCode(200);
         SimpleRouter::response()->json(['message' => 'Vote successful']);
+        } catch (\PDOException $e) {
+            SimpleRouter::response()->httpCode(500);
+            SimpleRouter::response()->json(['error' => 'Database error: ' . $e->getMessage()]);
+        } catch (\Exception $e) {
+            SimpleRouter::response()->httpCode(500);
+            SimpleRouter::response()->json(['error' => 'Internal Server Error']);
+        }
     }
 
     #[OA\Get(path: '/api/voting/{code}/correct', tags: ['Voting'])]
@@ -162,30 +170,88 @@ class VotingController
     #[OA\Response(response: 404, description: 'Question not found')]
     public function getQuestionStatistics(string $code)
     {
-        $query = "SELECT a.id AS answerId, a.answer AS questionText, COUNT(v.id) AS count
-                  FROM Answers a
-                  LEFT JOIN Votes v ON a.id = v.answer_id
-                  WHERE a.question_code = :code
-                  GROUP BY a.id";
-        $stmt = $this->dbConnection->prepare($query);
-        $stmt->bindParam(':code', $code);
-        $stmt->execute();
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            // Fetch the response type from the Questions table
+            $responseTypeQuery = "SELECT response_type FROM Questions WHERE question_code = :code";
+            $stmt = $this->dbConnection->prepare($responseTypeQuery);
+            $stmt->bindParam(':code', $code, PDO::PARAM_STR);
+            $stmt->execute();
+            $responseTypeResult = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$results) {
-            SimpleRouter::response()->httpCode(404);
-            SimpleRouter::response()->json(['error' => 'No data found for this question']);
-            return;
+            if (!$responseTypeResult) {
+                SimpleRouter::response()->httpCode(404);
+                SimpleRouter::response()->json(['error' => 'Question not found']);
+                return;
+            }
+
+            $responseType = (int) $responseTypeResult['response_type'];
+
+            $votingIdQuery = "SELECT id FROM Voting WHERE question_code = :code AND date_to IS NULL";
+            $stmt = $this->dbConnection->prepare($votingIdQuery);
+            $stmt->bindParam(':code', $code, PDO::PARAM_STR);
+            $stmt->execute();
+            $votingIdResult = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$votingIdResult) {
+                SimpleRouter::response()->httpCode(404);
+                SimpleRouter::response()->json(['error' => 'Active voting session not found']);
+                return;
+            }
+
+            $votingId = (int) $votingIdResult['id'];
+
+            if ($responseType === 2) {
+                // If response_type is 2, fetch all answers as a list
+                $query = "SELECT answer_id AS questionText 
+                      FROM Vote 
+                      WHERE voting_id = :votingId";
+                $stmt = $this->dbConnection->prepare($query);
+                $stmt->bindParam(':votingId', $votingId, PDO::PARAM_STR);
+                $stmt->execute();
+                $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                if (!$results) {
+                    SimpleRouter::response()->httpCode(404);
+                    SimpleRouter::response()->json(['error' => 'No answers found for this question']);
+                    return;
+                }
+
+                SimpleRouter::response()->httpCode(200);
+                SimpleRouter::response()->json($results);
+            } else {
+                // Fetch voting statistics
+                $query = "SELECT a.id AS answerId, a.answer AS questionText, COUNT(v.id) AS count
+                      FROM Answers a
+                      LEFT JOIN Vote v ON a.id = v.answer_id
+                      WHERE a.question_code = :code
+                      GROUP BY a.id";
+                $stmt = $this->dbConnection->prepare($query);
+                $stmt->bindParam(':code', $code, PDO::PARAM_STR);
+                $stmt->execute();
+                $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                if (!$results) {
+                    SimpleRouter::response()->httpCode(404);
+                    SimpleRouter::response()->json(['error' => 'No data found for this question']);
+                    return;
+                }
+
+                // Map results to response models
+                $statistics = array_map(function ($item) {
+                    return GetQuestionStatisticsResponseModel::constructFromModel($item);
+                }, $results);
+
+                // Return the response
+                SimpleRouter::response()->httpCode(200);
+                SimpleRouter::response()->json($statistics);
+            }
+        } catch (\PDOException $e) {
+            SimpleRouter::response()->httpCode(500);
+            SimpleRouter::response()->json(['error' => 'Database error: ' . $e->getMessage()]);
+        } catch (\Exception $e) {
+            SimpleRouter::response()->httpCode(500);
+            SimpleRouter::response()->json(['error' => 'Internal Server Error']);
         }
-
-        // Map results to response models
-        $statistics = array_map(function ($item) {
-            return GetQuestionStatisticsResponseModel::constructFromModel($item);
-        }, $results);
-
-        // Return the response
-        SimpleRouter::response()->httpCode(200);
-        SimpleRouter::response()->json($statistics);
     }
 
     #[OA\Post(path: '/api/voting/{code}/create', tags: ['Voting'])]
