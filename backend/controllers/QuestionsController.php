@@ -50,6 +50,7 @@ class QuestionsController
     #[OA\Response(response: 500, description: 'User does not exists')]
     public function getAllQuestionsByUser()
     {
+        try{
         $accessToken = $_COOKIE["AccessToken"];
         $username = $this->jwtHandler->decodeAccessToken($accessToken)["sub"];
 
@@ -64,7 +65,8 @@ class QuestionsController
                 q.question AS text, 
                 q.active AS active, 
                 q.subject_id AS subjectId,
-                q.question_code AS code
+                q.question_code AS code,
+                q.creation_date
             FROM Questions q WHERE q.author_id = :authorId";
         $statement = $this->dbConnection->prepare($query);
         $statement->bindParam(":authorId", $user->id);
@@ -75,6 +77,13 @@ class QuestionsController
 
         SimpleRouter::response()->httpCode(200);
         SimpleRouter::response()->json($response);
+        } catch (\PDOException $e) {
+            SimpleRouter::response()->httpCode(500);
+            SimpleRouter::response()->json(['error' => 'Database error: ' . $e->getMessage()]);
+        } catch (\Exception $e) {
+            SimpleRouter::response()->httpCode(500);
+            SimpleRouter::response()->json(['error' => 'Internal Server Error']);
+        }
     }
 
     #[OA\Get(path: '/api/question/export', tags: ['Question'])]
