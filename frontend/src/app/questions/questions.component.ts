@@ -240,14 +240,12 @@ export class QuestionsComponent implements OnInit {
       const questionData = {
         text: question.text,
         subjectId: question.subjectId,
-        active: question.active === false,
-        answers: question.answers.map((answer) => {
-          return {
-            id: answer.id,
-            answer: answer.answer,
-            correct: answer.correct,
-          };
-        }),
+        active: question.active,
+        answers: question.answers.map((answer) => ({
+          id: answer.id,
+          answer: answer.answer, // Ensure the answer text is correctly mapped
+          correct: answer.correct
+        }))
       };
 
       this.questionsService
@@ -267,19 +265,17 @@ export class QuestionsComponent implements OnInit {
 
   deactivateQuestion(question: Question) {
     if (question.question_code) {
-      question.active = false;
-      this.activeQuestions = this.activeQuestions.filter((q) => q !== question);
-      this.historicalQuestions.unshift(question);
-      this.questionsService
-        .updateQuestion(question.question_code, { active: false })
-        .subscribe({
-          next: () => {
-            console.log('Question deactivated successfully');
-          },
-          error: (err) => {
-            console.error(err);
-          },
-        });
+      this.questionsService.fetchAndToggleActiveStatus(question.question_code, false).subscribe({
+        next: (updatedQuestion) => {
+          question.active = updatedQuestion.active;
+          this.activeQuestions = this.activeQuestions.filter((q) => q !== question);
+          this.historicalQuestions.unshift(question);
+          console.log('Question deactivated successfully');
+        },
+        error: (err) => {
+          console.error('Error deactivating question:', err);
+        }
+      });
     } else {
       console.error('Question code is undefined.');
     }
@@ -287,21 +283,17 @@ export class QuestionsComponent implements OnInit {
 
   activeQuestion(question: Question) {
     if (question.question_code) {
-      question.active = true;
-      this.historicalQuestions = this.historicalQuestions.filter(
-        (q) => q !== question
-      );
-      this.activeQuestions.unshift(question);
-      this.questionsService
-        .updateQuestion(question.question_code, { active: true })
-        .subscribe({
-          next: () => {
-            console.log('Question activated successfully');
-          },
-          error: (err) => {
-            console.error(err);
-          },
-        });
+      this.questionsService.fetchAndToggleActiveStatus(question.question_code, true).subscribe({
+        next: (updatedQuestion) => {
+          question.active = updatedQuestion.active;
+          this.historicalQuestions = this.historicalQuestions.filter((q) => q !== question);
+          this.activeQuestions.unshift(question);
+          console.log('Question activated successfully');
+        },
+        error: (err) => {
+          console.error('Error activating question:', err);
+        }
+      });
     } else {
       console.error('Question code is undefined.');
     }

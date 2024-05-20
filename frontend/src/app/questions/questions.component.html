@@ -80,18 +80,12 @@
 
   <mat-card class="active-questions-card">
     <mat-card-header>
-      <mat-card-title>Aktívne otázky</mat-card-title>
-      <a
-        mat-raised-button
-        color="accent"
-        href="/api/question/export"
-        target="_blank"
-        >Exportovať otázky</a
-      >
+      <mat-card-title style="width: 100%;">Aktívne otázky</mat-card-title>
+
     </mat-card-header>
     <mat-card-content>
       <ul>
-        <li *ngFor="let question of activeQuestions">
+        <li *ngFor="let question of activeQuestions" class="clickable">
           <span *ngIf="!question.editing; else editMode">
             <img
               *ngIf="question.qrCodeURL"
@@ -135,7 +129,7 @@
     </mat-card-header>
     <mat-card-content>
       <ul>
-        <li *ngFor="let question of historicalQuestions">
+        <li *ngFor="let question of historicalQuestions" class="clickable">
           <span *ngIf="!question.editing; else editMode">
             {{ question.text }}
             <button mat-icon-button (click)="copyQuestion(question)">
@@ -158,4 +152,14 @@
       </ul>
     </mat-card-content>
   </mat-card>
+  <mat-card>
+    <a
+    mat-raised-button
+    color="accent"
+    href="/api/question/export"
+    target="_blank"
+    >Exportovať otázky</a>
+  </mat-card>
+
+
 </div>

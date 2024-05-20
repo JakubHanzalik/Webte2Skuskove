@@ -90,3 +90,27 @@
     height: 100px;
     margin-right: 10px;
   }
+
+  .mat-mdc-form-field-flex{
+    width: 90%;
+  }
+
+  .mat-mdc-form-field{
+    display: block;
+  }
+  .clickable {
+    cursor: pointer;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  span{
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+.mat-mdc-card-header-text{
+  width: 100%;
+}
+button{
+  margin-left: 3px;
+}

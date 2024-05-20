@@ -7,7 +7,7 @@
   <div class="subjects">
     <h2>Subjects</h2>
     <ul>
-      <li *ngFor="let subject of subjects" (click)="goToQuestions(subject.value)">
+      <li *ngFor="let subject of subjects" (click)="goToQuestions(subject.value)" class="clickable">
         {{ subject.text }}
       </li>
     </ul>

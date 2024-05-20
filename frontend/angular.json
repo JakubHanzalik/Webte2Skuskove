@@ -25,7 +25,7 @@
               "node_modules/swagger-ui/dist/swagger-ui.css",
               "src/styles.css"
             ],
-            
+
             "scripts": [],
             "allowedCommonJsDependencies": [
               "swagger-ui",
@@ -50,7 +50,7 @@
               "short-unique-id",
               "process",
               "@babel/runtime-corejs3"
-              
+
             ]
           },
           "configurations": {
@@ -58,8 +58,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "5mb",  
-                  "maximumError": "3mb"    
+                  "maximumWarning": "5mb",
+                  "maximumError": "3mb"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -67,14 +67,15 @@
                   "maximumError": "4kb"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "sourceMap": true
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
             }
-          },          
+          },
           "defaultConfiguration": "production"
         },
         "serve": {

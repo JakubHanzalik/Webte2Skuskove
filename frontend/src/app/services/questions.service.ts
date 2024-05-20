@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 
 interface Answer {
   id?: number;
@@ -12,9 +12,9 @@ interface Answer {
 interface QuestionDTO {
   question_code?: string;
   text: string;
-  active: boolean;
+  active: boolean; // Keep active as boolean here
   subjectId: number;
-  type: number;
+  type: number; // This property is required
   authorId?: number;
   answers: Answer[];
 }
@@ -28,17 +28,17 @@ export class QuestionsService {
   constructor(private http: HttpClient) {}
 
   getAllQuestions(): Observable<QuestionDTO[]> {
-    return this.http.get<QuestionDTO[]>(this.apiUrl).pipe(
-      map((questions: any[]) => questions.map(question => ({
+    return this.http.get<any[]>(this.apiUrl).pipe(
+      map((questions) => questions.map(question => ({
         question_code: question.code,
         text: question.text,
-        active: question.active,
+        active: question.active === '1', // Convert '1' to true and '0' to false
         subjectId: question.subjectId,
         authorId: question.authorId,
         type: question.type,
         answers: question.answers ? question.answers.map((answer: any) => ({
           id: answer.id,
-          answer: answer.text,
+          answer: answer.text, // Ensure the answer text is correctly mapped
           correct: answer.correct
         })) : []
       }))),
@@ -50,17 +50,17 @@ export class QuestionsService {
   }
 
   getQuestionByCode(code: string): Observable<QuestionDTO> {
-    return this.http.get<QuestionDTO>(`${this.apiUrl}/${code}`).pipe(
-      map((question: any) => ({
+    return this.http.get<any>(`${this.apiUrl}/${code}`).pipe(
+      map((question) => ({
         question_code: question.code,
         text: question.text,
-        active: question.active,
+        active: question.active === '1', // Convert '1' to true and '0' to false
         subjectId: question.subjectId,
         authorId: question.authorId,
         type: question.type,
         answers: question.answers ? question.answers.map((answer: any) => ({
           id: answer.id,
-          answer: answer.text,
+          answer: answer.answer, // Ensure the answer text is correctly mapped
           correct: answer.correct
         })) : []
       })),
@@ -81,10 +81,10 @@ export class QuestionsService {
     );
   }
 
-  updateQuestion(code: string, questionData: any): Observable<any> {
+  updateQuestion(code: string, questionData: any): Observable<QuestionDTO> {
     const url = `${this.apiUrl}/${code}`;
     console.log('Sending request to update question with data:', questionData);
-    return this.http.put(url, questionData, { withCredentials: true }).pipe(
+    return this.http.put<QuestionDTO>(url, questionData, { withCredentials: true }).pipe(
       catchError(error => {
         console.error('Failed to update question:', error);
         return throwError(() => new Error('Failed to update question'));
@@ -97,6 +97,28 @@ export class QuestionsService {
       catchError((error) => {
         console.error('Failed to delete question due to:', error);
         return throwError(() => new Error('Failed to delete question'));
+      })
+    );
+  }
+
+  fetchAndToggleActiveStatus(code: string, active: boolean): Observable<QuestionDTO> {
+    return this.getQuestionByCode(code).pipe(
+      switchMap((question) => {
+        const updatedQuestion = {
+          text: question.text,
+          subjectId: question.subjectId,
+          active: active, // Update the active status
+          answers: question.answers.map((answer) => ({
+            id: answer.id,
+            answer: answer.answer, // Ensure the answer text is correctly mapped
+            correct: answer.correct
+          }))
+        };
+        return this.updateQuestion(code, updatedQuestion);
+      }),
+      catchError(error => {
+        console.error('Error toggling active status:', error);
+        return throwError(() => new Error('Failed to toggle active status'));
       })
     );
   }
