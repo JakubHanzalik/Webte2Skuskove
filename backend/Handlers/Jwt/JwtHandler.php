@@ -11,7 +11,7 @@ use Firebase\JWT\Key;
 use Stuba\Handlers\User\GetUserByUsernameHandler;
 use Stuba\Db\Models\User\EUserRole;
 use Stuba\Exceptions\APIException;
-use Stuba\db\DbAccess;
+use Stuba\Db\DbAccess;
 use PDO;
 
 class JwtHandler
