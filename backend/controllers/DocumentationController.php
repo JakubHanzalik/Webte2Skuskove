@@ -15,7 +15,7 @@ class DocumentationController
     public function __construct()
     {
         $this->browserFactory = new BrowserFactory();
-        $this->browserFactory->addOptions(['ignoreCertificateErrors' => true]);
+        $this->browserFactory->addOptions(['ignoreCertificateErrors' => true, 'noSandbox' => true]);
     }
 
     #[OA\Get(path: '/api/docs', tags: ['Documentation'], description: 'Generate User manual')]
