@@ -11,6 +11,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface Answer {
   id?: number;
@@ -28,7 +30,8 @@ interface QuestionDTO {
   answers: Answer[];
 }
 
-interface Question extends QuestionDTO {
+interface Question extends Omit<QuestionDTO, 'active'> {
+  active: boolean;
   editing?: boolean;
   qrCodeURL?: string;
 }
@@ -38,6 +41,7 @@ enum QuestionType {
   MULTIPLE_CHOICE = 1,
   TEXT = 2,
 }
+
 interface RouterState {
   subjectValue: number;
 }
@@ -54,6 +58,7 @@ interface RouterState {
     MatIconModule,
     RouterModule,
     MatCardModule,
+    MatTooltipModule,
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
@@ -82,7 +87,8 @@ export class QuestionsComponent implements OnInit {
     private qrCodeService: QrcodeService,
     private router: Router,
     private route: ActivatedRoute,
-    private http: HttpClient
+    private http: HttpClient,
+    private snackBar: MatSnackBar // Add MatSnackBar to the constructor
   ) {}
 
   ngOnInit() {
@@ -124,6 +130,9 @@ export class QuestionsComponent implements OnInit {
           question.question_code
         );
         question.qrCodeURL = qrCodeURL;
+        this.snackBar.open('QR kód úspešne zobrazený', 'Close', {
+          duration: 3000,
+        });
       } catch (error) {
         console.error('Error generating QR code:', error);
       }
@@ -152,6 +161,9 @@ export class QuestionsComponent implements OnInit {
       this.questionsService.createQuestion(newQuestion).subscribe({
         next: () => {
           console.log('Question created successfully');
+          this.snackBar.open('Otázka úspešne vytvorená', 'Close', {
+            duration: 3000,
+          });
           this.newQuestionText = '';
           this.newQuestionAnswers = [
             { answer: '', correct: false },
@@ -190,6 +202,9 @@ export class QuestionsComponent implements OnInit {
       this.questionsService.deleteQuestion(question.question_code).subscribe({
         next: () => {
           this.updateQuestionsAfterDeletion(question);
+          this.snackBar.open('Otázka úspešne odstránená', 'Close', {
+            duration: 3000,
+          });
         },
         error: (err) => console.error('Error deleting question:', err),
       });
@@ -243,9 +258,9 @@ export class QuestionsComponent implements OnInit {
         active: question.active,
         answers: question.answers.map((answer) => ({
           id: answer.id,
-          answer: answer.answer, // Ensure the answer text is correctly mapped
-          correct: answer.correct
-        }))
+          answer: answer.answer,
+          correct: answer.correct,
+        })),
       };
 
       this.questionsService
@@ -253,6 +268,9 @@ export class QuestionsComponent implements OnInit {
         .subscribe({
           next: (response) => {
             console.log('Question updated successfully:', response);
+            this.snackBar.open('Otázka úspešne upravená', 'Close', {
+              duration: 3000,
+            });
           },
           error: (error) => {
             console.error('Error updating question:', error);
@@ -270,7 +288,9 @@ export class QuestionsComponent implements OnInit {
           question.active = updatedQuestion.active;
           this.activeQuestions = this.activeQuestions.filter((q) => q !== question);
           this.historicalQuestions.unshift(question);
-          console.log('Question deactivated successfully');
+          this.snackBar.open('Otázka úspešne deaktivovaná', 'Close', {
+            duration: 3000,
+          });
         },
         error: (err) => {
           console.error('Error deactivating question:', err);
@@ -288,7 +308,9 @@ export class QuestionsComponent implements OnInit {
           question.active = updatedQuestion.active;
           this.historicalQuestions = this.historicalQuestions.filter((q) => q !== question);
           this.activeQuestions.unshift(question);
-          console.log('Question activated successfully');
+          this.snackBar.open('Otázka úspešne aktivovaná', 'Close', {
+            duration: 3000,
+          });
         },
         error: (err) => {
           console.error('Error activating question:', err);
