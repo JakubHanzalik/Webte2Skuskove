@@ -56,16 +56,21 @@ export class UsersComponent implements OnInit {
   }
 
   getLoggedInUser(): void {
-    const userCookie = document.cookie.split('; ').find(row => row.startsWith('user='));
-    if (userCookie) {
-      this.loggedInUser = JSON.parse(decodeURIComponent(userCookie.split('=')[1]));
-    }
+    this.http.get<User>('/api/login').subscribe({
+      next: (user) => {
+        this.loggedInUser = user;
+        console.log('Logged in user:', this.loggedInUser);
+      },
+      error: (error) => {
+        console.error('Error fetching logged in user:', error);
+      }
+    });
   }
 
   openDialog(title: string, message: string): void {
     const dialogRef = this.dialog.open(UserDialogComponent, {
       width: '300px',
-      data: { title: title, message: message }
+      data: { title, message }
     });
 
     dialogRef.afterClosed().subscribe(result => {

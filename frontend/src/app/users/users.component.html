@@ -1,5 +1,5 @@
 <div class="users-container">
-    <div class="add-form">
+  <div class="add-form" *ngIf="loggedInUser?.role === 1 && !selectedUser">
     <mat-icon matListIcon>person</mat-icon>
     <h1>Edit users:</h1>
     <div class="table-responsive">
@@ -18,10 +18,10 @@
             <td>{{ user.username }}</td>
             <td>{{ user.role }}</td>
             <td>
-              <button (click)="editUser(user)" class="btn btn-success">
+              <button *ngIf="loggedInUser?.role === 1" (click)="editUser(user)" class="btn btn-success">
                 <mat-icon matListIcon>edit</mat-icon>
               </button>
-              <button (click)="onDeleteUser(user.id)" class="btn btn-danger">
+              <button *ngIf="loggedInUser?.role === 1" (click)="onDeleteUser(user.id)" class="btn btn-danger">
                 <mat-icon matListIcon>delete</mat-icon>
               </button>
             </td>
@@ -29,83 +29,85 @@
         </tbody>
       </table>
     </div>
-    </div>
-    <div *ngIf="!selectedUser" class="add-form">
-        <mat-icon>person_add</mat-icon>
-      <h2>Add New User</h2>
-      <form (submit)="addUser()">
-        <div class="form-group">
-          <label for="username">Username:</label>
-          <input [(ngModel)]="newUser.username" type="text" id="username" name="username" class="form-control">
-        </div>
-        <div class="form-group">
-          <label for="password">Password:</label>
-          <input [(ngModel)]="newUser.password" type="password" id="password" name="password" class="form-control">
-        </div>
-        <div class="form-group">
-          <label for="name">Name:</label>
-          <input [(ngModel)]="newUser.name" type="text" id="name" name="name" class="form-control">
-        </div>
-        <div class="form-group">
-          <label for="surname">Surname:</label>
-          <input [(ngModel)]="newUser.surname" type="text" id="surname" name="surname" class="form-control">
-        </div>
-        <div class="form-group">
-          <label for="role">Role:</label>
-          <input [(ngModel)]="newUser.role" type="number" id="role" name="role" class="form-control">
-        </div>
-        <div class="button-group">
-          <button type="submit" class="btn btn-add">Add User</button>
-        </div>
-      </form>
-    </div>
-    <div *ngIf="selectedUser" class="add-form">
-      <mat-icon>edit</mat-icon>
-      <h2>Edit User</h2>
-      <form (submit)="updateUser(selectedUser)">
-        <div class="form-group">
-          <label for="id">ID:</label>
-          <input [(ngModel)]="selectedUser.id" type="number" id="id" name="id" class="form-control" readonly>
-        </div>
-        <div class="form-group">
-          <label for="password">Password:</label>
-          <input [(ngModel)]="selectedUser.password" type="password" id="password" name="password" class="form-control">
-        </div>
-        <div class="form-group">
-          <label for="name">Name:</label>
-          <input [(ngModel)]="selectedUser.name" type="text" id="name" name="name" class="form-control">
-        </div>
-        <div class="form-group">
-          <label for="surname">Surname:</label>
-          <input [(ngModel)]="selectedUser.surname" type="text" id="surname" name="surname" class="form-control">
-        </div>
-        <div class="form-group">
-          <label for="role">Role:</label>
-          <input [(ngModel)]="selectedUser.role" type="number" id="role" name="role" class="form-control">
-        </div>
-        <div class="button-group">
-          <button type="submit" class="btn btn-save">
-            <mat-icon matListIcon>check</mat-icon>
-          </button>
-          <button type="button" class="btn btn-cancel" (click)="cancelEdit()">
-            <mat-icon matListIcon>close</mat-icon>
-          </button>
-        </div>
-      </form>
-    </div>
-    <div class="add-form" *ngIf="loggedInUser?.role !== 1">
-      <h2>Change Password</h2>
-      <form (submit)="changePassword()">
-        <div class="form-group">
-          <label for="newPassword">New Password:</label>
-          <input [(ngModel)]="newPassword" type="password" id="newPassword" name="newPassword" class="form-control" required>
-        </div>
-        <div class="form-group">
-          <label for="confirmPassword">Confirm Password:</label>
-          <input [(ngModel)]="confirmPassword" type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
-        </div>
-        <button type="submit" class="btn btn-add">Change Password</button>
-      </form>
-    </div>
   </div>
 
+  <div *ngIf="loggedInUser?.role === 1 && !selectedUser" class="add-form">
+    <mat-icon>person_add</mat-icon>
+    <h2>Add New User</h2>
+    <form (submit)="addUser()">
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input [(ngModel)]="newUser.username" type="text" id="username" name="username" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input [(ngModel)]="newUser.password" type="password" id="password" name="password" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input [(ngModel)]="newUser.name" type="text" id="name" name="name" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="surname">Surname:</label>
+        <input [(ngModel)]="newUser.surname" type="text" id="surname" name="surname" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="role">Role:</label>
+        <input [(ngModel)]="newUser.role" type="number" id="role" name="role" class="form-control">
+      </div>
+      <div class="button-group">
+        <button type="submit" class="btn btn-add">Add User</button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="selectedUser" class="add-form">
+    <mat-icon>edit</mat-icon>
+    <h2>Edit User</h2>
+    <form (submit)="updateUser(selectedUser)">
+      <div class="form-group">
+        <label for="id">ID:</label>
+        <input [(ngModel)]="selectedUser.id" type="number" id="id" name="id" class="form-control" readonly>
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input [(ngModel)]="selectedUser.password" type="password" id="password" name="password" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input [(ngModel)]="selectedUser.name" type="text" id="name" name="name" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="surname">Surname:</label>
+        <input [(ngModel)]="selectedUser.surname" type="text" id="surname" name="surname" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="role">Role:</label>
+        <input [(ngModel)]="selectedUser.role" type="number" id="role" name="role" class="form-control">
+      </div>
+      <div class="button-group">
+        <button type="submit" class="btn btn-save">
+          <mat-icon matListIcon>check</mat-icon>
+        </button>
+        <button type="button" class="btn btn-cancel" (click)="cancelEdit()">
+          <mat-icon matListIcon>close</mat-icon>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="add-form" *ngIf="loggedInUser?.role !== 1">
+    <h2>Change Password</h2>
+    <form (submit)="changePassword()">
+      <div class="form-group">
+        <label for="newPassword">New Password:</label>
+        <input [(ngModel)]="newPassword" type="password" id="newPassword" name="newPassword" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password:</label>
+        <input [(ngModel)]="confirmPassword" type="password" id="confirmPassword" name="confirmPassword" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-add">Change Password</button>
+    </form>
+  </div>
+</div>
