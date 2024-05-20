@@ -240,6 +240,30 @@ export class QuestionComponent implements OnInit {
     }
   }
 
+  closeVoting(): void {
+    if (this.questionId && this.isLoggedIn) {
+      const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
+      const closeVotingUrl = `${baseUrl}/voting/${this.questionId}/close`;
+
+      const requestBody = {
+        note: "Voting closed by user"
+      };
+
+      this.http.post(closeVotingUrl, requestBody)
+        .pipe(
+          catchError(err => {
+            console.error('Error closing voting:', err);
+            return of(null);
+          })
+        )
+        .subscribe(response => {
+          console.log('Voting closed:', response);
+          this.showResults = true;
+          this.getQuestionStatistics();  // Fetch the statistics after closing
+        });
+    }
+  }
+
   redirectToError(): void {
     this.router.navigate(['/error404']);
   }
