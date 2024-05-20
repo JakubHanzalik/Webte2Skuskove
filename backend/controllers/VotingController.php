@@ -72,64 +72,64 @@ class VotingController
 
     public function voteByCode(string $code)
     {
-        try{
-        $model = new VoteByCodeRequestModel(SimpleRouter::request()->getInputHandler()->all());
-
-        $query = "SELECT id FROM Voting WHERE question_code = :code AND date_to IS NULL ORDER BY date_from DESC LIMIT 1";
-        $stmt = $this->dbConnection->prepare($query);
-        $stmt->bindParam(':code', $code, PDO::PARAM_STR);
-        $stmt->execute();
-
-        if ($stmt->rowCount() == 0) {
-            throw new APIException("Voting hasn't been started yet", 400);
-        }
-
-        $votingId = $stmt->fetchColumn();
-
-        $question = $this->getQuestionByCodeHandler->handle($code);
-
-        if (is_null($question)) {
-            throw new APIException('Question not found', 404);
-        }
-
-        if ($model->getFilledType() != $question->response_type) {
-            if ($question->response_type != EQuestionType::MULTIPLE_CHOICE && $model->getFilledType() != EQuestionType::SINGLE_CHOICE) {
-                throw new APIException('Input does not match question type', 400);
-            }
-        }
-
-        $this->dbConnection->beginTransaction();
         try {
-            if ($model->getFilledType() == EQuestionType::TEXT) {
-                $insertQuery = "INSERT INTO Vote (voting_id, answer_text) VALUES (:votingId, :answerText)";
-                $stmt = $this->dbConnection->prepare($insertQuery);
-                $stmt->bindParam(':votingId', $votingId);
-                $stmt->bindParam(':answerText', $model->answerText);
-                $stmt->execute();
-            } else if ($model->getFilledType() == EQuestionType::SINGLE_CHOICE) {
-                $insertQuery = "INSERT INTO Vote (voting_id, answer_id) VALUES (:votingId, :answerId)";
-                $stmt = $this->dbConnection->prepare($insertQuery);
-                $stmt->bindParam(':votingId', $votingId);
-                $stmt->bindParam(':answerId', $model->answerIds[0]);
-                $stmt->execute();
-            } else if ($model->getFilledType() == EQuestionType::MULTIPLE_CHOICE) {
-                $insertQuery = "INSERT INTO Vote (voting_id, answer_id) VALUES (:votingId, :answerId)";
-                $stmt = $this->dbConnection->prepare($insertQuery);
-                $stmt->bindParam(':votingId', $votingId);
-                foreach ($model->answerIds as $answerId) {
-                    $stmt->bindParam(':answerId', $answerId);
-                    $stmt->execute();
+            $model = new VoteByCodeRequestModel(SimpleRouter::request()->getInputHandler()->all());
+
+            $query = "SELECT id FROM Voting WHERE question_code = :code AND date_to IS NULL ORDER BY date_from DESC LIMIT 1";
+            $stmt = $this->dbConnection->prepare($query);
+            $stmt->bindParam(':code', $code, PDO::PARAM_STR);
+            $stmt->execute();
+
+            if ($stmt->rowCount() == 0) {
+                throw new APIException("Voting hasn't been started yet", 400);
+            }
+
+            $votingId = $stmt->fetchColumn();
+
+            $question = $this->getQuestionByCodeHandler->handle($code);
+
+            if (is_null($question)) {
+                throw new APIException('Question not found', 404);
+            }
+
+            if ($model->getFilledType() != $question->response_type) {
+                if ($question->response_type != EQuestionType::MULTIPLE_CHOICE && $model->getFilledType() != EQuestionType::SINGLE_CHOICE) {
+                    throw new APIException('Input does not match question type', 400);
                 }
             }
 
-            $this->dbConnection->commit();
-        } catch (APIException $e) {
-            $this->dbConnection->rollBack();
-            throw $e;
-        }
+            $this->dbConnection->beginTransaction();
+            try {
+                if ($model->getFilledType() == EQuestionType::TEXT) {
+                    $insertQuery = "INSERT INTO Vote (voting_id, answer_text) VALUES (:votingId, :answerText)";
+                    $stmt = $this->dbConnection->prepare($insertQuery);
+                    $stmt->bindParam(':votingId', $votingId);
+                    $stmt->bindParam(':answerText', $model->answerText);
+                    $stmt->execute();
+                } else if ($model->getFilledType() == EQuestionType::SINGLE_CHOICE) {
+                    $insertQuery = "INSERT INTO Vote (voting_id, answer_id) VALUES (:votingId, :answerId)";
+                    $stmt = $this->dbConnection->prepare($insertQuery);
+                    $stmt->bindParam(':votingId', $votingId);
+                    $stmt->bindParam(':answerId', $model->answerIds[0]);
+                    $stmt->execute();
+                } else if ($model->getFilledType() == EQuestionType::MULTIPLE_CHOICE) {
+                    $insertQuery = "INSERT INTO Vote (voting_id, answer_id) VALUES (:votingId, :answerId)";
+                    $stmt = $this->dbConnection->prepare($insertQuery);
+                    $stmt->bindParam(':votingId', $votingId);
+                    foreach ($model->answerIds as $answerId) {
+                        $stmt->bindParam(':answerId', $answerId);
+                        $stmt->execute();
+                    }
+                }
 
-        SimpleRouter::response()->httpCode(200);
-        SimpleRouter::response()->json(['message' => 'Vote successful']);
+                $this->dbConnection->commit();
+            } catch (APIException $e) {
+                $this->dbConnection->rollBack();
+                throw $e;
+            }
+
+            SimpleRouter::response()->httpCode(200);
+            SimpleRouter::response()->json(['message' => 'Vote successful']);
         } catch (\PDOException $e) {
             SimpleRouter::response()->httpCode(500);
             SimpleRouter::response()->json(['error' => 'Database error: ' . $e->getMessage()]);
@@ -166,91 +166,65 @@ class VotingController
     #[OA\Get(path: '/api/voting/{code}/statistics', tags: ['Voting'])]
     #[OA\Parameter(name: "code", in: 'path', required: true, description: "Question code", example: "abcde", schema: new OA\Schema(type: 'string'))]
     #[OA\Response(response: 200, description: 'Get question statistics', content: new OA\JsonContent(ref: '#/components/schemas/GetQuestionStatisticsResponseModel'))]
-    #[OA\Response(response: 401, description: 'Did not vote yet')]
     #[OA\Response(response: 404, description: 'Question not found')]
     public function getQuestionStatistics(string $code)
     {
-        try {
-            // Fetch the response type from the Questions table
-            $responseTypeQuery = "SELECT response_type FROM Questions WHERE question_code = :code";
-            $stmt = $this->dbConnection->prepare($responseTypeQuery);
+        $responseTypeQuery = "SELECT response_type FROM Questions WHERE question_code = :code";
+        $stmt = $this->dbConnection->prepare($responseTypeQuery);
+        $stmt->bindParam(':code', $code, PDO::PARAM_STR);
+        $stmt->execute();
+
+
+        if ($stmt->rowCount() == 0) {
+            throw new APIException('Question not found', 404);
+        }
+
+        $responseType = $stmt->fetchColumn();
+
+        $votingIdQuery = "SELECT id FROM Voting WHERE question_code = :code AND date_to IS NULL";
+        $stmt = $this->dbConnection->prepare($votingIdQuery);
+        $stmt->bindParam(':code', $code, PDO::PARAM_STR);
+        $stmt->execute();
+
+        if ($stmt->rowCount() == 0) {
+            throw new APIException("Voting hasn't been started yet", 400);
+        }
+
+        $votingId = $stmt->fetchColumn();
+
+        if ($responseType === EQuestionType::TEXT->value) {
+            $query = "SELECT answer_text AS questionText 
+                            FROM Vote 
+                            WHERE voting_id = :votingId";
+            $stmt = $this->dbConnection->prepare($query);
+            $stmt->bindParam(':votingId', $votingId, PDO::PARAM_STR);
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if ($stmt->rowCount() == 0) {
+                throw new APIException('No data found for this question', 404);
+            }
+
+            SimpleRouter::response()->httpCode(200);
+            SimpleRouter::response()->json($results);
+        } else {
+            $query = "SELECT v.answer_id AS answerId, COUNT(v.answer_id) AS count, (SELECT a.answer FROM Answers a WHERE a.question_code = :code AND a.id = v.answer_id) AS questionText
+                      FROM Vote v
+                      WHERE v.voting_id = :votingId
+                      GROUP BY v.answer_id";
+            $stmt = $this->dbConnection->prepare($query);
+            $stmt->bindParam(':votingId', $votingId, PDO::PARAM_STR);
             $stmt->bindParam(':code', $code, PDO::PARAM_STR);
             $stmt->execute();
-            $responseTypeResult = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$responseTypeResult) {
-                SimpleRouter::response()->httpCode(404);
-                SimpleRouter::response()->json(['error' => 'Question not found']);
-                return;
+            if ($stmt->rowCount() == 0) {
+                throw new APIException('No data found for this question', 404);
             }
 
-            $responseType = (int) $responseTypeResult['response_type'];
+            $results = $stmt->fetchAll(PDO::FETCH_CLASS, GetQuestionStatisticsResponseModel::class);
 
-            $votingIdQuery = "SELECT id FROM Voting WHERE question_code = :code AND date_to IS NULL";
-            $stmt = $this->dbConnection->prepare($votingIdQuery);
-            $stmt->bindParam(':code', $code, PDO::PARAM_STR);
-            $stmt->execute();
-            $votingIdResult = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if (!$votingIdResult) {
-                SimpleRouter::response()->httpCode(404);
-                SimpleRouter::response()->json(['error' => 'Active voting session not found']);
-                return;
-            }
-
-            $votingId = (int) $votingIdResult['id'];
-
-            if ($responseType === 2) {
-                // If response_type is 2, fetch all answers as a list
-                $query = "SELECT answer_text AS questionText 
-                      FROM Vote 
-                      WHERE voting_id = :votingId";
-                $stmt = $this->dbConnection->prepare($query);
-                $stmt->bindParam(':votingId', $votingId, PDO::PARAM_STR);
-                $stmt->execute();
-                $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                if (!$results) {
-                    SimpleRouter::response()->httpCode(404);
-                    SimpleRouter::response()->json(['error' => 'No answers found for this question']);
-                    return;
-                }
-
-                SimpleRouter::response()->httpCode(200);
-                SimpleRouter::response()->json($results);
-            } else {
-                // Fetch voting statistics
-                $query = "SELECT a.id AS answerId, a.answer AS questionText, COUNT(v.id) AS count
-                      FROM Answers a
-                      LEFT JOIN Vote v ON a.id = v.answer_id
-                      WHERE a.question_code = :code
-                      GROUP BY a.id";
-                $stmt = $this->dbConnection->prepare($query);
-                $stmt->bindParam(':code', $code, PDO::PARAM_STR);
-                $stmt->execute();
-                $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                if (!$results) {
-                    SimpleRouter::response()->httpCode(404);
-                    SimpleRouter::response()->json(['error' => 'No data found for this question']);
-                    return;
-                }
-
-                // Map results to response models
-                $statistics = array_map(function ($item) {
-                    return GetQuestionStatisticsResponseModel::constructFromModel($item);
-                }, $results);
-
-                // Return the response
-                SimpleRouter::response()->httpCode(200);
-                SimpleRouter::response()->json($statistics);
-            }
-        } catch (\PDOException $e) {
-            SimpleRouter::response()->httpCode(500);
-            SimpleRouter::response()->json(['error' => 'Database error: ' . $e->getMessage()]);
-        } catch (\Exception $e) {
-            SimpleRouter::response()->httpCode(500);
-            SimpleRouter::response()->json(['error' => 'Internal Server Error']);
+            SimpleRouter::response()->httpCode(200);
+            SimpleRouter::response()->json($results);
         }
     }
 
@@ -277,7 +251,7 @@ class VotingController
     {
         $requestData = SimpleRouter::request()->getInputHandler()->all();
         $note = $requestData['note'] ?? '';
-        $this->closeVotingByQuestionCodeHandler->handle($questionCode,$note);
+        $this->closeVotingByQuestionCodeHandler->handle($questionCode, $note);
         SimpleRouter::response()->httpCode(200);
         SimpleRouter::response()->json(['message' => 'Voting closed']);
     }
