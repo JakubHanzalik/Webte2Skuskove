@@ -86,7 +86,7 @@ export class QuestionsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params) => {
       const subjectId = +params.get('subjectId')!;
       console.log('Subject value from route:', subjectId);
       this.newQuestionSubjectId = subjectId;
@@ -100,32 +100,35 @@ export class QuestionsComponent implements OnInit {
       next: (res: QuestionDTO[]) => {
         console.log('Received data:', res);
 
-        const filteredQuestions = subjectFilter !== undefined
-          ? res.filter(q => q.subjectId === subjectFilter)
-          : res;
+        const filteredQuestions =
+          subjectFilter !== undefined
+            ? res.filter((q) => q.subjectId === subjectFilter)
+            : res;
 
         console.log('Filtered Questions:', filteredQuestions);
 
-        this.activeQuestions = filteredQuestions.filter(q => q.active);
-        this.historicalQuestions = filteredQuestions.filter(q => !q.active);
+        this.activeQuestions = filteredQuestions.filter((q) => q.active);
+        this.historicalQuestions = filteredQuestions.filter((q) => !q.active);
 
         console.log('Active Questions:', this.activeQuestions);
         console.log('Historical Questions:', this.historicalQuestions);
       },
-      error: (err) => console.error('Error fetching questions:', err)
+      error: (err) => console.error('Error fetching questions:', err),
     });
   }
 
   async showQRCode(question: Question) {
     if (question.question_code) {
       try {
-        const qrCodeURL = await this.qrCodeService.generateQR(question.question_code);
+        const qrCodeURL = await this.qrCodeService.generateQR(
+          question.question_code
+        );
         question.qrCodeURL = qrCodeURL;
       } catch (error) {
-        console.error("Error generating QR code:", error);
+        console.error('Error generating QR code:', error);
       }
     } else {
-      console.error("Question code is undefined.");
+      console.error('Question code is undefined.');
     }
   }
 
@@ -134,10 +137,12 @@ export class QuestionsComponent implements OnInit {
       const newQuestion: QuestionDTO = {
         text: this.newQuestionText,
         active: true,
-        answers: this.newQuestionAnswers.filter(answer => answer.answer.trim()).map((answer) => ({
-          answer: answer.answer,
-          correct: answer.correct,
-        })),
+        answers: this.newQuestionAnswers
+          .filter((answer) => answer.answer.trim())
+          .map((answer) => ({
+            answer: answer.answer,
+            correct: answer.correct,
+          })),
         subjectId: this.newQuestionSubjectId,
         type: this.newQuestionType,
       };
@@ -163,7 +168,9 @@ export class QuestionsComponent implements OnInit {
   }
 
   addAnswerField() {
-    if (this.newQuestionAnswers[this.newQuestionAnswers.length - 1].answer.trim()) {
+    if (
+      this.newQuestionAnswers[this.newQuestionAnswers.length - 1].answer.trim()
+    ) {
       this.newQuestionAnswers.push({ answer: '', correct: false });
     }
   }
@@ -187,7 +194,9 @@ export class QuestionsComponent implements OnInit {
         error: (err) => console.error('Error deleting question:', err),
       });
     } else {
-      console.error('Attempted to delete a question without a valid question code.');
+      console.error(
+        'Attempted to delete a question without a valid question code.'
+      );
     }
   }
 
@@ -205,20 +214,22 @@ export class QuestionsComponent implements OnInit {
 
   editQuestion(question: Question) {
     if (question.question_code) {
-      this.questionsService.getQuestionByCode(question.question_code).subscribe({
-        next: (fetchedQuestion: Question) => {
-          if (fetchedQuestion) {
-            this.originalQuestionText = fetchedQuestion.text;
-            fetchedQuestion.active = fetchedQuestion.active === true;
-            question.editing = true;
-          } else {
-            console.error('Otázka nebola nájdená.');
-          }
-        },
-        error: (err) => {
-          console.error('Chyba pri získavaní otázky:', err);
-        },
-      });
+      this.questionsService
+        .getQuestionByCode(question.question_code)
+        .subscribe({
+          next: (fetchedQuestion: Question) => {
+            if (fetchedQuestion) {
+              this.originalQuestionText = fetchedQuestion.text;
+              fetchedQuestion.active = fetchedQuestion.active === true;
+              question.editing = true;
+            } else {
+              console.error('Otázka nebola nájdená.');
+            }
+          },
+          error: (err) => {
+            console.error('Chyba pri získavaní otázky:', err);
+          },
+        });
     } else {
       console.error('Question code is undefined.');
     }
@@ -231,18 +242,24 @@ export class QuestionsComponent implements OnInit {
         subjectId: question.subjectId,
         active: question.active === false,
         answers: question.answers.map((answer) => {
-          return { id: answer.id, answer: answer.answer, correct: answer.correct };
+          return {
+            id: answer.id,
+            answer: answer.answer,
+            correct: answer.correct,
+          };
         }),
       };
 
-      this.questionsService.updateQuestion(question.question_code, questionData).subscribe({
-        next: (response) => {
-          console.log('Question updated successfully:', response);
-        },
-        error: (error) => {
-          console.error('Error updating question:', error);
-        },
-      });
+      this.questionsService
+        .updateQuestion(question.question_code, questionData)
+        .subscribe({
+          next: (response) => {
+            console.log('Question updated successfully:', response);
+          },
+          error: (error) => {
+            console.error('Error updating question:', error);
+          },
+        });
     } else {
       console.error('Question code is undefined.');
     }
@@ -253,14 +270,16 @@ export class QuestionsComponent implements OnInit {
       question.active = false;
       this.activeQuestions = this.activeQuestions.filter((q) => q !== question);
       this.historicalQuestions.unshift(question);
-      this.questionsService.updateQuestion(question.question_code, { active: false }).subscribe({
-        next: () => {
-          console.log('Question deactivated successfully');
-        },
-        error: (err) => {
-          console.error(err);
-        },
-      });
+      this.questionsService
+        .updateQuestion(question.question_code, { active: false })
+        .subscribe({
+          next: () => {
+            console.log('Question deactivated successfully');
+          },
+          error: (err) => {
+            console.error(err);
+          },
+        });
     } else {
       console.error('Question code is undefined.');
     }
@@ -269,16 +288,20 @@ export class QuestionsComponent implements OnInit {
   activeQuestion(question: Question) {
     if (question.question_code) {
       question.active = true;
-      this.historicalQuestions = this.historicalQuestions.filter((q) => q !== question);
+      this.historicalQuestions = this.historicalQuestions.filter(
+        (q) => q !== question
+      );
       this.activeQuestions.unshift(question);
-      this.questionsService.updateQuestion(question.question_code, { active: true }).subscribe({
-        next: () => {
-          console.log('Question activated successfully');
-        },
-        error: (err) => {
-          console.error(err);
-        },
-      });
+      this.questionsService
+        .updateQuestion(question.question_code, { active: true })
+        .subscribe({
+          next: () => {
+            console.log('Question activated successfully');
+          },
+          error: (err) => {
+            console.error(err);
+          },
+        });
     } else {
       console.error('Question code is undefined.');
     }
@@ -289,17 +312,5 @@ export class QuestionsComponent implements OnInit {
     if (question.editing) {
       this.originalQuestionText = question.text;
     }
-  }
-
-  exportQuestions() {
-    const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}/api`;
-    const exportUrl = `${baseUrl}/question/export`;
-
-    this.http.get(exportUrl).subscribe({
-      next: (response) => {
-
-      },
-      error: (err) => console.error('Error exporting questions:', err),
-    });
   }
 }

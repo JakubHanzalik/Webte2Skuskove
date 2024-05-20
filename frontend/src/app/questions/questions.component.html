@@ -6,30 +6,53 @@
     <mat-card-content>
       <mat-form-field appearance="fill">
         <mat-label>Text otázky</mat-label>
-        <input matInput type="text" [(ngModel)]="newQuestionText" placeholder="Zadajte novú otázku">
+        <input
+          matInput
+          type="text"
+          [(ngModel)]="newQuestionText"
+          placeholder="Zadajte novú otázku"
+        />
       </mat-form-field>
 
       <mat-form-field appearance="fill">
         <mat-label>Predmet</mat-label>
         <mat-select [(ngModel)]="newQuestionSubjectId" disabled>
-          <mat-option [value]="newQuestionSubjectId">Predmet {{ newQuestionSubjectId }}</mat-option>
+          <mat-option [value]="newQuestionSubjectId"
+            >Predmet {{ newQuestionSubjectId }}</mat-option
+          >
         </mat-select>
       </mat-form-field>
 
       <mat-form-field appearance="fill">
         <mat-label>Typ otázky</mat-label>
-        <mat-select [(ngModel)]="newQuestionType" (selectionChange)="addAnswerField()">
-          <mat-option [value]="QuestionType.SINGLE_CHOICE">Jedna odpoveď</mat-option>
-          <mat-option [value]="QuestionType.MULTIPLE_CHOICE">Viacero odpovedí</mat-option>
+        <mat-select
+          [(ngModel)]="newQuestionType"
+          (selectionChange)="addAnswerField()"
+        >
+          <mat-option [value]="QuestionType.SINGLE_CHOICE"
+            >Jedna odpoveď</mat-option
+          >
+          <mat-option [value]="QuestionType.MULTIPLE_CHOICE"
+            >Viacero odpovedí</mat-option
+          >
           <mat-option [value]="QuestionType.TEXT">Text</mat-option>
         </mat-select>
       </mat-form-field>
 
       <div *ngIf="newQuestionType !== QuestionType.TEXT">
-        <div *ngFor="let answer of newQuestionAnswers; let i = index" class="answer-input">
+        <div
+          *ngFor="let answer of newQuestionAnswers; let i = index"
+          class="answer-input"
+        >
           <mat-form-field appearance="fill">
             <mat-label>Text odpovede</mat-label>
-            <input matInput type="text" [(ngModel)]="answer.answer" placeholder="Text odpovede" (input)="addAnswerField()">
+            <input
+              matInput
+              type="text"
+              [(ngModel)]="answer.answer"
+              placeholder="Text odpovede"
+              (input)="addAnswerField()"
+            />
           </mat-form-field>
           <mat-checkbox [(ngModel)]="answer.correct">Správna</mat-checkbox>
         </div>
@@ -39,26 +62,48 @@
         <div class="answer-input">
           <mat-form-field appearance="fill">
             <mat-label>Text odpovede</mat-label>
-            <input matInput type="text" [(ngModel)]="newQuestionAnswers[0].answer" placeholder="Text odpovede">
+            <input
+              matInput
+              type="text"
+              [(ngModel)]="newQuestionAnswers[0].answer"
+              placeholder="Text odpovede"
+            />
           </mat-form-field>
         </div>
       </div>
 
-      <button mat-raised-button color="primary" (click)="addNewQuestion()">Pridať otázku</button>
+      <button mat-raised-button color="primary" (click)="addNewQuestion()">
+        Pridať otázku
+      </button>
     </mat-card-content>
   </mat-card>
 
   <mat-card class="active-questions-card">
     <mat-card-header>
       <mat-card-title>Aktívne otázky</mat-card-title>
-      <button mat-raised-button color="accent" (click)="exportQuestions()">Exportovať otázky</button>
+      <a
+        mat-raised-button
+        color="accent"
+        href="/api/question/export"
+        target="_blank"
+        >Exportovať otázky</a
+      >
     </mat-card-header>
     <mat-card-content>
       <ul>
         <li *ngFor="let question of activeQuestions">
           <span *ngIf="!question.editing; else editMode">
-            <img *ngIf="question.qrCodeURL" [src]="question.qrCodeURL" alt="QR kód" class="qr-code">
-            <span [routerLink]="['/', question.question_code]" routerLinkActive="router-link-active">{{ question.text }}</span>
+            <img
+              *ngIf="question.qrCodeURL"
+              [src]="question.qrCodeURL"
+              alt="QR kód"
+              class="qr-code"
+            />
+            <span
+              [routerLink]="['/', question.question_code]"
+              routerLinkActive="router-link-active"
+              >{{ question.text }}</span
+            >
 
             <button mat-icon-button (click)="showQRCode(question)">
               <mat-icon>art_track</mat-icon>
